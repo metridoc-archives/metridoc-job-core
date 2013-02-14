@@ -25,8 +25,6 @@ abstract class MetridocJob implements Job {
         return null  //To change body of implemented methods use File | Settings | File Templates.
     }
 
-
-
     protected abstract MetridocJob create(Map<String, Object> config)
     protected abstract doExecute()
 }
