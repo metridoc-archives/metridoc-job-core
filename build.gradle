@@ -10,13 +10,20 @@ repositories {
 configurations {
     //we do not want commons logging under any circumstances
     compile.exclude module: 'commons-logging'
+    //creates provided scope
+    provided
+}
+
+sourceSets {
+    //adds provided scope to classpath
+    main { compileClasspath += configurations.provided }
 }
 
 dependencies {
     def camelVersion = "2.9.2"
     def slf4jVersion = "1.6.2"
 
-    compile('org.codehaus.groovy:groovy-all:2.0.5')
+    provided('org.codehaus.groovy:groovy-all:2.0.5')
     compile("org.apache.camel:camel-core:$camelVersion") {
         exclude module: 'slf4j-api'
     }
@@ -33,8 +40,8 @@ dependencies {
         exclude module:'camel-core'
         exclude module:'groovy-all'
     }
-    compile("org.apache.poi:poi:3.8-beta3")
-    compile("org.apache.poi:poi-ooxml:3.8-beta3")
+    provided("org.apache.poi:poi:3.8-beta3")
+    provided("org.apache.poi:poi-ooxml:3.8-beta3")
     testCompile("org.slf4j:slf4j-simple:$slf4jVersion") {
         exclude module: 'slf4j-api'
     }
