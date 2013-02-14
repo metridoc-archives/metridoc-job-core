@@ -8,5 +8,6 @@ package metridoc.core
  * To change this template use File | Settings | File Templates.
  */
 public interface Job {
-    def execute()
+    def execute(Map<String, Object> config)
+    def interrupt()
 }
