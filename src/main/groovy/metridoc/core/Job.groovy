@@ -9,5 +9,5 @@ package metridoc.core
  */
 public interface Job {
     def execute(Map<String, Object> config)
-    def interrupt()
+    void interrupt()
 }

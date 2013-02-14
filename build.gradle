@@ -1,7 +1,7 @@
 apply plugin: 'groovy'
 apply plugin: 'maven'
-project.ext.set("version", "0.1-SNAPSHOT")
-project.ext.set("groupId", "com.googlecode.metridoc")
+project.group = "com.googlecode.metridoc"
+project.version = "0.1-SNAPSHOT"
 
 repositories {
     mavenCentral()
@@ -10,38 +10,35 @@ repositories {
 configurations {
     //we do not want commons logging under any circumstances
     compile.exclude module: 'commons-logging'
-    //creates provided scope
-    provided
+
 }
 
-sourceSets {
-    //adds provided scope to classpath
-    main { compileClasspath += configurations.provided }
-}
+
 
 dependencies {
     def camelVersion = "2.9.2"
     def slf4jVersion = "1.6.2"
 
-    provided('org.codehaus.groovy:groovy-all:2.0.5')
+    compile('org.codehaus.groovy:groovy-all:2.0.5')
+    testCompile('org.codehaus.groovy:groovy-all:2.0.5')
     compile("org.apache.camel:camel-core:$camelVersion") {
         exclude module: 'slf4j-api'
     }
     compile("org.apache.camel:camel-stream:$camelVersion") {
-        exclude module:'camel-core'
+        exclude module: 'camel-core'
     }
     compile("org.apache.camel:camel-ftp:$camelVersion") {
-        exclude module:'camel-core'
+        exclude module: 'camel-core'
     }
     compile('org.hibernate:hibernate-core:3.6.10.Final') {
         exclude module: 'slf4j-api'
     }
     compile("org.apache.camel:camel-groovy:$camelVersion") {
-        exclude module:'camel-core'
-        exclude module:'groovy-all'
+        exclude module: 'camel-core'
+        exclude module: 'groovy-all'
     }
-    provided("org.apache.poi:poi:3.8-beta3")
-    provided("org.apache.poi:poi-ooxml:3.8-beta3")
+    compile("org.apache.poi:poi:3.8-beta3")
+    compile("org.apache.poi:poi-ooxml:3.8-beta3")
     testCompile("org.slf4j:slf4j-simple:$slf4jVersion") {
         exclude module: 'slf4j-api'
     }
@@ -60,4 +57,47 @@ dependencies {
 task wrapper(type: Wrapper) {
     gradleVersion = '1.4'
 }
+
+
+install {
+    repositories.mavenInstaller {installer ->
+        installer.pom.whenConfigured {pom ->
+            pom.dependencies.find {dep -> dep.artifactId == 'poi' }.optional = true
+            pom.dependencies.find {dep -> dep.artifactId == 'poi-ooxml' }.optional = true
+            pom.dependencies.find {dep -> dep.artifactId == 'groovy-all' }.scope = 'provided'
+        }
+
+        pom.project {
+            name = project.description
+            description = project.description
+            url = 'http://metridoc.googlecode.com/'
+            organization {
+                name = 'Upenn Libraries'
+                url = 'http://metridoc.googlecode.com/'
+            }
+            licenses {
+                license {
+                    name 'Educational Community License'
+                    url 'http://opensource.org/licenses/ECL-2.0'
+                    distribution 'repo'
+                }
+            }
+            scm {
+                url = 'https://metridoc.googlecode.com/svn/trunk/metridoc-job-core/'
+                connection = 'scm:svn:https://metridoc.googlecode.com/svn/trunk/metridoc-job-core/'
+                developerConnection = 'scm:svn:https://metridoc.googlecode.com/svn/trunk/metridoc-job-core/'
+            }
+            developers {
+                developer {
+                    id = 'tbarker'
+                    name = 'Thomas Barker'
+                    email = 'tbarker@pobox.upenn.edu'
+                }
+            }
+        }
+    }
+}
+
+
+
 
