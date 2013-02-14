@@ -9,14 +9,15 @@ package metridoc.core
  */
 abstract class MetridocJob implements Job {
 
-    String defaultTarget = "default"
+    static final String DEFAULT_TARGET = "default"
+    String defaultTarget = DEFAULT_TARGET
     def Map<String, Closure> targetMap = Collections.synchronizedMap([:])
     private Set _targetsRan = [] as Set
     boolean interrupt = false
 
     @Override
     def execute(Map<String, Object> config) {
-        return null  //To change body of implemented methods use File | Settings | File Templates.
+        create(config).doExecute()
     }
 
     @Override
