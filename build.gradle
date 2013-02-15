@@ -15,8 +15,7 @@ dependencies {
     def camelVersion = "2.9.2"
     def slf4jVersion = "1.6.2"
 
-//    deployerJars 'com.google.code.maven-svn-wagon:maven-svn-wagon:1.4'
-    deployerJars 'org.apache.maven.wagon:wagon-webdav:1.0-beta-2'
+    deployerJars 'com.google.code.maven-svn-wagon:maven-svn-wagon:1.4'
 
     compile('org.codehaus.groovy:groovy-all:2.0.5')
     testCompile('org.codehaus.groovy:groovy-all:2.0.5')
@@ -75,8 +74,10 @@ uploadArchives {
 
             repository(
                     id: "Metridoc googlecode repo",
-                    url: "file:../maven/repository",
-            )
+                    url: "svn:https://metridoc.googlecode.com/svn/trunk/maven/repository",
+            ) {
+                authentication(userName:googlecodeUserName, password:googlecodePassword)
+            }
             configurePom(pom)
             configuration = configurations.deployerJars
         }
