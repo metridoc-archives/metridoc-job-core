@@ -74,9 +74,8 @@ uploadArchives {
         mavenDeployer {
 
             repository(
-                    id: "Metridoc googlecode repo"
-                    url: uri("dav:https://metridoc.googlecode.com/svn/trunk/maven/repository"),
-                    authentication:[userName: googleCodeUser, password: googleCodePassword]
+                    id: "Metridoc googlecode repo",
+                    url: "file:../maven/repository",
             )
             configurePom(pom)
             configuration = configurations.deployerJars
