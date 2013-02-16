@@ -1,19 +1,10 @@
 package metridoc.core
-
-import org.slf4j.LoggerFactory
-
 /**
  * This is a convenience class to create a non script based job, like in grails or a java application
  */
 abstract class MetridocJob implements Job {
 
-    static final String DEFAULT_TARGET = "default"
-    String defaultTarget = DEFAULT_TARGET
-    Map<String, Closure> targetMap = Collections.synchronizedMap([:])
-    private Set _targetsRan = [] as Set
-    private boolean interrupted = false
-    private Binding _binding
-    private static final jobLogger = LoggerFactory.getLogger(MetridocJob)
+    TargetManager targetManager = new TargetManager()
 
     /**
      * suggested default trigger for a scheduler to use.  Especially useful to trigger a job out of the
@@ -21,19 +12,33 @@ abstract class MetridocJob implements Job {
      */
     Trigger defaultTrigger = Trigger.NEVER
 
+    Map<String, Closure> getTargetMap() {
+        return targetManager.targetMap
+    }
+
     @Override
     def execute() {
         execute([:])
     }
 
+    void setDefaultTarget(String defaultTarget) {
+        targetManager.defaultTarget = defaultTarget
+    }
+
+    String getDefaultTarget() {
+        targetManager.defaultTarget
+    }
+
     @Override
     def execute(Map<String, Object> config) {
-        create(config).doExecute()
-
+        def job = create(config)
+        job.defaultTarget = defaultTarget
+        job.targetManager = targetManager
+        job.binding.setVariable("job", job)
         if (defaultTarget) {
             def defaultTargetIsDefined = targetMap.containsKey(defaultTarget)
             if(defaultTargetIsDefined) {
-                depends(defaultTarget)
+                job.depends(defaultTarget)
             } else {
                 Assert.isTrue(defaultTarget == "default", "target $defaultTarget does not exist")
             }
@@ -48,7 +53,7 @@ abstract class MetridocJob implements Job {
      */
     @Override
     void interrupt() {
-        interrupted = true
+        targetManager.interrupt()
     }
 
     /**
@@ -65,14 +70,7 @@ abstract class MetridocJob implements Job {
     }
 
     def target(Map data, Closure closure) {
-        closure.delegate = this //required for imported targets
-        Assert.isTrue(data.size() == 1, "the map in target can only have one variable, which is the name and the description of the target")
-        def key = (data.keySet() as List<String>)[0]
-        String description = data[key]
-        def closureToRun = {
-            profile(description, closure)
-        }
-        targetMap.put(key, closureToRun)
+        targetManager.target(data, closure)
     }
 
     /**
@@ -82,26 +80,7 @@ abstract class MetridocJob implements Job {
      * @return
      */
     def depends(String... targetNames) {
-        targetNames.each { targetName ->
-            Closure target = targetMap.get(targetName)
-            Assert.isTrue(target != null, "target $targetName does not exist")
-
-            def targetHasNotBeenCalled = !targetsRan.contains(targetName)
-            if (targetHasNotBeenCalled) {
-                target.delegate = this
-                target.resolveStrategy = Closure.DELEGATE_FIRST
-                target.call()
-                targetsRan.add(targetName)
-            }
-        }
-    }
-
-    /**
-     *
-     * @return all targets that have run
-     */
-    Set getTargetsRan() {
-        return _targetsRan
+        targetManager.depends(targetNames)
     }
 
     /**
@@ -109,11 +88,7 @@ abstract class MetridocJob implements Job {
      * @return the binding that is passed to all imported targets
      */
     Binding getBinding() {
-        if (_binding) return _binding
-
-        _binding = new Binding()
-        _binding.job = this
-        return _binding
+        targetManager.binding
     }
 
     /**
@@ -130,7 +105,7 @@ abstract class MetridocJob implements Job {
      * @return returns the binding from the script in case global variables need to accessed
      */
     def includeTargets(Class<Script> scriptClass) {
-        return includeTargets(scriptClass, binding)
+        return targetManager.includeTargets(scriptClass, binding)
     }
 
     /**
@@ -142,15 +117,7 @@ abstract class MetridocJob implements Job {
      * @return the passed binding
      */
     def includeTargets(Class<Script> scriptClass, Binding binding) {
-
-        binding.setVariable("target") { Map description, Closure closure ->
-            target(description, closure)
-        }
-        Script script = scriptClass.newInstance()
-        script.binding = binding
-        script.run()
-
-        return binding
+        return targetManager.includeTargets(scriptClass, binding)
     }
 
     /**
@@ -159,7 +126,7 @@ abstract class MetridocJob implements Job {
      * @param targetMap
      */
     def includeTargets(Map<String, Closure> targetMap) {
-        targetMap.putAll(targetMap)
+        targetManager.includeTargets(targetMap)
     }
 
     /**
@@ -168,7 +135,7 @@ abstract class MetridocJob implements Job {
      * @param binding
      */
     def importBindingVariables(Binding binding) {
-        binding.variables.putAll(binding.variables)
+        targetManager.importBindingVariables(binding)
     }
 
     /**
@@ -177,16 +144,10 @@ abstract class MetridocJob implements Job {
      * @param closure the code to run
      */
     def profile(String description, Closure closure) {
-        if (interrupted) {
-            throw new JobInterruptionException(this.getClass().name)
-        }
-        def start = System.currentTimeMillis()
-        jobLogger.info "profiling [$description] start"
-        closure.call()
-        def end = System.currentTimeMillis()
-        jobLogger.info "profiling [$description] finished ${end - start} ms"
-        if (interrupted) {
-            throw new JobInterruptionException(this.getClass().name)
-        }
+        targetManager.profile(description, closure)
+    }
+
+    Set getTargetsRan() {
+        targetManager.targetsRan
     }
 }
