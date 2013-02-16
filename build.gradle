@@ -74,7 +74,7 @@ uploadArchives {
 
             repository(
                     id: "Metridoc googlecode repo",
-                    url: "svn:https://metridoc.googlecode.com/svn/trunk/maven/repository",
+                    url: "svn:https://metridoc.googlecode.com/svn/maven/repository",
             ) {
                 authentication(userName:googlecodeUserName, password:googlecodePassword)
             }
