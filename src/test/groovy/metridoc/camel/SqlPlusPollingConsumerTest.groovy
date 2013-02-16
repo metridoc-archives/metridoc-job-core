@@ -35,11 +35,6 @@ class SqlPlusPollingConsumerTest extends CamelTestSupport {
     }
 
     @Before
-    void addSqlPlusComponent() {
-        context.addComponent("sqlplus", new SqlPlusComponent())
-    }
-
-    @Before
     void addEmbeddedDataSource() {
         embeddedDataSource = new EmbeddedDatabaseBuilder().setType(EmbeddedDatabaseType.H2).build()
         simpleRegistry.put("dataSource", embeddedDataSource)
