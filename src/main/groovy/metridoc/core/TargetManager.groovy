@@ -1,46 +1,27 @@
 package metridoc.core
 
-import org.slf4j.LoggerFactory
+import groovy.util.logging.Slf4j
 
 /**
- * This is a convenience class to create a non script based job, like in grails or a java application
+ *
  */
-abstract class MetridocJob implements Job {
-
+@Slf4j
+class TargetManager {
     static final String DEFAULT_TARGET = "default"
     String defaultTarget = DEFAULT_TARGET
-    Map<String, Closure> targetMap = Collections.synchronizedMap([:])
-    private Set _targetsRan = [] as Set
+    Map<String, Closure> targetMap = [:]
+    Set<String> targetsRan = []
     private boolean interrupted = false
     private Binding _binding
-    private static final jobLogger = LoggerFactory.getLogger(MetridocJob)
 
-    /**
-     * suggested default trigger for a scheduler to use.  Especially useful to trigger a job out of the
-     * box without requiring input from the user.  Defaults to never
-     */
-    Trigger defaultTrigger = Trigger.NEVER
+    Binding getBinding() {
+        if (_binding) return _binding
 
-    @Override
-    def execute() {
-        execute([:])
+        _binding = new Binding()
+        _binding.targetManager = this
+        return _binding
     }
-
-    @Override
-    def execute(Map<String, Object> config) {
-        create(config).doExecute()
-
-        if (defaultTarget) {
-            def defaultTargetIsDefined = targetMap.containsKey(defaultTarget)
-            if(defaultTargetIsDefined) {
-                depends(defaultTarget)
-            } else {
-                Assert.isTrue(defaultTarget == "default", "target $defaultTarget does not exist")
-            }
-        }
-    }
-
-    /**
+/**
      * If job is not run from the command line, use this to fire off an interuption.  This is not as
      * effective as killing a commandline job though.  Basically either the job will have to be aware of
      * the interuption or wait until it is checked in a progress closure
@@ -49,19 +30,6 @@ abstract class MetridocJob implements Job {
     @Override
     void interrupt() {
         interrupted = true
-    }
-
-    /**
-     * called first thing before execute.  This ensures that a new object is called per run since each
-     * job instance is stateful.  Either the config can auto fill properties, or the implementing job can
-     * have a
-     * constructor that takes a {@link Map}
-     *
-     * @param config
-     * @return
-     */
-    protected MetridocJob create(Map<String, Object> config) {
-        this.getClass().newInstance(config)
     }
 
     def target(Map data, Closure closure) {
@@ -95,33 +63,6 @@ abstract class MetridocJob implements Job {
             }
         }
     }
-
-    /**
-     *
-     * @return all targets that have run
-     */
-    Set getTargetsRan() {
-        return _targetsRan
-    }
-
-    /**
-     *
-     * @return the binding that is passed to all imported targets
-     */
-    Binding getBinding() {
-        if (_binding) return _binding
-
-        _binding = new Binding()
-        _binding.job = this
-        return _binding
-    }
-
-    /**
-     * This is where all the work is done in an implementing class
-     *
-     * @return
-     */
-    protected abstract doExecute()
 
     /**
      * loads scripts that contain targets to allow for code reuse
@@ -181,12 +122,16 @@ abstract class MetridocJob implements Job {
             throw new JobInterruptionException(this.getClass().name)
         }
         def start = System.currentTimeMillis()
-        jobLogger.info "profiling [$description] start"
+        log.info "profiling [$description] start"
         closure.call()
         def end = System.currentTimeMillis()
-        jobLogger.info "profiling [$description] finished ${end - start} ms"
+        log.info "profiling [$description] finished ${end - start} ms"
         if (interrupted) {
             throw new JobInterruptionException(this.getClass().name)
         }
+    }
+
+    def runDefaultTarget() {
+        depends(defaultTarget)
     }
 }
