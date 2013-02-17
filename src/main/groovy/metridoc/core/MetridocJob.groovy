@@ -1,4 +1,10 @@
 package metridoc.core
+
+import metridoc.camel.CamelScript
+import metridoc.camel.CamelScriptRegistry
+import metridoc.camel.SqlPlusComponent
+import org.apache.camel.builder.RouteBuilder
+
 /**
  * This is a convenience class to create a non script based job, like in grails or a java application
  */
@@ -43,6 +49,7 @@ abstract class MetridocJob implements Job {
                 Assert.isTrue(defaultTarget == "default", "target $defaultTarget does not exist")
             }
         }
+        doExecute()
     }
 
     /**
@@ -149,5 +156,37 @@ abstract class MetridocJob implements Job {
 
     Set getTargetsRan() {
         targetManager.targetsRan
+    }
+
+    /**
+     * runs the closure as a route within the {@link metridoc.camel.GroovyRouteBuilder}.  Really handy for database migrations and
+     * batch processing
+     *
+     * @param closure
+     * @return
+     */
+    def runRoute(Closure closure) {
+        closure.delegate = this
+        CamelScript.runRoute(closure)
+    }
+
+    /**
+     * instead of using runRoute with a closure, you can pass a RouteBuilder instead.  This can be convenient if someone
+     * wants to use their own {@link org.apache.camel.builder.RouteBuilder} or wants to benefit from code completion
+     *
+     * @param builder
+     */
+    def runRoute(RouteBuilder builder) {
+        def mockClosure = {}
+        mockClosure.delegate = builder
+        def registry = new CamelScriptRegistry(closure: mockClosure)
+        CamelScript.runRouteBuilders(registry, builder)
+    }
+
+    def executeTarget(String target) {
+        if (targetMap.isEmpty()) {
+            execute()
+        }
+        depends(target)
     }
 }
