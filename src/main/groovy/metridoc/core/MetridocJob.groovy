@@ -2,7 +2,6 @@ package metridoc.core
 
 import metridoc.camel.CamelScript
 import metridoc.camel.CamelScriptRegistry
-import metridoc.camel.SqlPlusComponent
 import org.apache.camel.builder.RouteBuilder
 
 /**
