@@ -99,8 +99,8 @@ class CamelUtils {
                         }
                     }
                 }
-
-                notDone = size > 0 || camelContext.inflightRepository.size()
+                int inflightSize = camelContext.inflightRepository.size()
+                notDone = size > 0 || inflightSize
                 nextUpdate = logProgress(stopWatch, nextUpdate, camelContext)
             }
         }
