@@ -1,5 +1,6 @@
 package metridoc.core.tools
 
+import metridoc.core.TargetManager
 import org.apache.camel.CamelContext
 import org.apache.camel.Exchange
 import org.apache.camel.component.file.GenericFile
@@ -63,6 +64,13 @@ class CamelToolTest {
             assert "bam" == registry.lookup("boo")
             assert "bar" == registry.lookup("foo")
         }
+    }
+
+    @Test
+    void "make sure we can add the tool to the target manager"() {
+        def manager = new TargetManager()
+        manager.includeTool(CamelTool)
+        assert manager.binding.camel
     }
 
     @Test

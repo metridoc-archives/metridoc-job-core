@@ -1,6 +1,7 @@
 package metridoc.core
 
 import groovy.util.logging.Slf4j
+import org.apache.commons.lang.StringUtils
 
 /**
  *
@@ -128,6 +129,22 @@ class TargetManager {
         log.info "profiling [$description] finished ${end - start} ms"
         if (interrupted) {
             throw new JobInterruptionException(this.getClass().name)
+        }
+    }
+
+    void includeTool(Class tool) {
+        def simpleName = tool.simpleName
+        def toolName = simpleName
+        if (simpleName.endsWith("Tool")) {
+            def index = simpleName.indexOf("Tool")
+            toolName = simpleName.substring(0, index)
+        }
+        def toolNameUsed = StringUtils.uncapitalize(toolName)
+        if (binding.hasVariable(toolNameUsed)) {
+            log.info "tool $toolNameUsed already exists"
+        } else {
+            def instance = tool.newInstance(binding: binding)
+            binding."$toolNameUsed" = instance
         }
     }
 
