@@ -5,19 +5,40 @@ package metridoc.core
  */
 class MetridocScript {
 
-    static void target(LinkedHashMap description, Closure unitOfWork) {
-
+    private static TargetManager getManager(Script self) {
+        initializeTargetManagerIfNotThere(self)
+        self.targetManager
     }
 
-    /**
-     * fires off the default target.  This is "default" by default, can be changed by binding defaultTarget to something
-     * else in the groovy script
-     */
-    static void runTargets(Script script) {
-
+    private static initializeTargetManagerIfNotThere(Script self) {
+        if (!self.binding.hasVariable("targetManager")) {
+            TargetManager targetManager = new TargetManager(binding: self.binding)
+            self.targetManager = targetManager
+        }
     }
 
-    static void runTargets(Script script, String... targets) {
+    static void target(Script self, LinkedHashMap description, Closure unitOfWork) {
+        initializeTargetManagerIfNotThere(self)
+        getManager(self).target(description, unitOfWork)
+    }
 
+    static void includeTargets(Script self, Class<Script> targets) {
+        getManager(self).includeTargets(targets)
+    }
+
+    static void includeTool(Script self, Class tool) {
+        getManager(self).includeTool(tool)
+    }
+
+    static void runDefaultTarget(Script self) {
+        getManager(self).runDefaultTarget()
+    }
+
+    static void runTargets(Script self, String... targets)  {
+        getManager(self).depends(targets)
+    }
+
+    static void profile(Script self, String description, Closure work) {
+        getManager(self).profile(description, work)
     }
 }

@@ -22,6 +22,10 @@ class TargetManager {
         _binding.targetManager = this
         return _binding
     }
+
+    void setBinding(Binding _binding) {
+        this._binding = _binding
+    }
 /**
      * If job is not run from the command line, use this to fire off an interuption.  This is not as
      * effective as killing a commandline job though.  Basically either the job will have to be aware of
