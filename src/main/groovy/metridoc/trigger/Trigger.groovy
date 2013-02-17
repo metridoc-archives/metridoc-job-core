@@ -1,4 +1,4 @@
-package metridoc.core
+package metridoc.trigger
 
 /**
  * Times that can be assigned to a job.
