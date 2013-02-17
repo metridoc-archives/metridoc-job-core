@@ -44,7 +44,7 @@ class CamelToolTest {
         tool.with {
             withCamelContext {
                 asyncSend("seda:test", "testBody")
-                consume("seda:test") {Exchange exchange ->
+                consume("seda:test") { Exchange exchange ->
                     assert "testBody" == exchange.in.body
                     fromCalled = true
                 }
@@ -75,14 +75,14 @@ class CamelToolTest {
 
     @Test
     void "test full blown routing examples"() {
-        int filesProcessed = 0
         def binding = new Binding()
         binding.fileFilter = [
                 accept: { GenericFile file ->
-                    def correctFileName = file.fileName.startsWith("file")
-                    def noMoreThanFourFilesProcessed = filesProcessed < 4
-                    filesProcessed++
-                    return correctFileName && noMoreThanFourFilesProcessed
+                    return file.fileName.startsWith("file1") ||
+                            file.fileName.startsWith("file2") ||
+                            file.fileName.startsWith("file3") ||
+                            file.fileName.startsWith("file4")
+
                 }
         ] as GenericFileFilter
 
@@ -96,7 +96,7 @@ class CamelToolTest {
                 Set fileNames = []
                 //let's do 5 messages.  The fifth should be ignored because of the file filter
                 (1..5).each {
-                    consumeWait("file://${tmpDirectory.path}?initialDelay=0&filter=#fileFilter" as String, 1000L) {GenericFile file ->
+                    consumeWait("file://${tmpDirectory.path}?noop=true&initialDelay=0&filter=#fileFilter" as String, 1000L) { GenericFile file ->
                         if (file != null) {
                             fileNames << file.fileName
                             send("mock:endFull", it)
@@ -111,14 +111,46 @@ class CamelToolTest {
         deleteTempDirectoryAndFiles()
     }
 
+    @Test
+    void "if there is a failure proper actions should take place, such as moving files on error"() {
+        def tool = new CamelTool()
+        createTempDirectoryAndFiles()
+        tool.with() {
+            try {
+                consume("file://${tmpDirectory.path}?initialDelay=0&moveFailed=.error" as String) { GenericFile file ->
+                    throw new RuntimeException("maent to fail for testing")
+                }
+                assert false : "exception should have occurred"
+            } catch (RuntimeException e) {
+                assert new File("${tmpDirectory.path}/.error").listFiles()
+            }
+        }
+
+        deleteTempDirectoryAndFiles()
+    }
+
+
     def getTmpDirectory() {
         def home = SystemUtils.USER_HOME
         new File("${home}/.metridoctmp")
     }
 
+    def getErrorDirectory() {
+        new File("${tmpDirectory.path}/.error")
+    }
+
+    def deleteErrorFiles() {
+        if (errorDirectory.exists()) {
+            errorDirectory.eachFile {
+                it.delete()
+            }
+            errorDirectory.delete()
+        }
+    }
+
     def deleteTempDirectoryAndFiles() {
         deleteFiles()
-
+        deleteErrorFiles()
         tmpDirectory.delete()
     }
 

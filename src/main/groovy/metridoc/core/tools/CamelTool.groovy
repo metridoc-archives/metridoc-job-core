@@ -110,6 +110,11 @@ class CamelTool {
                     }
                     processBody.call(messageBody)
                 }
+            } catch (Exception e) {
+                if (body) {
+                    body.exception = e
+                }
+                throw e
             } finally {
                 if (body) {
                     consumerTemplate.doneUoW(body)
