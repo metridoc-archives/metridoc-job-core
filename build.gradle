@@ -101,6 +101,7 @@ uploadArchives {
 }
 
 def configurePom(pom) {
+    pom.artifactId = "metridoc-job-core"
     pom.whenConfigured { pomToConfigure ->
         pomToConfigure.dependencies.find { dep -> dep.artifactId == 'poi' }.optional = true
         pomToConfigure.dependencies.find { dep -> dep.artifactId == 'poi-ooxml' }.optional = true
