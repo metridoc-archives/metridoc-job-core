@@ -16,7 +16,7 @@ dependencies {
     def slf4jVersion = "1.6.2"
 
     deployerJars 'com.google.code.maven-svn-wagon:maven-svn-wagon:1.4'
-
+    compile('com.google.guava:guava:13.0.1')
     compile('org.codehaus.groovy:groovy-all:2.0.5')
     testCompile('org.codehaus.groovy:groovy-all:2.0.5')
     compile("org.apache.camel:camel-core:$camelVersion") {
