@@ -92,7 +92,7 @@ uploadArchives {
                     id: "Metridoc googlecode repo",
                     url: "svn:https://metridoc.googlecode.com/svn/maven/repository",
             ) {
-                authentication(userName:googlecodeUserName, password:googlecodePassword)
+                authentication(userName: googlecodeUserName, password: googlecodePassword)
             }
             configurePom(pom)
             configuration = configurations.deployerJars
@@ -100,7 +100,7 @@ uploadArchives {
     }
 }
 
-def configurePom (pom) {
+def configurePom(pom) {
     pom.whenConfigured { pomToConfigure ->
         pomToConfigure.dependencies.find { dep -> dep.artifactId == 'poi' }.optional = true
         pomToConfigure.dependencies.find { dep -> dep.artifactId == 'poi-ooxml' }.optional = true
@@ -135,9 +135,16 @@ def configurePom (pom) {
                 dep.exclusions.add(slf4jExclusion)
             }
 
-            if (artifactId == "hibernate-core") {
+            if (artifactId == "hibernate-core" || artifactId == "hibernate-validator") {
                 dep.exclusions.add(slf4jExclusion)
+            }
+
+            if (artifactId == "hibernate-core") {
                 dep.exclusions.add(dom4JExclusion)
+                dep.exclusions.add(Exclusion.newInstance(
+                        artifactId: "antlr",
+                        groupId: "antlr"
+                ))
             }
 
             if (artifactId == "camel-groovy") {
