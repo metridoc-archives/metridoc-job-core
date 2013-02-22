@@ -82,7 +82,7 @@ class HibernateTool {
                     properties."hibernate.hbm2ddl.auto" = dbCreate.toString()
                 }
                 if (url) {
-                    properties."hibernate.connection.url" = dbCreate.toString()
+                    properties."hibernate.connection.url" = url.toString()
                 }
                 if (username) {
                     properties."hibernate.connection.username" = username.toString()
