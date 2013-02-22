@@ -23,12 +23,13 @@ class HibernateTool {
 
     void setBinding(Binding binding) {
         ConfigObject config
-        if (binding.config && binding.config instanceof ConfigObject) {
+        if (binding.hasVariable("config") && binding.config instanceof ConfigObject) {
             config = binding.config
         } else {
             config = new ConfigObject()
         }
         config.putAll(binding.variables)
+        setConfig(config)
     }
 
     void setConfig(ConfigObject configObject) {
@@ -44,7 +45,7 @@ class HibernateTool {
         }
     }
 
-    void withTransaction(Session session, Closure closure) {
+    static void withTransaction(Session session, Closure closure) {
         def transaction = session.beginTransaction()
         try {
             closure.call(session)
@@ -107,7 +108,7 @@ class HibernateTool {
         def result = new Properties()
 
         configObject.flatten().findAll { it.key.startsWith("${hibernatePrefix}.") }.each {
-            result.setProperty(it.key, it.value.toString())
+            result.setProperty(it.key as String, it.value.toString())
         }
 
         return result

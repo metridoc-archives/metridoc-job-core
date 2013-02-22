@@ -27,12 +27,11 @@ class TargetManager {
         this._binding = _binding
     }
 /**
-     * If job is not run from the command line, use this to fire off an interuption.  This is not as
-     * effective as killing a commandline job though.  Basically either the job will have to be aware of
-     * the interuption or wait until it is checked in a progress closure
-     * @return
-     */
-    @Override
+ * If job is not run from the command line, use this to fire off an interuption.  This is not as
+ * effective as killing a commandline job though.  Basically either the job will have to be aware of
+ * the interuption or wait until it is checked in a progress closure
+ * @return
+ */
     void interrupt() {
         interrupted = true
     }
@@ -75,7 +74,7 @@ class TargetManager {
      * @param scriptClass
      * @return returns the binding from the script in case global variables need to accessed
      */
-    def includeTargets(Class<Script> scriptClass) {
+    def includeTargets(Class<? extends Script> scriptClass) {
         return includeTargets(scriptClass, binding)
     }
 
@@ -87,7 +86,7 @@ class TargetManager {
      * @param binding
      * @return the passed binding
      */
-    def includeTargets(Class<Script> scriptClass, Binding binding) {
+    def includeTargets(Class<? extends Script> scriptClass, Binding binding) {
 
         binding.setVariable("target") { Map description, Closure closure ->
             target(description, closure)
@@ -105,7 +104,7 @@ class TargetManager {
      * @param targetMap
      */
     def includeTargets(Map<String, Closure> targetMap) {
-        targetMap.putAll(targetMap)
+        this.targetMap.putAll(targetMap)
     }
 
     /**
@@ -114,7 +113,7 @@ class TargetManager {
      * @param binding
      */
     def importBindingVariables(Binding binding) {
-        binding.variables.putAll(binding.variables)
+        this.binding.variables.putAll(binding.variables)
     }
 
     /**
@@ -136,22 +135,24 @@ class TargetManager {
         }
     }
 
-    void includeTool(Class tool) {
+    public <T> T includeTool(Class<T> tool) {
         def simpleName = tool.simpleName
         def toolName = simpleName
+        def toolInstance
         if (simpleName.endsWith("Tool")) {
             def index = simpleName.indexOf("Tool")
             toolName = simpleName.substring(0, index)
         }
         def toolNameUsed = StringUtils.uncapitalize(toolName)
         if (binding.hasVariable(toolNameUsed)) {
-            log.info "tool $toolNameUsed already exists"
+            log.debug "tool $toolNameUsed already exists"
         } else {
             def instance = tool.newInstance(binding: binding)
             if (!binding.hasVariable(toolNameUsed)) {
                 binding."$toolNameUsed" = instance
             }
         }
+        return binding."${toolNameUsed}"
     }
 
     def runDefaultTarget() {

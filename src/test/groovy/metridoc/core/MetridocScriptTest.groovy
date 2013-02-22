@@ -1,10 +1,11 @@
 package metridoc.core
 
+import metridoc.core.tools.HibernateTool
 import org.junit.Test
 
 class MetridocScriptTest {
 
-    def script = new MetridocScriptHelper()
+    Script script = new MetridocScriptHelper()
 
     @Test
     void "test initializing the targetManager"() {
@@ -15,9 +16,16 @@ class MetridocScriptTest {
     @Test
     void "target manager can only be initialize once"() {
         MetridocScript.initializeTargetManagerIfNotThere(script)
-        def targetManager =  script.targetManager
+        def targetManager = script.targetManager
         MetridocScript.initializeTargetManagerIfNotThere(script)
         assert targetManager == script.targetManager
+    }
+
+    @Test
+    void "include tool returns the tool that has been instantiated or instantiated in the past"() {
+        def tool = MetridocScript.includeTool(script, HibernateTool)
+        assert tool
+        assert tool == MetridocScript.includeTool(script, HibernateTool)
     }
 }
 

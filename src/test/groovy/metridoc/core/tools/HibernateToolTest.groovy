@@ -14,6 +14,12 @@ import javax.validation.constraints.NotNull
 class HibernateToolTest {
 
     @Test
+    void "set Binding should not fail if config property does not exist"() {
+        def tool = new HibernateTool()
+        tool.binding = new Binding()
+    }
+
+    @Test
     void "test converting to hibernate properties from dataSource properties"() {
         def configObject = new ConfigObject()
         configObject.dataSource.dialect = "org.hibernate.dialect.MySQL5InnoDBDialect"
@@ -38,7 +44,7 @@ class HibernateToolTest {
     @Test
     void "test the validator"() {
         def tool = new HibernateTool()
-        assert 0 == tool.validate(new BeanForValidation(foo:  "bar")).size()
+        assert 0 == tool.validate(new BeanForValidation(foo: "bar")).size()
         def violations = tool.validate(new BeanForValidation())
         assert 1 == violations.size()
     }

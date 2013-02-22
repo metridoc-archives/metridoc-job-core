@@ -1,11 +1,9 @@
 package metridoc.core
-
-import org.codehaus.groovy.reflection.ReflectionUtils
-
 /**
  * Class to use if you are dong groovy scripting
  */
 class MetridocScript {
+
 
     private static TargetManager getManager(Script self) {
         initializeTargetManagerIfNotThere(self.binding)
@@ -28,6 +26,10 @@ class MetridocScript {
         }
     }
 
+    static ConfigObject configure() {
+
+    }
+
     static void target(Script self, LinkedHashMap description, Closure unitOfWork) {
         initializeTargetManagerIfNotThere(self)
         getManager(self).target(description, unitOfWork)
@@ -37,11 +39,11 @@ class MetridocScript {
         getManager(self).includeTargets(targets)
     }
 
-    static void includeTool(Script self, Class tool) {
+    static <T> T includeTool(Script self, Class<T> tool) {
         getManager(self).includeTool(tool)
     }
 
-    static void includeTool(Binding self, Class tool) {
+    static <T> T includeTool(Binding self, Class<T> tool) {
         getManager(self).includeTool(tool)
     }
 
@@ -49,7 +51,7 @@ class MetridocScript {
         getManager(self).runDefaultTarget()
     }
 
-    static void runTargets(Script self, String... targets)  {
+    static void runTargets(Script self, String... targets) {
         getManager(self).depends(targets)
     }
 

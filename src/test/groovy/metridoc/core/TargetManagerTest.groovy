@@ -1,5 +1,6 @@
 package metridoc.core
 
+import metridoc.core.tools.HibernateTool
 import org.junit.Test
 
 /**
@@ -34,6 +35,14 @@ class TargetManagerTest {
         assert targetManager.binding.fooRan
         assert targetManager.targetsRan.contains("foo")
         assert targetManager.targetsRan.contains("bar")
+    }
+
+    @Test
+    void "include tool returns the tool it instantiates or has already instantiated"() {
+        def tool = targetManager.includeTool(HibernateTool)
+        assert tool
+        assert tool instanceof HibernateTool
+        assert tool == targetManager.includeTool(HibernateTool)
     }
 
     class MetridocJobTestTargetHelper extends Script {
