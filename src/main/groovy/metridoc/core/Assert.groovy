@@ -11,7 +11,17 @@ class Assert {
 
     static void isTrue(boolean expression, String message) {
         if (!expression) {
-            throw new IllegalArgumentException(message)
+            throwException(message)
         }
+    }
+
+    static void notNull(value, String message) {
+        if (value == null) {
+            throwException(message)
+        }
+    }
+
+    private static void throwException(String message) {
+        throw new IllegalArgumentException(message)
     }
 }

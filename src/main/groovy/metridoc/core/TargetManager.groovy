@@ -148,7 +148,9 @@ class TargetManager {
             log.info "tool $toolNameUsed already exists"
         } else {
             def instance = tool.newInstance(binding: binding)
-            binding."$toolNameUsed" = instance
+            if (!binding.hasVariable(toolNameUsed)) {
+                binding."$toolNameUsed" = instance
+            }
         }
     }
 
