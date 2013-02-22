@@ -1,5 +1,6 @@
 package metridoc.core.tools
 
+import metridoc.core.MetridocScript
 import org.hibernate.Session
 import org.hibernate.SessionFactory
 import org.hibernate.cfg.Configuration
@@ -22,14 +23,8 @@ class HibernateTool {
     }
 
     void setBinding(Binding binding) {
-        ConfigObject config
-        if (binding.hasVariable("config") && binding.config instanceof ConfigObject) {
-            config = binding.config
-        } else {
-            config = new ConfigObject()
-        }
-        config.putAll(binding.variables)
-        setConfig(config)
+        MetridocScript.includeTool(binding, ConfigTool)
+        setConfig(binding.config)
     }
 
     void setConfig(ConfigObject config) {
@@ -61,7 +56,7 @@ class HibernateTool {
             def configuration = new Configuration()
             configuration.with {
                 entityClasses.each {
-                    addClass(it)
+                    addAnnotatedClass(it)
                 }
                 addProperties(hibernateProperties)
                 sessionFactory = buildSessionFactory()

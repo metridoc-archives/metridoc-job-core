@@ -1,4 +1,7 @@
 package metridoc.core
+
+import metridoc.core.tools.ConfigTool
+
 /**
  * Class to use if you are dong groovy scripting
  */
@@ -26,8 +29,9 @@ class MetridocScript {
         }
     }
 
-    static ConfigObject configure() {
-
+    static ConfigObject configure(Script self) {
+        includeTool(self, ConfigTool)
+        return self.binding.config
     }
 
     static void target(Script self, LinkedHashMap description, Closure unitOfWork) {
