@@ -32,7 +32,7 @@ class HibernateTool {
         setConfig(config)
     }
 
-    void setConfig(ConfigObject configObject) {
+    void setConfig(ConfigObject config) {
         //defaults first
         hibernateProperties."hibernate.current_session_context_class" = "thread"
         hibernateProperties."hibernate.hbm2ddl.auto" = "update"
@@ -40,8 +40,8 @@ class HibernateTool {
 
         hibernateProperties.putAll(convertDataSourcePropsToHibernate(config))
         hibernateProperties.putAll(convertHibernateProperties(config))
-        if (configObject.entityClasses) {
-            entityClasses = configObject.entityClasses
+        if (config.entityClasses) {
+            entityClasses = config.entityClasses
         }
     }
 
