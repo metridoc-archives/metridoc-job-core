@@ -59,6 +59,10 @@ class MetridocScript {
         getManager(self).depends(targets)
     }
 
+    static void depends(Script self, String... targetDependencies) {
+        getManager(self).depends(targetDependencies)
+    }
+
     static void profile(Script self, String description, Closure work) {
         getManager(self).profile(description, work)
     }

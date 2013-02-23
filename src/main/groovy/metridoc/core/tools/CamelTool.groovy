@@ -9,6 +9,7 @@ import org.apache.camel.ProducerTemplate
 import org.apache.camel.impl.DefaultCamelContext
 import org.apache.camel.impl.JndiRegistry
 import org.apache.camel.util.jndi.JndiContext
+import org.codehaus.groovy.runtime.typehandling.GroovyCastException
 
 /**
  * Each routing method creates a new CamelContext using the binding to fill its registry and shuts it down before
@@ -24,7 +25,7 @@ class CamelTool {
     private static ThreadLocal<ConsumerTemplate> consumerTemplate = new ThreadLocal<ConsumerTemplate>()
 
     def bindBinding() {
-        withCamelContext {DefaultCamelContext camelContext ->
+        withCamelContext { DefaultCamelContext camelContext ->
             JndiRegistry registry = camelContext.registry.registry as JndiRegistry
             JndiContext jndiContext = registry.context as JndiContext
             if (binding) {
@@ -55,12 +56,11 @@ class CamelTool {
         } finally {
             if (context) {
                 try {
-                    CamelUtils.waitTillDone(context)
                     if (context.started) {
                         context.shutdown()
                     }
                 } catch (Exception ex) {
-                    log.error("unexcpected exception occurred shutting down camel", ex)
+                    log.error("unexpected exception occurred shutting down camel", ex)
                 }
                 camelContext.set(null)
                 producerTemplate.set(null)
@@ -90,15 +90,43 @@ class CamelTool {
         consumeHelper(consumer, closure)
     }
 
-    private void consumeHelper(Closure consume, Closure processBody) {
-        withCamelContext {CamelContext context ->
+    void consumeTillDone(String endpoint, long wait = 5000L, Closure closure) {
+        boolean hasValue = true
+        withCamelContext {
+            while (hasValue) {
+                def consumer = { ConsumerTemplate consumerTemplate ->
+                    Exchange exchange = consumerTemplate.receive(endpoint, wait)
+                    hasValue = exchange != null
+                    return exchange
+                }
+                consumeHelper(consumer, false, closure)
+            }
+        }
+    }
+
+    public <T> T convertTo(Class<T> convertion, valueToConvert) {
+        withCamelContext {CamelContext camelContext ->
+            def converted = camelContext.typeConverter.convertTo(convertion, valueToConvert)
+            if (converted == null) {
+                try {
+                    converted = valueToConvert.asType(convertion)
+                } catch (GroovyCastException ex) {
+                    //do nothing, no convertion available
+                }
+            }
+            return converted
+        }
+    }
+
+    private void consumeHelper(Closure consume, boolean processNull = true, Closure processBody) {
+        withCamelContext { CamelContext context ->
             ConsumerTemplate consumerTemplate = consumerTemplate.get()
             Exchange body = null
             try {
                 body = consume.call(consumerTemplate)
                 def parameter = processBody.parameterTypes[0]
 
-                if(parameter == Exchange) {
+                if (parameter == Exchange && body != null) {
                     processBody.call(body)
                 } else {
                     def messageBody = null
@@ -108,7 +136,11 @@ class CamelTool {
                             messageBody = body.in.body.asType(parameter)
                         }
                     }
-                    processBody.call(messageBody)
+                    if (messageBody != null) {
+                        processBody.call(messageBody)
+                    } else if (processNull) {
+                        processBody.call(null)
+                    }
                 }
             } catch (Exception e) {
                 if (body) {
