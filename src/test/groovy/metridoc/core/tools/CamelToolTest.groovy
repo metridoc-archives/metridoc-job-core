@@ -87,6 +87,7 @@ class CamelToolTest {
         ] as GenericFileFilter
 
         tool.binding = binding
+        deleteTempDirectoryAndFiles()
         createTempDirectoryAndFiles()
         MockEndpoint mock = null
         tool.with {
