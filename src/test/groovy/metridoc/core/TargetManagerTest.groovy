@@ -45,6 +45,20 @@ class TargetManagerTest {
         assert tool == targetManager.includeTool(HibernateTool)
     }
 
+    @Test
+    void "test target manager interruption"() {
+        assert !targetManager.interrupted
+        targetManager.interrupt()
+        assert targetManager.interrupted
+        assert targetManager.binding.interrupted
+    }
+
+    @Test
+    void "if the binding has an interrupted value set to true, then it is interrupted"() {
+        targetManager.binding.interrupted = true
+        assert targetManager.interrupted
+    }
+
     class MetridocJobTestTargetHelper extends Script {
 
         @Override

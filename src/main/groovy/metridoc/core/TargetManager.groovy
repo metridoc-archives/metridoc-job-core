@@ -12,7 +12,7 @@ class TargetManager {
     String defaultTarget = DEFAULT_TARGET
     Map<String, Closure> targetMap = [:]
     Set<String> targetsRan = []
-    private boolean interrupted = false
+    private boolean _interrupted = false
     private Binding _binding
 
     Binding getBinding() {
@@ -34,6 +34,16 @@ class TargetManager {
  */
     void interrupt() {
         interrupted = true
+        getBinding().interrupted = true
+    }
+
+    boolean getInterrupted() {
+        def bindingInterrupted = binding.hasVariable("interrupted") ? binding.interrupted : false
+        return _interrupted || bindingInterrupted
+    }
+
+    void setInterrupted(boolean interrupted) {
+        this._interrupted = interrupted
     }
 
     def target(Map data, Closure closure) {
