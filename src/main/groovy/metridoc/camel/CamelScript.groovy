@@ -68,6 +68,7 @@ class CamelScript {
 
     static void runRouteBuilders(String start, Registry registry, RouteBuilder... builders) {
         def camelContext = new DefaultCamelContext(registry)
+        camelContext.disableJMX()
         try {
             components.each {
                 camelContext.addComponent(it.key, it.value.newInstance(camelContext))
