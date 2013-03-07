@@ -25,25 +25,28 @@ class ConfigTool {
         use(MetridocScript) {
             binding.includeTool(ParseArgsTool)
         }
-        def configSlurper = new ConfigSlurper()
 
-        binding.with {
+        //is the config already set?  If so, ignore.
+        if (!binding.hasVariable("config")) {
+
+            def configSlurper = new ConfigSlurper("development")
+
             String env = getVariableFromCli("env", String, binding)
             if (env) {
                 String envUsed = ENVIRONMENT_SHORTCUTS[env] ?: env
                 configSlurper = new ConfigSlurper(envUsed)
             }
-        }
 
-        def defaultConfig = new File(METRIDOC_CONFIG)
-        def defaultConfigObject = configureFromFile(defaultConfig, configSlurper) ?: new ConfigObject()
-        def cliConfigLocation = getVariableFromCli("config", String, binding)
-        def cliConfigObject = new ConfigObject()
-        if (cliConfigLocation) {
-            cliConfigObject = configureFromFile(new File(cliConfigLocation), configSlurper)
+            def defaultConfig = new File(METRIDOC_CONFIG)
+            def defaultConfigObject = configureFromFile(defaultConfig, configSlurper) ?: new ConfigObject()
+            def cliConfigLocation = getVariableFromCli("config", String, binding)
+            def cliConfigObject = new ConfigObject()
+            if (cliConfigLocation) {
+                cliConfigObject = configureFromFile(new File(cliConfigLocation), configSlurper)
+            }
+            defaultConfigObject.merge(cliConfigObject)
+            binding.config = defaultConfigObject
         }
-        defaultConfigObject.merge(cliConfigObject)
-        binding.config = defaultConfigObject
     }
 
     private static ConfigObject configureFromFile(File file, ConfigSlurper slurper) {

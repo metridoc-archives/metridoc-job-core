@@ -3,7 +3,7 @@ package metridoc.core
 import metridoc.core.tools.ConfigTool
 
 /**
- * Class to use if you are dong groovy scripting
+ * Class to use if you are doing groovy scripting and want to add Metridoc functionality
  */
 class MetridocScript {
 
@@ -30,6 +30,8 @@ class MetridocScript {
     }
 
     static ConfigObject configure(Script self) {
+        //Need to make sure that we use the correct classloader, fixes issues with remote runs
+        Thread.currentThread().setContextClassLoader(self.getClass().getClassLoader())
         includeTool(self, ConfigTool)
         return self.binding.config
     }
