@@ -1,7 +1,7 @@
 apply plugin: 'groovy'
 apply plugin: 'maven'
 project.group = "com.googlecode.metridoc"
-project.version = "0.2-SNAPSHOT"
+project.version = "0.1.4"
 
 repositories {
     mavenCentral()
@@ -42,6 +42,7 @@ dependencies {
         exclude module: 'camel-core'
         exclude module: 'groovy-all'
     }
+    compile("commons-codec:commons-codec:1.5")
     compile("org.apache.poi:poi:3.8-beta3")
     compile("org.apache.poi:poi-ooxml:3.8-beta3") {
         exclude module: 'poi'
