@@ -15,11 +15,13 @@ class ParseArgsTool {
     static final KEY_NO_VALUE = /^[\-]+([^=]+)$/
     static final ONLY_PARAM = /^([^\-]+)$/
 
+    @SuppressWarnings("GrMethodMayBeStatic")
     void setBinding(Binding binding) {
+        def argsMap = [:]
+        binding.argsMap = argsMap
+
         if (binding.hasVariable(ARGS) && binding."$ARGS" instanceof String[]) {
             String[] args = binding."$ARGS"
-            def argsMap = [:]
-            binding.argsMap = argsMap
             args.each {
                 Matcher m = it =~ KEY_VALUE
                 if (m.matches()) {
