@@ -44,7 +44,7 @@ abstract class DefaultTool {
         } else {
             if (value != null) {
                 try {
-                    value.asType(expectedType)
+                    return value.asType(expectedType)
                 } catch (Throwable throwable) {
                     //do nothing, not compatible
                 }
