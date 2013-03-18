@@ -21,8 +21,10 @@ class FileProcessingTool extends RecordTool {
             if (directory.exists()) {
                 sources << directory.listFiles().collect { it.isFile() }
             }
-        } else if (file.exists()) {
-            sources << [file]
+        } else if (file) {
+            if (file.exists()) {
+                sources << [file]
+            }
         }
 
         return sources
@@ -53,7 +55,7 @@ abstract class HandleLineProcessor implements RecordProcessor {
                     data: [
                             fileName: file.name,
                             lineNumber: rowNum,
-                            originalLine: line
+                            line: line
                     ]
             )
             def transformedRecord = new RecordProcessorWrapper(processor: tool.lineProcessor).process(record)
