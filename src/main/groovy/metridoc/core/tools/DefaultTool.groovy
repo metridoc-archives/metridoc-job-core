@@ -9,7 +9,7 @@ import metridoc.core.MetridocScript
  * Time: 9:42 AM
  * To change this template use File | Settings | File Templates.
  */
-abstract class DefaultTool {
+abstract class DefaultTool implements Tool {
     Binding binding
 
     void setBinding(Binding binding) {
@@ -24,13 +24,15 @@ abstract class DefaultTool {
     public <T> T getVariable(String variableName, Class<T> expectedType) {
         //command line goes first
         def value
-        value = getVariableHelper(binding.argsMap, variableName, expectedType)
-        if (value != null) return value
+        if (binding) {
+            value = getVariableHelper(binding.argsMap, variableName, expectedType)
+            if (value != null) return value
 
-        value = getVariableHelper(binding.variables, variableName, expectedType)
-        if (value != null) return value
+            value = getVariableHelper(binding.variables, variableName, expectedType)
+            if (value != null) return value
 
-        value = getVariableHelper(binding.config, variableName, expectedType)
+            value = getVariableHelper(binding.config, variableName, expectedType)
+        }
 
         return value
     }

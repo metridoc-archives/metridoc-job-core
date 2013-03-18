@@ -70,7 +70,7 @@ class CamelToolTest {
     void "make sure we can add the tool to the target manager"() {
         def manager = new TargetManager()
         manager.includeTool(CamelTool)
-        assert manager.binding.camel
+        assert manager.binding.camelTool
     }
 
     @Test

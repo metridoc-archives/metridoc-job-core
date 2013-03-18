@@ -1,7 +1,11 @@
 package metridoc.core
 
 import groovy.util.logging.Slf4j
+import metridoc.core.tools.DefaultTool
 import org.apache.commons.lang.StringUtils
+
+import java.beans.ReflectionUtils
+import java.lang.reflect.Field
 
 /**
  *
@@ -146,18 +150,39 @@ class TargetManager {
     }
 
     public <T> T includeTool(Class<T> tool) {
-        def simpleName = tool.simpleName
-        def toolName = simpleName
+        def toolName = tool.simpleName
         def toolInstance
-        if (simpleName.endsWith("Tool")) {
-            def index = simpleName.indexOf("Tool")
-            toolName = simpleName.substring(0, index)
-        }
         def toolNameUsed = StringUtils.uncapitalize(toolName)
         if (binding.hasVariable(toolNameUsed)) {
             log.debug "tool $toolNameUsed already exists"
         } else {
             def instance = tool.newInstance(binding: binding)
+            instance.properties.each { String key, value ->
+                def inBinding
+                if (instance instanceof DefaultTool) {
+                    inBinding = instance.getVariable(key) != null
+                } else {
+                    inBinding = binding.hasVariable(key)
+                }
+
+                if (inBinding) {
+                    try {
+                        Field field = tool.getDeclaredField(key)
+                        def type = field.type
+                        if (instance instanceof DefaultTool) {
+                            instance."$key" = instance.getVariable(key, type)
+                        } else {
+                            try {
+                                instance."$key" = binding.getVariable(key).asType(type)
+                            } catch (Throwable throwable) {
+                                //do nothing
+                            }
+                        }
+                    } catch (NoSuchFieldException fieldException) {
+                        //ignore... handles issues when searching for field "class" for instance
+                    }
+                }
+            }
             if (!binding.hasVariable(toolNameUsed)) {
                 binding."$toolNameUsed" = instance
             }
