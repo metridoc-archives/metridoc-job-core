@@ -164,7 +164,7 @@ class TargetManager {
         return binding."${toolNameUsed}"
     }
 
-    static void handlePropertyInjection(instance) {
+    void handlePropertyInjection(instance) {
         instance.properties.each { String key, value ->
             def inBinding
             if (instance instanceof DefaultTool) {
