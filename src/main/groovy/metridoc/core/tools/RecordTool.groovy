@@ -11,7 +11,7 @@ import groovy.util.logging.Slf4j
  * To change this template use File | Settings | File Templates.
  */
 @Slf4j
-abstract class RecordTool extends DefaultTool {
+abstract class RecordTool extends RunnableTool {
     String encoding = "utf-8"
 
     @Override
@@ -20,7 +20,9 @@ abstract class RecordTool extends DefaultTool {
         encoding = getVariable("encoding") ?: this.encoding
     }
 
-    def run() {
+
+
+    def doRun() {
         handleRecords(preProcessors)
         handleRecords(sourceProcessors)
         handleRecords(postProcessors)

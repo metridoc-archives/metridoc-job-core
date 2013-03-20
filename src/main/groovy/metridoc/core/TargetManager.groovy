@@ -4,7 +4,6 @@ import groovy.util.logging.Slf4j
 import metridoc.core.tools.DefaultTool
 import org.apache.commons.lang.StringUtils
 
-import java.beans.ReflectionUtils
 import java.lang.reflect.Field
 
 /**
@@ -157,37 +156,41 @@ class TargetManager {
             log.debug "tool $toolNameUsed already exists"
         } else {
             def instance = tool.newInstance(binding: binding)
-            instance.properties.each { String key, value ->
-                def inBinding
-                if (instance instanceof DefaultTool) {
-                    inBinding = instance.getVariable(key) != null
-                } else {
-                    inBinding = binding.hasVariable(key)
-                }
-
-                if (inBinding) {
-                    try {
-                        Field field = tool.getDeclaredField(key)
-                        def type = field.type
-                        if (instance instanceof DefaultTool) {
-                            instance."$key" = instance.getVariable(key, type)
-                        } else {
-                            try {
-                                instance."$key" = binding.getVariable(key).asType(type)
-                            } catch (Throwable throwable) {
-                                //do nothing
-                            }
-                        }
-                    } catch (NoSuchFieldException fieldException) {
-                        //ignore... handles issues when searching for field "class" for instance
-                    }
-                }
-            }
+            handlePropertyInjection(instance)
             if (!binding.hasVariable(toolNameUsed)) {
                 binding."$toolNameUsed" = instance
             }
         }
         return binding."${toolNameUsed}"
+    }
+
+    static void handlePropertyInjection(instance) {
+        instance.properties.each { String key, value ->
+            def inBinding
+            if (instance instanceof DefaultTool) {
+                inBinding = instance.getVariable(key) != null
+            } else {
+                inBinding = binding.hasVariable(key)
+            }
+
+            if (inBinding) {
+                try {
+                    Field field = instance.getClass().getDeclaredField(key)
+                    def type = field.type
+                    if (instance instanceof DefaultTool) {
+                        instance."$key" = instance.getVariable(key, type)
+                    } else {
+                        try {
+                            instance."$key" = binding.getVariable(key).asType(type)
+                        } catch (Throwable throwable) {
+                            //do nothing
+                        }
+                    }
+                } catch (NoSuchFieldException fieldException) {
+                    //ignore... handles issues when searching for field "class" for instance
+                }
+            }
+        }
     }
 
     def runDefaultTarget() {
