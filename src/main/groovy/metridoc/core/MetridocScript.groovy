@@ -41,7 +41,16 @@ class MetridocScript {
         getManager(self).target(description, unitOfWork)
     }
 
+    static void target(Binding self, LinkedHashMap description, Closure unitOfWork) {
+        initializeTargetManagerIfNotThere(self)
+        getManager(self).target(description, unitOfWork)
+    }
+
     static void includeTargets(Script self, Class<Script> targets) {
+        getManager(self).includeTargets(targets)
+    }
+
+    static void includeTargets(Binding self, Class<Script> targets) {
         getManager(self).includeTargets(targets)
     }
 
