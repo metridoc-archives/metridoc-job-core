@@ -1,6 +1,6 @@
 package metridoc.core.tools
 
-import metridoc.core.TargetManager
+import metridoc.core.MetridocScript
 
 /**
  * Created with IntelliJ IDEA.
@@ -9,11 +9,12 @@ import metridoc.core.TargetManager
  * Time: 12:38 PM
  * To change this template use File | Settings | File Templates.
  */
-abstract class RunnableTool extends DefaultTool{
+abstract class RunnableTool extends DefaultTool {
 
     def run() {
         //redo injection in case properties were set after including the tool
-        TargetManager.handlePropertyInjection(this)
+
+        MetridocScript.getManager(binding).handlePropertyInjection(this)
         return doRun()
     }
 

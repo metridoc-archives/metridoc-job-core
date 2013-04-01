@@ -44,7 +44,7 @@ class SqlPlusRouteTest {
         tool.binding.dataSource = embeddedDataSource
 
         tool.with {
-            consumeNoWait("sqlplus:foo?dataSource=dataSource") {ResultSet resultSet ->
+            consumeNoWait("sqlplus:foo?dataSource=dataSource") { ResultSet resultSet ->
                 send("sqlplus:bar?dataSource=dataSource", resultSet)
             }
         }
