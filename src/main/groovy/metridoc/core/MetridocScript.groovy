@@ -66,7 +66,15 @@ class MetridocScript {
         getManager(self).runDefaultTarget()
     }
 
+    static void runDefaultTarget(Binding self) {
+        getManager(self).runDefaultTarget()
+    }
+
     static void runTargets(Script self, String... targets) {
+        getManager(self).depends(targets)
+    }
+
+    static void runTargets(Binding self, String... targets) {
         getManager(self).depends(targets)
     }
 
@@ -74,7 +82,15 @@ class MetridocScript {
         getManager(self).depends(targetDependencies)
     }
 
+    static void depends(Binding self, String... targetDependencies) {
+        getManager(self).depends(targetDependencies)
+    }
+
     static void profile(Script self, String description, Closure work) {
+        getManager(self).profile(description, work)
+    }
+
+    static void profile(Binding self, String description, Closure work) {
         getManager(self).profile(description, work)
     }
 }

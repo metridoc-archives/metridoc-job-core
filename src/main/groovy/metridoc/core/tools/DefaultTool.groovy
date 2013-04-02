@@ -73,4 +73,34 @@ abstract class DefaultTool implements Tool {
 
         return [:]
     }
+
+    void target(LinkedHashMap targetInfo, Closure closure) {
+        use(MetridocScript) {
+            binding.target(targetInfo, closure)
+        }
+    }
+
+    public <T> T includeTool(Class<T> tool) {
+        use(MetridocScript) {
+            return binding.includeTool(tool)
+        }
+    }
+
+    void includeTargets(Class<Script> targets) {
+        use(MetridocScript) {
+            return binding.includeTargets(targets)
+        }
+    }
+
+    void depends(String... targetNames) {
+        use(MetridocScript) {
+            return binding.depends(targetNames)
+        }
+    }
+
+    void profile(String description, Closure work) {
+        use(MetridocScript) {
+            return binding.profile(description, work)
+        }
+    }
 }
