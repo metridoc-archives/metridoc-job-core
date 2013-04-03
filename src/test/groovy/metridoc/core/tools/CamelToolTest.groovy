@@ -3,9 +3,12 @@ package metridoc.core.tools
 import metridoc.core.TargetManager
 import org.apache.camel.CamelContext
 import org.apache.camel.Exchange
+import org.apache.camel.Processor
+import org.apache.camel.builder.RouteBuilder
 import org.apache.camel.component.file.GenericFile
 import org.apache.camel.component.file.GenericFileFilter
 import org.apache.camel.component.mock.MockEndpoint
+import org.apache.camel.impl.DefaultExchange
 import org.apache.commons.lang.SystemUtils
 import org.junit.Test
 
@@ -128,6 +131,31 @@ class CamelToolTest {
         }
 
         deleteTempDirectoryAndFiles()
+    }
+
+    @Test
+    void "check responses from a route"() {
+        def tool = new CamelTool()
+        tool.withCamelContext {CamelContext camelContext ->
+            camelContext.addRoutes(
+                    new RouteBuilder() {
+                        @Override
+                        void configure() throws Exception {
+                            from("direct:start").process(
+                                    new Processor() {
+                                        @Override
+                                        void process(Exchange exchange) throws Exception {
+                                            exchange.out.body = 5
+                                        }
+                                    }
+                            )
+                        }
+                    }
+            )
+            camelContext.start()
+            int response = tool.send("direct:start", "hello") as int
+            assert 5 == response
+        }
     }
 
 

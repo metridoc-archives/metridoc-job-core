@@ -7,9 +7,15 @@ import org.apache.camel.ConsumerTemplate
 import org.apache.camel.Exchange
 import org.apache.camel.ProducerTemplate
 import org.apache.camel.impl.DefaultCamelContext
+import org.apache.camel.impl.DefaultExchange
 import org.apache.camel.impl.JndiRegistry
+import org.apache.camel.spi.Synchronization
 import org.apache.camel.util.jndi.JndiContext
 import org.codehaus.groovy.runtime.typehandling.GroovyCastException
+
+import java.util.concurrent.Callable
+import java.util.concurrent.Executor
+import java.util.concurrent.Future
 
 /**
  * Each routing method creates a new CamelContext using the binding to fill its registry and shuts it down before
@@ -155,23 +161,64 @@ class CamelTool {
         }
     }
 
-    void send(String endpoint, body) {
+    Exchange send(String endpoint, body) {
         send(endpoint, body, [:])
     }
 
-    void send(String endpoint, body, Map headers) {
-        withCamelContext {
-            producerTemplate.get().requestBodyAndHeaders(endpoint, body, headers)
+    def send(String endpoint, body, Map headers) {
+        withCamelContext {CamelContext camelContext ->
+            DefaultExchange exchange = createExchange(camelContext, body, headers)
+
+            def wrappedResponseExchange = new WrappedResponseExchange()
+            def response = producerTemplate.get().send(endpoint, exchange)
+            wrappedResponseExchange.exchange = response
+            return wrappedResponseExchange
         }
     }
 
-    void asyncSend(String endpoint, body) {
+    private DefaultExchange createExchange(CamelContext camelContext, body, headers) {
+        def exchange = new DefaultExchange(camelContext)
+        exchange.in.body = body
+        exchange.in.headers = headers
+        exchange
+    }
+
+    Future asyncSend(String endpoint, body) {
         asyncSend(endpoint, body, [:])
     }
 
-    void asyncSend(String endpoint, body, Map headers) {
+    Future asyncSend(String endpoint, body, Map headers) {
         withCamelContext { CamelContext context ->
-            producerTemplate.get().asyncRequestBodyAndHeaders(endpoint, body, headers)
+            def exchange = createExchange(context, body, headers)
+            Future<Exchange> future = producerTemplate.get().asyncSend(endpoint, exchange)
+            return new FutureWrapper(future: future)
         }
+    }
+}
+
+class WrappedResponseExchange implements Exchange {
+    @Delegate
+    Exchange exchange
+
+    def asType(Class type) {
+        def response = exchange.out.getBody(type)
+        if (response) return response
+
+        def body = this.out.body
+        if (body) {
+            throw new GroovyCastException(body, type)
+        } else {
+            throw new NullPointerException("Exception body is null, can't convert to $type")
+        }
+    }
+}
+
+class FutureWrapper implements Future<Exchange> {
+    @Delegate
+    Future<Exchange> future
+
+    Exchange get() {
+        Exchange exchange = future.get()
+        new WrappedResponseExchange(exchange: exchange)
     }
 }
