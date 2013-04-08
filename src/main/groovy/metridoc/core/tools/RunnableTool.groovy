@@ -1,6 +1,7 @@
 package metridoc.core.tools
 
 import metridoc.core.MetridocScript
+import org.apache.commons.lang.StringUtils
 
 /**
  * Created with IntelliJ IDEA.
@@ -11,11 +12,15 @@ import metridoc.core.MetridocScript
  */
 abstract class RunnableTool extends DefaultTool {
 
-    void setDefaulttarget(String target) {
+    void setDefaultTarget(String target) {
         MetridocScript.getManager(binding).defaultTarget = target
     }
 
     def execute() {
+        def thisToolName = StringUtils.uncapitalize(this.getClass().simpleName)
+        if(!binding.hasVariable(thisToolName)) {
+            binding.setVariable(thisToolName, this)
+        }
         //redo injection in case properties were set after including the tool
         def manager = MetridocScript.getManager(binding)
         manager.handlePropertyInjection(this)
