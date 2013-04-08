@@ -22,7 +22,7 @@ abstract class RecordTool extends RunnableTool {
 
 
 
-    def doRun() {
+    def configure() {
         handleRecords(preProcessors)
         handleRecords(sourceProcessors)
         handleRecords(postProcessors)

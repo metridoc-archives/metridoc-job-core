@@ -15,11 +15,11 @@ class RunnableToolTest {
     void "dealing with bug where the runnable tool crashes since it is trying to deal with property injection incorrectly"() {
         def runnableTool = new RunnableTool() {
             @Override
-            def doRun() {
+            def configure() {
                 //do nothing
             }
         }
 
-        runnableTool.run()
+        runnableTool.execute()
     }
 }

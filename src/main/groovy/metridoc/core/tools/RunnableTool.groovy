@@ -11,12 +11,20 @@ import metridoc.core.MetridocScript
  */
 abstract class RunnableTool extends DefaultTool {
 
-    def run() {
-        //redo injection in case properties were set after including the tool
-
-        MetridocScript.getManager(binding).handlePropertyInjection(this)
-        return doRun()
+    void setDefaulttarget(String target) {
+        MetridocScript.getManager(binding).defaultTarget = target
     }
 
-    abstract doRun()
+    def execute() {
+        //redo injection in case properties were set after including the tool
+        def manager = MetridocScript.getManager(binding)
+        manager.handlePropertyInjection(this)
+        configure()
+        String defaultTarget = manager.defaultTarget
+        if(manager.targetMap.containsKey(defaultTarget)) {
+            manager.runDefaultTarget()
+        }
+    }
+
+    abstract configure()
 }
