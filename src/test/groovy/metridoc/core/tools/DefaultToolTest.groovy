@@ -71,8 +71,19 @@ class DefaultToolTest {
         config.foo = "bar"
         def binding = new Binding()
         binding.foo = "foobar"
+        binding.config = config
         tool.setBinding(binding)
         assert "foobar" == tool.getVariable("foo")
+    }
+
+    @Test
+    void "if a config is set and a non available variable is searched for, null is returned"() {
+        def config = new ConfigObject()
+        def binding = new Binding()
+        binding.config = config
+        tool.setBinding(binding)
+
+        assert null == tool.getVariable("bar")
     }
 }
 

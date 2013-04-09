@@ -87,6 +87,18 @@ class TargetManagerTest {
         assert helper.foo == "bar"
     }
 
+    @Test
+    void "property injection should override already set properties"() {
+        def binding = targetManager.binding
+        binding.foo = "bam"
+        def helper = new PropertyInjectionHelper()
+        targetManager.handlePropertyInjection(helper)
+        assert "bam" == helper.foo
+
+        //check that the current properties are maintained
+        assert "foo" == helper.bar
+    }
+
     class FooToolHelper implements Tool{
         def bar
         String bam
@@ -97,6 +109,11 @@ class TargetManagerTest {
         void setBinding(Binding binding) {
 
         }
+    }
+
+    class PropertyInjectionHelper {
+        def foo = "bar"
+        def bar = "foo"
     }
 
     class FooBarToolHelper extends DefaultTool{

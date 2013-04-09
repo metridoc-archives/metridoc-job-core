@@ -45,6 +45,11 @@ abstract class DefaultTool implements Tool {
     private static <T> T getVariableHelper(config, String variableName, Class<T> expectedType) {
         Map usedConfig = convertConfig(config)
         def value = usedConfig[variableName]
+
+        if(value instanceof Map && value.isEmpty()) {
+            return null
+        }
+
         if (expectedType == null) {
             return value
         } else {
