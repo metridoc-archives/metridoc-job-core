@@ -30,6 +30,7 @@ class CamelTool {
     private static ThreadLocal<ProducerTemplate> producerTemplate = new ThreadLocal<ProducerTemplate>()
     private static ThreadLocal<ConsumerTemplate> consumerTemplate = new ThreadLocal<ConsumerTemplate>()
 
+
     def bindBinding() {
         withCamelContext { DefaultCamelContext camelContext ->
             JndiRegistry registry = camelContext.registry.registry as JndiRegistry
@@ -165,7 +166,7 @@ class CamelTool {
         send(endpoint, body, [:])
     }
 
-    def send(String endpoint, body, Map headers) {
+    Exchange send(String endpoint, body, Map headers) {
         withCamelContext {CamelContext camelContext ->
             DefaultExchange exchange = createExchange(camelContext, body, headers)
 

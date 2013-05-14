@@ -10,7 +10,14 @@ import metridoc.core.MetridocScript
  * To change this template use File | Settings | File Templates.
  */
 abstract class DefaultTool implements Tool {
-    Binding binding = new Binding()
+    Binding binding
+
+    Binding getBinding() {
+        if(binding) return binding
+        setBinding(new Binding())
+
+        return binding
+    }
 
     void setBinding(Binding binding) {
         MetridocScript.includeTool(binding, ConfigTool)
@@ -24,7 +31,7 @@ abstract class DefaultTool implements Tool {
     public <T> T getVariable(String variableName, Class<T> expectedType) {
         //command line goes first
         def value
-        if (binding) {
+        if (getBinding()) {
             if (binding.hasVariable("argsMap")) {
                 value = getVariableHelper(binding.argsMap, variableName, expectedType)
             }

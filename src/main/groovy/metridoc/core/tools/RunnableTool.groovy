@@ -17,6 +17,10 @@ abstract class RunnableTool extends DefaultTool {
     }
 
     def execute() {
+        def parseTool = includeTool(ParseArgsTool)
+        //in case args was set after this was initialized
+        parseTool.setBinding(binding)
+
         def thisToolName = StringUtils.uncapitalize(this.getClass().simpleName)
         if(!binding.hasVariable(thisToolName)) {
             binding.setVariable(thisToolName, this)
@@ -25,6 +29,10 @@ abstract class RunnableTool extends DefaultTool {
         def manager = MetridocScript.getManager(binding)
         manager.handlePropertyInjection(this)
         configure()
+        String target = getVariable("target", String)
+        if(target) {
+            setDefaultTarget(target)
+        }
         String defaultTarget = manager.defaultTarget
         if(manager.targetMap.containsKey(defaultTarget)) {
             manager.runDefaultTarget()
