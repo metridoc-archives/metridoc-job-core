@@ -1,7 +1,7 @@
 apply plugin: 'groovy'
 apply plugin: 'maven'
 project.group = "com.googlecode.metridoc"
-project.version = "0.5-SNAPSHOT"
+project.version = "0.5.RC1"
 sourceCompatibility = "1.6"
 targetCompatibility = "1.6"
 
@@ -9,15 +9,10 @@ repositories {
     mavenCentral()
 }
 
-configurations {
-    deployerJars
-}
-
 dependencies {
     def camelVersion = "2.9.2"
     def slf4jVersion = "1.6.2"
 
-    deployerJars 'com.google.code.maven-svn-wagon:maven-svn-wagon:1.4'
     compile('com.google.guava:guava:13.0.1')
     compile('org.codehaus.groovy:groovy-all:2.0.5')
     testCompile('org.codehaus.groovy:groovy-all:2.0.5')
@@ -78,7 +73,7 @@ dependencies {
 }
 
 task wrapper(type: Wrapper) {
-    gradleVersion = '1.4'
+    gradleVersion = '1.5'
 }
 
 
@@ -93,13 +88,13 @@ uploadArchives {
         mavenDeployer {
 
             repository(
-                    id: "Metridoc googlecode repo",
-                    url: "svn:https://metridoc.googlecode.com/svn/maven/repository",
+                    id: "Metridoc bintray repo",
+                    url: "https://api.bintray.com/maven/upennlib/metridoc/metridoc-job-core",
             ) {
-                authentication(userName: googlecodeUserName, password: googlecodePassword)
+                authentication(userName: bintrayUserName, password: bintrayPassword)
             }
             configurePom(pom)
-            configuration = configurations.deployerJars
+
         }
     }
 }
@@ -218,9 +213,7 @@ artifacts {
         type = 'javadoc'
     }
 
-    archives(packageSources) {
-        type = 'sources'
-    }
+    archives(packageSources)
 }
 
 
