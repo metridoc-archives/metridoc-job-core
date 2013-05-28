@@ -2,6 +2,8 @@ apply plugin: 'groovy'
 apply plugin: 'maven'
 project.group = "com.googlecode.metridoc"
 project.version = "0.5-SNAPSHOT"
+sourceCompatibility = "1.6"
+targetCompatibility = "1.6"
 
 repositories {
     mavenCentral()
@@ -182,6 +184,7 @@ def configurePom(pom) {
         licenses {
             license {
                 name 'Educational Community License'
+                //noinspection GroovyAssignabilityCheck
                 url 'http://opensource.org/licenses/ECL-2.0'
                 distribution 'repo'
             }
