@@ -91,7 +91,9 @@ uploadArchives {
                     id: "Metridoc bintray repo",
                     url: "https://api.bintray.com/maven/upennlib/metridoc/metridoc-job-core",
             ) {
-                authentication(userName: bintrayUserName, password: bintrayPassword)
+                if (hasProperty("bintrayUserName")) {
+                    authentication(userName: bintrayUserName, password: bintrayPassword)
+                }
             }
             configurePom(pom)
 
