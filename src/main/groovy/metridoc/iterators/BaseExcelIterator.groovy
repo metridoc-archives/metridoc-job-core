@@ -15,27 +15,16 @@
 package metridoc.iterators
 
 
-/**
- * Created by IntelliJ IDEA.
- * User: tbarker
- * Date: 9/16/11
- * Time: 9:13 AM
- * To change this template use File | Settings | File Templates.
- */
-abstract class BaseExcelIterator extends FileIteratorCreator {
+abstract class BaseExcelIterator<T> extends FileIterator<T> {
 
     /**
      * if a sheet name is specified, it trumps any sheet index if specified
      */
     String sheetName
     /**
-     * default is 0, will be ignored if a {@link metridoc.iterators.BaseExcelIterator#sheetName} is specified
+     * default is 0, will be ignored if a {@link BaseExcelIterator#sheetName} is specified
      */
     int sheetIndex = 0
-
-    int getRowNum() {
-        return getLine() - 1 //excel rows are zero based
-    }
 
     protected static int convertColumnToNumber(String column) {
         def m = (column =~ /(\D+)\d*/)  //strip out row numbers

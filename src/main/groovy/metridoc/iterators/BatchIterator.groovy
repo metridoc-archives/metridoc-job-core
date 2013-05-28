@@ -14,13 +14,9 @@
  */
 package metridoc.iterators
 
-/**
- * Created by IntelliJ IDEA.
- * User: tbarker
- * Date: 6/25/12
- * Time: 2:51 PM
- */
-class BatchIterator implements Iterator {
+import com.google.common.collect.AbstractIterator
+
+class BatchIterator extends AbstractIterator {
     /**
      * the wrapped iterator
      */
@@ -34,15 +30,11 @@ class BatchIterator implements Iterator {
         this.batchSize = batchSize
     }
 
-    boolean hasNext() {
-        return iterator.hasNext()
-    }
-
-    def next() {
-
+    @Override
+    protected Object computeNext() {
         def result = []
         for (int i = 0; i < batchSize; i++) {
-            if (hasNext()) {
+            if (iterator.hasNext()) {
                 result.add(iterator.next())
             } else {
                 break
@@ -50,13 +42,9 @@ class BatchIterator implements Iterator {
         }
 
         if (!result) {
-            throw new NoSuchElementException("No more elements left in BatchIterator")
+            return endOfData()
         }
 
         return result
-    }
-
-    void remove() {
-        throw new UnsupportedOperationException("remove is not supported in BatchIterator")
     }
 }

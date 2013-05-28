@@ -89,8 +89,7 @@ class SqlPlusProcessor extends SqlPlusMixin implements Processor {
     }
 
     private void handleBatchResultSet(String tableOrInsert, ResultSet resultSet) {
-        def resultSetIterator = new SqlIterator().create(resultSet)
-        resultSetIterator.columns = endpoint.columns
+        def resultSetIterator = new SqlIterator(resultSet: resultSet)
         handleBatchIteration(tableOrInsert, resultSetIterator)
     }
 

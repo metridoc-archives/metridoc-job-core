@@ -14,35 +14,14 @@
  */
 package metridoc.iterators
 
+import com.google.common.collect.AbstractIterator
+import metridoc.utils.IOUtils
 
-/**
- * Created by IntelliJ IDEA.
- * User: tbarker
- * Date: 9/8/11
- * Time: 2:51 PM
- * To change this template use File | Settings | File Templates.
- */
-class LineIterator extends FileIteratorCreator {
+abstract class FileIterator<T> extends AbstractIterator<T> implements Closeable{
 
-    org.apache.commons.io.LineIterator lineIterator
-
-    @Override
-    Iterator<List> doCreate(InputStream inputStream) {
-        def lineIterator = new org.apache.commons.io.LineIterator(new InputStreamReader(inputStream))
-        return new LineIterator(lineIterator: lineIterator)
-    }
+    InputStream inputStream
 
     void close() {
-        lineIterator.close()
-    }
-
-    @Override
-    List doNext() {
-
-        if (lineIterator.hasNext()) {
-            return [lineIterator.nextLine()]
-        }
-
-        return null
+        IOUtils.closeQuietly(inputStream)
     }
 }

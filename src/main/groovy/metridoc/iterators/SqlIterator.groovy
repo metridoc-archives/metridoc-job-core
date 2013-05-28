@@ -14,32 +14,21 @@
  */
 package metridoc.iterators
 
+import com.google.common.collect.AbstractIterator
+
 import java.sql.ResultSet
 
-/**
- * Created by IntelliJ IDEA.
- * User: tbarker
- * Date: 9/27/11
- * Time: 8:53 AM
- */
-class SqlIterator extends DefaultIteratorCreator<ResultSet, Map> {
+class SqlIterator extends AbstractIterator<Map> {
 
-    Set columns
     ResultSet resultSet
 
     @Override
-    Iterator<Map> doCreate(ResultSet resultSet) {
-        return new SqlIterator(resultSet: resultSet)
-    }
-
-    @Override
-    Map doNext() {
-
+    protected Map computeNext() {
         if (resultSet.next()) {
             return resultSet.toRowResult()
         }
 
-        return null
+        return endOfData()
     }
 }
 

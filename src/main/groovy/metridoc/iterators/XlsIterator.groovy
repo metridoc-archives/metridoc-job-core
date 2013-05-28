@@ -14,68 +14,17 @@
  */
 package metridoc.iterators
 
-
 import groovy.util.logging.Slf4j
-import org.apache.poi.ss.usermodel.Sheet
-import org.apache.poi.ss.usermodel.Workbook
-import org.apache.poi.ss.usermodel.Cell
-import org.apache.poi.ss.usermodel.Row
-import org.apache.poi.ss.usermodel.WorkbookFactory
-import org.apache.poi.ss.usermodel.DateUtil
+import org.apache.poi.ss.usermodel.*
 
-/**
- * Created by IntelliJ IDEA.
- * User: tbarker
- * Date: 9/15/11
- * Time: 3:24 PM
- */
 @Slf4j
-class XlsIterator extends BaseExcelIterator {
+class XlsIterator extends BaseExcelIterator<List> {
 
-    Sheet sheet
-
-    private void initializeSheetIfNull() {
-        if (sheet == null) {
-            Workbook workbook = WorkbookFactory.create(getInputStream())
-            if (sheetName) {
-                sheet = workbook.getSheet(sheetName)
-            } else {
-                sheet = workbook.getSheetAt(sheetIndex)
-            }
-        }
-    }
-
-    @Override
-    Iterator<List> doCreate(InputStream inputStream) {
-        def args = [inputStream: inputStream]
-        if (parameters) {
-            args.putAll(parameters)
-        }
-        return new XlsIterator(args)
-    }
-
-
-
-    @Override
-    List doNext() {
-        def result = []
-        def rowNum = getRowNum()
-
-        log.debug("retrieving row {} for sheet {}", rowNum, getSheet().sheetName)
-        Row row = getSheet().getRow(rowNum)
-        if(row == null) {
-            return null
-        }
-
-        def lastCellIndex = row.lastCellNum
-
-        (0..(lastCellIndex - 1)).each {
-            def cell = row.getCell(it)
-            result.add(getCellValue(cell))
-        }
-
-        return result
-    }
+    @Lazy
+    Workbook workbook = {WorkbookFactory.create(getInputStream())}()
+    @Lazy
+    Sheet sheet = {sheetName ? workbook.getSheet(sheetName) : workbook.getSheetAt(sheetIndex)}()
+    int rowNum = 0
 
     private static Object getCellValue(Cell cell) {
 
@@ -103,8 +52,24 @@ class XlsIterator extends BaseExcelIterator {
         }
     }
 
-    Sheet getSheet() {
-        initializeSheetIfNull()
-        return sheet
+    @Override
+    protected List computeNext() {
+        def result = []
+
+        log.debug("retrieving row {} for sheet {}", rowNum, getSheet().sheetName)
+        Row row = getSheet().getRow(rowNum)
+        if (row == null) {
+            return endOfData()
+        }
+
+        def lastCellIndex = row.lastCellNum
+
+        (0..(lastCellIndex - 1)).each {
+            def cell = row.getCell(it)
+            result.add(getCellValue(cell))
+        }
+
+        rowNum++
+        return result
     }
 }

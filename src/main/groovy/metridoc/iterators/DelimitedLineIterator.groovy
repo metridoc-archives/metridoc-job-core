@@ -14,39 +14,51 @@
  */
 package metridoc.iterators
 
+import org.apache.commons.io.LineIterator
 
-class DelimitedLineIterator extends FileIteratorCreator {
 
-    org.apache.commons.io.LineIterator lineIterator
+class DelimitedLineIterator extends FileIterator<List<String>> {
+
+    Reader reader
+    LineIterator lineIterator
+    /**
+     * regex of the delimiter, for instance if you split text with | you would pass /\|/
+     */
     String delimiter
+
     int delimitTill = 0
 
-    @Override
-    Iterator<List> doCreate(InputStream inputStream) {
-        def lineIterator = new org.apache.commons.io.LineIterator(new InputStreamReader(inputStream))
-
-        if (getParameters() && getParameters().containsKey('delimiter')) {
-            delimiter = getParameters().get('delimiter')
+    Reader getReader() {
+        if(reader) {
+            return reader
         }
-        return new DelimitedLineIterator(lineIterator: lineIterator, delimiter: delimiter, delimitTill: delimitTill)
+        reader = new InputStreamReader(inputStream)
     }
 
-    void close() {
-        lineIterator.close()
+    LineIterator getLineIterator() {
+        if(lineIterator) return lineIterator
+
+        lineIterator = new LineIterator(getReader())
     }
 
     @Override
-    List doNext() {
-        if (lineIterator.hasNext()) {
-            def line = lineIterator.nextLine()
+    void close() {
+        getLineIterator().close()
+    }
+
+    @Override
+    protected List<String> computeNext() {
+        if (getLineIterator().hasNext()) {
+            def line = getLineIterator().nextLine()
             if (delimiter) {
                 def splitLine = line.split(delimiter, delimitTill)
 
                 return splitLine
             } else {
-                line.split()
+                return line.split()
             }
         }
-        return null
+        close()
+        return endOfData()
     }
 }

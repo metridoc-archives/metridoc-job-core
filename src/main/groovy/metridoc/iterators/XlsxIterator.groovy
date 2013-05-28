@@ -18,20 +18,12 @@ import org.apache.poi.openxml4j.opc.OPCPackage
 import org.apache.poi.xssf.eventusermodel.XSSFReader
 import org.apache.poi.xssf.model.SharedStringsTable
 import org.apache.poi.xssf.usermodel.XSSFRichTextString
+import org.slf4j.LoggerFactory
 
 import javax.xml.stream.XMLInputFactory
 import javax.xml.stream.XMLStreamReader
 
-import org.slf4j.LoggerFactory
-
-/**
- * Created by IntelliJ IDEA.
- * User: tbarker
- * Date: 9/16/11
- * Time: 9:13 AM
- * To change this template use File | Settings | File Templates.
- */
-class XlsxIterator extends BaseExcelIterator {
+class XlsxIterator extends BaseExcelIterator<List> {
 
     private static log = LoggerFactory.getLogger(XlsxIterator)
     XMLStreamReader reader
@@ -111,52 +103,6 @@ class XlsxIterator extends BaseExcelIterator {
         return atEnd || atRow
     }
 
-    List convertRowToList(List<XlsxCell> row) {
-        def result = []
-        def width = getRowWidth(row)
-
-        def cellIterator = row.iterator()
-        def currentCell = cellIterator.next()
-
-        (0..(width - 1)).each {zeroBasedColumnIndex ->
-            def cellIndex = convertColumnToNumber(currentCell.reference)
-
-            if((zeroBasedColumnIndex + 1) == cellIndex) {
-                result.add(currentCell.formattedValue)
-                if(cellIterator.hasNext()) {
-                    currentCell = cellIterator.next()
-                }
-            } else {
-                result.add(null)
-            }
-        }
-
-        return result
-    }
-
-    private static Map<String, Object> convertRowToHash(List<XlsxCell> row, LinkedHashSet<String> columns) {
-        def result = [:]
-
-        def rowIterator = row.iterator()
-        int columnIndex = 0
-        def currentCell = rowIterator.next()
-
-        columns.each {
-            columnIndex++
-            int cellIndex = convertColumnToNumber(currentCell.reference)
-            if (columnIndex == cellIndex) {
-                result.put(it, currentCell.formattedValue)
-                if (rowIterator.hasNext()) {
-                    currentCell = rowIterator.next()
-                }
-            } else {
-                result.put(it, null)
-            }
-        }
-
-        return result
-    }
-
     private static Map<String, String> getAttributeMap(XMLStreamReader reader) {
         int attributeCount = reader.attributeCount
         def result = [:]
@@ -197,7 +143,7 @@ class XlsxIterator extends BaseExcelIterator {
     }
 
     private static String getSheetReferenceByName(XMLStreamReader workbookReader, String name) {
-        return getSheetReference(workbookReader) {Map attributeMap ->
+        return getSheetReference(workbookReader) { Map attributeMap ->
             def sheetName = attributeMap.name
             if (sheetName == name) {
                 return attributeMap.id
@@ -206,38 +152,13 @@ class XlsxIterator extends BaseExcelIterator {
     }
 
     private static String getSheetReferenceByIndex(XMLStreamReader workbookReader, int index) {
-        return getSheetReference(workbookReader) {Map attributeMap ->
+        return getSheetReference(workbookReader) { Map attributeMap ->
             def oneBaseIndex = index + 1
             def sheetId = Integer.valueOf(attributeMap.sheetId)
             if (oneBaseIndex == sheetId) {
                 return attributeMap.id
             }
         }
-    }
-
-    private void addCellToHash(XlsxCell cell, int columnIndex, Map<String, Object> result) {
-
-        def value = null
-
-        if (cell != null) {
-            value = cell.formattedValue
-        }
-
-        def columnsAsList = columns as List
-        result.put(columnsAsList[columnIndex], value)
-    }
-
-    private static int getRowWidth(List<XlsxCell> row) {
-        int result = 0
-
-        row.each {XlsxCell cell ->
-            int columnNumber = convertColumnToNumber(cell.reference)
-            if (columnNumber > result) {
-                result = columnNumber
-            }
-        }
-
-        return result
     }
 
     private List<XlsxCell> getRow(XMLStreamReader reader) {
@@ -250,6 +171,7 @@ class XlsxIterator extends BaseExcelIterator {
                 def name = reader.localName
 
                 switch (name) {
+                    //c comes before v, so XlsxCell should be instantiated
                     case "c":
                         cell = new XlsxCell(stringLookup: getStringLookup())
                         def attributes = getAttributeMap(reader)
@@ -285,44 +207,15 @@ class XlsxIterator extends BaseExcelIterator {
     }
 
     @Override
-    List doNext() {
+    protected List computeNext() {
         def row = getNextRow(getReader())
 
-        row ? convertRowToList(row) : null
-    }
-
-    private static LinkedHashSet<String> getColumnsFromRowValues(List<XlsxCell> row) {
-        int width = getRowWidth(row)
-        Map<Integer, XlsxCell> rowMap = [:]
-
-        row.each {cell ->
-            rowMap.put(cell.columnIndex, cell)
+        if (row) {
+            return row.collect {it.getFormattedValue()}
         }
 
-        LinkedHashSet<String> result = [] as SortedSet
-        (1..width).each {
-            boolean hasItem = rowMap.containsKey(it)
-
-            if (!hasItem) {
-                result.add(it.toString())
-            } else {
-                String value = String.valueOf(rowMap.get(it).formattedValue)
-                result.add(value)
-            }
-        }
-
-        return result
-    }
-
-    @Override
-    Iterator<List> doCreate(InputStream inputStream) {
-        def args = [inputStream: inputStream]
-
-        if (parameters) {
-            args.putAll(parameters)
-        }
-
-        return new XlsxIterator(args)
+        close()
+        return endOfData()
     }
 }
 

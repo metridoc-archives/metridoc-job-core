@@ -14,15 +14,14 @@
  */
 package metridoc.camel
 
-
-import org.apache.camel.language.groovy.CamelGroovyMethods
-
 import metridoc.camel.aggregator.BodyAggregator
 import metridoc.camel.aggregator.InflightAggregationWrapper
-import org.apache.camel.Expression
 import org.apache.camel.builder.ExpressionBuilder
-import org.apache.camel.model.*
-import metridoc.iterators.LineIterator
+import org.apache.camel.language.groovy.CamelGroovyMethods
+import org.apache.camel.model.AggregateDefinition
+import org.apache.camel.model.ChoiceDefinition
+import org.apache.camel.model.FilterDefinition
+import org.apache.camel.model.ProcessorDefinition
 
 /**
  * Created by IntelliJ IDEA.
@@ -65,17 +64,6 @@ class CamelExtensions {
      */
     static ChoiceDefinition when(ChoiceDefinition self, Closure filter) {
         return CamelGroovyMethods.when(self, filter)
-    }
-
-    /**
-     * splits a text file by line
-     *
-     * @param self
-     * @return
-     */
-    static SplitDefinition splitByLine(ProcessorDefinition self) {
-        Expression bean = ExpressionBuilder.beanExpression(LineIterator.class, "create");
-        return self.split(bean).streaming()
     }
 
     /**

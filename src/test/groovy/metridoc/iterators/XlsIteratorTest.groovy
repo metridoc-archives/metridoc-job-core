@@ -11,7 +11,7 @@ import org.springframework.core.io.ClassPathResource
  * Time: 1:23 PM
  * To change this template use File | Settings | File Templates.
  */
-class XlsIteratorCreatorTest {
+class XlsIteratorTest {
 
     def file = new File("src/test/groovy/metridoc/iterators/locations.xls")
     def iterator = new XlsIterator(inputStream: file.newInputStream())

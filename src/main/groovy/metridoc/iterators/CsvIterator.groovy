@@ -15,39 +15,21 @@
 package metridoc.iterators
 
 import au.com.bytecode.opencsv.CSVReader
-import au.com.bytecode.opencsv.CSVParser
 
 /**
- * Created by IntelliJ IDEA.
- * User: tbarker
- * Date: 11/28/11
- * Time: 3:37 PM
  *
  * Handles iterating over csv files
- * The allowed parameters (which can be retrieved by calling {@link CsvIterator#getParameters} must be a property in
- * {@link CSVParser}, otherwise an exception will occur.
  *
  *
  */
-class CsvIterator extends FileIteratorCreator {
+class CsvIterator extends FileIterator<String[]> {
 
-    CSVReader csvReader
-
-    @Override
-    Iterator<List> doCreate(InputStream inputStream) {
-        def reader = new InputStreamReader(inputStream)
-        def csvReader = new CSVReader(reader)
-        if (getParameters()) {
-            csvReader.parser = new CSVParser(getParameters())
-        }
-
-        return new CsvIterator(csvReader: csvReader)
-    }
+    CSVReader csvReader = new CSVReader(new InputStreamReader(inputStream))
 
     @Override
-    List doNext() {
+    protected String[] computeNext() {
         def next = csvReader.readNext()
-        next == null ? null : Arrays.asList(next)
+        next == null ? endOfData() : next
     }
 }
 
