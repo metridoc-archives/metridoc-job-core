@@ -1,7 +1,9 @@
+import groovy.json.JsonSlurper
+
 apply plugin: 'groovy'
 apply plugin: 'maven'
 project.group = "com.googlecode.metridoc"
-project.version = "0.5.RC1"
+project.version = "0.5.RC2-SNAPSHOT"
 sourceCompatibility = "1.6"
 targetCompatibility = "1.6"
 
@@ -218,6 +220,22 @@ artifacts {
     archives(packageSources)
 }
 
+task uploadToBintray(dependsOn: "test") << {
+    if (version.contains("SNAPSHOT")) {
+        println "bintray does not support SNAPSHOTs, skipping upload to bintray"
+        return
+    }
 
+    def json = new URL("https://api.bintray.com/packages/upennlib/metridoc/metridoc-job-core").text
+    def slurper = new JsonSlurper()
+    def versions = slurper.parseText(json).versions
+    def versionAlreadyDeployed = versions.contains(version)
+
+    if (versionAlreadyDeployed) {
+        println "version $version has already been deployed to bintray"
+    } else {
+        dependsOn uploadArchives
+    }
+}
 
 
