@@ -1,11 +1,24 @@
 import groovy.json.JsonSlurper
+import wslite.http.auth.HTTPBasicAuthorization
+import wslite.rest.ContentType
+import wslite.rest.RESTClient
 
 apply plugin: 'groovy'
 apply plugin: 'maven'
 project.group = "com.googlecode.metridoc"
-project.version = "0.5.RC2-SNAPSHOT"
+project.version = "0.5.RC2"
 sourceCompatibility = "1.6"
 targetCompatibility = "1.6"
+
+
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'com.github.groovy-wslite:groovy-wslite:0.7.2'
+    }
+}
 
 repositories {
     mavenCentral()
@@ -17,7 +30,6 @@ dependencies {
 
     compile('com.google.guava:guava:13.0.1')
     compile('org.codehaus.groovy:groovy-all:2.0.5')
-    testCompile('org.codehaus.groovy:groovy-all:2.0.5')
     compile("mysql:mysql-connector-java:5.1.20")
     compile("org.apache.camel:camel-core:$camelVersion") {
         exclude module: 'slf4j-api'
@@ -47,6 +59,7 @@ dependencies {
         exclude module: 'poi'
         exclude module: 'dom4j'
     }
+    testCompile "org.spockframework:spock-core:0.7-groovy-2.0"
     testCompile("org.slf4j:slf4j-simple:$slf4jVersion") {
         exclude module: 'slf4j-api'
     }
@@ -93,9 +106,7 @@ uploadArchives {
                     id: "Metridoc bintray repo",
                     url: "https://api.bintray.com/maven/upennlib/metridoc/metridoc-job-core",
             ) {
-                if (hasProperty("bintrayUserName")) {
-                    authentication(userName: bintrayUserName, password: bintrayPassword)
-                }
+                authentication(userName: project.properties.bintrayUsername, password: project.properties.bintrayPassword)
             }
             configurePom(pom)
 
@@ -220,9 +231,21 @@ artifacts {
     archives(packageSources)
 }
 
-task uploadToBintray(dependsOn: "test") << {
+task uploadToBintray(dependsOn: ["prepareForBintrayUpload", "publishBintrayPackages"])
+
+task prepareForBintrayUpload << {
+
     if (version.contains("SNAPSHOT")) {
         println "bintray does not support SNAPSHOTs, skipping upload to bintray"
+        uploadArchives.enabled = false
+        publishBintrayPackages.enabled = false
+        return
+    }
+
+    if (!project.hasProperty("bintrayUsername")) {
+        println "bintray credentials not setup, skipping upload to bintray"
+        uploadArchives.enabled = false
+        publishBintrayPackages.enabled = false
         return
     }
 
@@ -232,10 +255,25 @@ task uploadToBintray(dependsOn: "test") << {
     def versionAlreadyDeployed = versions.contains(version)
 
     if (versionAlreadyDeployed) {
-        println "version $version has already been deployed to bintray"
-    } else {
-        dependsOn uploadArchives
+        println "version $version has already been deployed to bintray, skipping upload to bintray"
+        uploadArchives.enabled = false
+        publishBintrayPackages.enabled = false
     }
+}
+
+task publishBintrayPackages(dependsOn: "uploadArchives") << {
+    def client = new RESTClient("https://api.bintray.com/")
+    client.authorization = new HTTPBasicAuthorization(bintrayUsername, bintrayPassword)
+    def response = client.post(
+            path: "/content/upennlib/metridoc/metridoc-job-core/$version/publish",
+            accept: ContentType.JSON
+    ) {
+        type ContentType.JSON
+        charset "utf-8"
+        text ""
+    }
+    println response.getContentAsString()
+    assert 200 == response.statusCode
 }
 
 
