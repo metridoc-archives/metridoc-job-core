@@ -13,26 +13,26 @@ class XlsxIteratorTest {
 
     @Test
     void "testing basic iteration"() {
+        assert "LOCATION_ID" == iterator.headers.get(0)
         def row = iterator.next()
-        assert "LOCATION_ID" == row.get(0)
-        row = iterator.next()
-        assert 1 == row.get(0)
+        assert 1 == row.get("LOCATION_ID")
     }
 
+    @SuppressWarnings("GroovyVariableNotAssigned")
     @Test
     void "if there is no more data an error is thrown"() {
         def next
-        (1..359).each {
+        (1..358).each {
             next = iterator.next()
         }
 
-        assert 359 == next.get(0)
+        assert 359 == next.get("LOCATION_ID")
         assert !iterator.hasNext()
 
         try {
             iterator.next()
             assert false: "exception should have occurred"
-        } catch(NoSuchElementException ex) {
+        } catch (NoSuchElementException ignored) {
 
         }
     }

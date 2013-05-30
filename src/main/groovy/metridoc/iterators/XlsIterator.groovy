@@ -18,13 +18,24 @@ import groovy.util.logging.Slf4j
 import org.apache.poi.ss.usermodel.*
 
 @Slf4j
-class XlsIterator extends BaseExcelIterator<List> {
+class XlsIterator extends BaseExcelIterator {
 
-    @Lazy
-    Workbook workbook = {WorkbookFactory.create(getInputStream())}()
-    @Lazy
-    Sheet sheet = {sheetName ? workbook.getSheet(sheetName) : workbook.getSheetAt(sheetIndex)}()
-    int rowNum = 0
+    @Lazy(soft = true)
+    Workbook workbook = { WorkbookFactory.create(getInputStream()) }()
+    @Lazy(soft = true)
+    Sheet sheet = { sheetName ? workbook.getSheet(sheetName) : workbook.getSheetAt(sheetIndex) }()
+
+    @Lazy(soft = true)
+    List headers = {
+        def row = getRow(0)
+        rowNum++
+
+        return row
+    }()
+
+    int rowStart = 0
+    @Lazy(soft = true)
+    private Integer rowNum = { rowStart }()
 
     private static Object getCellValue(Cell cell) {
 
@@ -52,24 +63,42 @@ class XlsIterator extends BaseExcelIterator<List> {
         }
     }
 
-    @Override
-    protected List computeNext() {
-        def result = []
+    protected Map computeNext() {
+        def result = [:]
 
         log.debug("retrieving row {} for sheet {}", rowNum, getSheet().sheetName)
-        Row row = getSheet().getRow(rowNum)
+        def row = getRow(rowNum)
+
         if (row == null) {
             return endOfData()
         }
 
-        def lastCellIndex = row.lastCellNum
-
-        (0..(lastCellIndex - 1)).each {
-            def cell = row.getCell(it)
-            result.add(getCellValue(cell))
+        (0..headers.size() - 1).each {
+            result[headers[it]] = null
+            if (it < row.size() - 1) {
+                result[headers[it]] = row[it]
+            }
         }
 
         rowNum++
         return result
+    }
+
+    private List getRow(int rowNumber) {
+        Row row = getSheet().getRow(rowNum)
+
+        if (row) {
+            def lastCellIndex = row.lastCellNum
+            def result = []
+
+            (0..(lastCellIndex - 1)).each {
+                def cell = row.getCell(it)
+                result.add(getCellValue(cell))
+            }
+
+            return result
+        }
+
+        return null
     }
 }

@@ -16,14 +16,14 @@ package metridoc.iterators
 
 import com.google.common.collect.AbstractIterator
 
-class BatchIterator extends AbstractIterator {
+class BatchIterator extends AbstractIterator<List<Map<String, Object>>> {
     /**
      * the wrapped iterator
      */
-    Iterator iterator
+    RowIterator iterator
     int batchSize
 
-    BatchIterator(Iterator iterator, int batchSize) {
+    BatchIterator(RowIterator iterator, int batchSize) {
         assert iterator: "iterator cannot be null"
         assert batchSize > 0: "batch size must be greater than 0"
         this.iterator = iterator
@@ -31,7 +31,7 @@ class BatchIterator extends AbstractIterator {
     }
 
     @Override
-    protected Object computeNext() {
+    protected List<Map<String, Object>> computeNext() {
         def result = []
         for (int i = 0; i < batchSize; i++) {
             if (iterator.hasNext()) {

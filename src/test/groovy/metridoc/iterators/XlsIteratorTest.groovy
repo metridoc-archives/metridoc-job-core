@@ -2,14 +2,11 @@ package metridoc.iterators
 
 import org.junit.After
 import org.junit.Test
-import org.springframework.core.io.ClassPathResource
 
 /**
  * Created with IntelliJ IDEA.
- * User: tbarker
- * Date: 9/28/12
- * Time: 1:23 PM
- * To change this template use File | Settings | File Templates.
+ *
+ * @author Thomas Barker
  */
 class XlsIteratorTest {
 
@@ -23,15 +20,14 @@ class XlsIteratorTest {
 
     @Test
     void "testing a location file we use in another program where we found errors"() {
-        def row = iterator.next()
-        assert "LOCATION_ID" == row.get(0)
+        assert "LOCATION_ID" == iterator.headers.get(0)
     }
 
     @Test
     void "testing cell conversion issues we were seeing with formulas"() {
         iterator.next()
         def row = iterator.next()
-        assert 1 == row.get(0)
+        assert 2 == row.get("LOCATION_ID")
     }
 
     @Test
@@ -40,20 +36,21 @@ class XlsIteratorTest {
         assert null == iterator.sheet.getRow(359)
     }
 
+    @SuppressWarnings("GroovyVariableNotAssigned")
     @Test
     void "if there is no more data an error is thrown"() {
         def next
-        (1..359).each {
+        (1..358).each {
             next = iterator.next()
         }
 
-        assert 359 == next.get(0) as Integer
+        assert 359 == next.get("LOCATION_ID")
         assert !iterator.hasNext()
 
         try {
             iterator.next()
             assert false: "exception should have occurred"
-        } catch(NoSuchElementException ex) {
+        } catch (NoSuchElementException ignored) {
 
         }
     }

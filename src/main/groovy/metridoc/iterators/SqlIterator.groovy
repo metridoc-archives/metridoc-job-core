@@ -14,11 +14,9 @@
  */
 package metridoc.iterators
 
-import com.google.common.collect.AbstractIterator
-
 import java.sql.ResultSet
 
-class SqlIterator extends AbstractIterator<Map> {
+class SqlIterator extends RowIterator {
 
     ResultSet resultSet
 

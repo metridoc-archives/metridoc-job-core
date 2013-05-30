@@ -17,47 +17,67 @@ package metridoc.iterators
 import org.apache.commons.io.LineIterator
 
 
-class DelimitedLineIterator extends FileIterator<List<String>> {
+class DelimitedLineIterator extends FileIterator {
 
-    Reader reader
-    LineIterator lineIterator
+    @Lazy(soft = true)
+    Reader reader = { new InputStreamReader(inputStream) }()
+
+    @Lazy
+    LineIterator lineIterator = { new LineIterator(getReader()) }()
+
+    /**
+     * if headers are not specified, column numbers are used
+     */
+    List headers
     /**
      * regex of the delimiter, for instance if you split text with | you would pass /\|/
      */
     String delimiter
 
-    int delimitTill = 0
-
-    Reader getReader() {
-        if(reader) {
-            return reader
-        }
-        reader = new InputStreamReader(inputStream)
-    }
-
-    LineIterator getLineIterator() {
-        if(lineIterator) return lineIterator
-
-        lineIterator = new LineIterator(getReader())
-    }
+    @Lazy(soft = true)
+    Integer delimitTill = { headers ? headers.size() : 0 }()
 
     @Override
     void close() {
         getLineIterator().close()
     }
 
+    @SuppressWarnings("GroovyAssignabilityCheck")
     @Override
-    protected List<String> computeNext() {
+    protected Map computeNext() {
+        if (delimiter == null) {
+            throw new IllegalArgumentException("delimiter must be specified")
+        }
+
         if (getLineIterator().hasNext()) {
             def line = getLineIterator().nextLine()
-            if (delimiter) {
-                def splitLine = line.split(delimiter, delimitTill)
-
-                return splitLine
+            def splitLine
+            if (delimitTill) {
+                splitLine = line.split(delimiter, delimitTill)
             } else {
-                return line.split()
+                splitLine = line.split(delimiter)
             }
+
+            def result = [:]
+            if (headers) {
+                if (headers.size() != splitLine.size()) {
+                    def errorMessage = "headers $headers and line $splitLine do not have the same number of arguments"
+                    throw new IllegalStateException(errorMessage)
+                }
+            } else {
+                headers = []
+                (0..splitLine.size() - 1).each {
+                    headers << it
+                }
+            }
+
+            (0..splitLine.size() - 1).each {
+                result[headers[it]] = splitLine[it]
+            }
+
+            return result
         }
+
         close()
         return endOfData()
     }

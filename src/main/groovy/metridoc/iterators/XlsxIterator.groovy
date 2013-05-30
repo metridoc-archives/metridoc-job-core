@@ -23,52 +23,35 @@ import org.slf4j.LoggerFactory
 import javax.xml.stream.XMLInputFactory
 import javax.xml.stream.XMLStreamReader
 
-class XlsxIterator extends BaseExcelIterator<List> {
+class XlsxIterator extends BaseExcelIterator {
 
     private static log = LoggerFactory.getLogger(XlsxIterator)
-    XMLStreamReader reader
 
-    SharedStringsTable stringLookup
-    XSSFReader xssfReader
-
-    XSSFReader getXssfReader() {
-        if (xssfReader) {
-            return xssfReader
+    @Lazy
+    XMLStreamReader reader = {
+        def sheet = xssfReader.getSheet(sheetReference)
+        XMLInputFactory.newInstance().createXMLStreamReader(sheet)
+    }()
+    @Lazy
+    XSSFReader xssfReader = { new XSSFReader(OPCPackage.open(inputStream)) }()
+    @Lazy
+    SharedStringsTable stringLookup = { xssfReader.sharedStringsTable }()
+    @Lazy
+    String sheetReference = {
+        if (sheetName) {
+            return getSheetReferenceByName(getWorkbookReader(), sheetName)
         }
 
-        OPCPackage pkg = OPCPackage.open(inputStream)
-        xssfReader = new XSSFReader(pkg)
-    }
+        return getSheetReferenceByIndex(getWorkbookReader(), sheetIndex)
+    }()
 
-    SharedStringsTable getStringLookup() {
-
-        if (stringLookup) {
-            return stringLookup
-        }
-
-        stringLookup = getXssfReader().getSharedStringsTable()
-    }
-
-    XMLStreamReader getReader() {
-
-        if (reader) {
-            return reader
-        }
-
-        def sheetReference = getSheetReference()
-        def sheet = getXssfReader().getSheet(sheetReference)
-        reader = XMLInputFactory.newInstance().createXMLStreamReader(sheet)
-    }
-
-    /**
-     *
-     * @return a fresh workbook reader.  Calling this multiple times will return a different, fresh one starting at the
-     * top of the workbook document
-     */
-    XMLStreamReader getWorkbookReader() {
-        def workbook = getXssfReader().getWorkbookData()
+    @Lazy(soft = true)
+    List headers = { getRow(reader).collect { it.getFormattedValue() } }()
+    @Lazy
+    XMLStreamReader workbookReader = {
+        def workbook = xssfReader.workbookData
         return XMLInputFactory.newInstance().createXMLStreamReader(workbook)
-    }
+    }()
 
     private static closeXmlStreamReader(XMLStreamReader xmlReader) {
         try {
@@ -161,6 +144,7 @@ class XlsxIterator extends BaseExcelIterator<List> {
         }
     }
 
+    @SuppressWarnings("GroovyVariableNotAssigned")
     private List<XlsxCell> getRow(XMLStreamReader reader) {
         boolean gettingCells = true
         def result = []
@@ -171,7 +155,7 @@ class XlsxIterator extends BaseExcelIterator<List> {
                 def name = reader.localName
 
                 switch (name) {
-                    //c comes before v, so XlsxCell should be instantiated
+                //c comes before v, so XlsxCell should be instantiated
                     case "c":
                         cell = new XlsxCell(stringLookup: getStringLookup())
                         def attributes = getAttributeMap(reader)
@@ -179,8 +163,8 @@ class XlsxIterator extends BaseExcelIterator<List> {
                         cell.type = attributes.t
                         break
                     case "v":
-                        def attributes = getAttributeMap(reader)
-                        cell.value = Double.valueOf(reader.getElementText())
+                        def cellValue = Double.valueOf(reader.getElementText())
+                        cell.value = cellValue
                         result.add(cell)
                         break
                 }
@@ -198,20 +182,17 @@ class XlsxIterator extends BaseExcelIterator<List> {
         return result
     }
 
-    String getSheetReference() {
-        if (sheetName) {
-            return getSheetReferenceByName(getWorkbookReader(), sheetName)
-        }
-
-        return getSheetReferenceByIndex(getWorkbookReader(), sheetIndex)
-    }
-
     @Override
-    protected List computeNext() {
+    protected Map computeNext() {
+        def headerSize = headers.size()
         def row = getNextRow(getReader())
-
+        def result = [:]
         if (row) {
-            return row.collect {it.getFormattedValue()}
+            def data = row.collect { it.getFormattedValue() }
+            (0..headerSize - 1).each {
+                result[headers[it]] = data[it]
+            }
+            return result
         }
 
         close()

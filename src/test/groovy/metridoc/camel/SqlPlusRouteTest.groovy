@@ -2,6 +2,7 @@ package metridoc.camel
 
 import groovy.sql.Sql
 import metridoc.core.tools.CamelTool
+import org.apache.camel.Exchange
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -45,7 +46,8 @@ class SqlPlusRouteTest {
 
         tool.with {
             consumeNoWait("sqlplus:foo?dataSource=dataSource") { ResultSet resultSet ->
-                send("sqlplus:bar?dataSource=dataSource", resultSet)
+                Exchange exchange = send("sqlplus:bar?dataSource=dataSource", resultSet)
+                assert exchange.getException() == null
             }
         }
 

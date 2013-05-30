@@ -15,7 +15,7 @@
 package metridoc.iterators
 
 
-abstract class BaseExcelIterator<T> extends FileIterator<T> {
+abstract class BaseExcelIterator extends FileIterator {
 
     /**
      * if a sheet name is specified, it trumps any sheet index if specified
@@ -26,6 +26,7 @@ abstract class BaseExcelIterator<T> extends FileIterator<T> {
      */
     int sheetIndex = 0
 
+    @SuppressWarnings("GroovyAssignabilityCheck")
     protected static int convertColumnToNumber(String column) {
         def m = (column =~ /(\D+)\d*/)  //strip out row numbers
         m.find()

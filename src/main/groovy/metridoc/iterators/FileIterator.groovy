@@ -14,10 +14,9 @@
  */
 package metridoc.iterators
 
-import com.google.common.collect.AbstractIterator
 import metridoc.utils.IOUtils
 
-abstract class FileIterator<T> extends AbstractIterator<T> implements Closeable{
+abstract class FileIterator extends RowIterator implements Closeable {
 
     InputStream inputStream
 
