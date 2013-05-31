@@ -2,6 +2,7 @@ import groovy.json.JsonSlurper
 import wslite.http.auth.HTTPBasicAuthorization
 import wslite.rest.ContentType
 import wslite.rest.RESTClient
+import wslite.rest.RESTClientException
 
 apply plugin: 'groovy'
 apply plugin: 'maven'
@@ -264,16 +265,22 @@ task prepareForBintrayUpload << {
 task publishBintrayPackages(dependsOn: "uploadArchives") << {
     def client = new RESTClient("https://api.bintray.com/")
     client.authorization = new HTTPBasicAuthorization(bintrayUsername, bintrayPassword)
-    def response = client.post(
-            path: "/content/upennlib/metridoc/metridoc-job-core/$version/publish",
-            accept: ContentType.JSON
-    ) {
-        type ContentType.JSON
-        charset "utf-8"
-        text ""
+    try {
+        def response = client.post(
+                path: "/content/upennlib/metridoc/metridoc-job-core/$version/publish",
+                accept: ContentType.JSON
+        ) {
+            type ContentType.JSON
+            charset "utf-8"
+            text ""
+        }
+        println response.getContentAsString()
+    } catch (RESTClientException ex) {
+        println ""
+        println "COULD NOT PUBLISH"
+        println ex.response.getContentAsString()
+        throw ex
     }
-    println response.getContentAsString()
-    assert 200 == response.statusCode
 }
 
 
