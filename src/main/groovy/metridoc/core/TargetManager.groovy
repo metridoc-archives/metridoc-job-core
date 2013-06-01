@@ -66,6 +66,7 @@ class TargetManager {
      * @param targetNames
      * @return
      */
+    @SuppressWarnings("UnnecessaryQualifiedReference")
     def depends(String... targetNames) {
         targetNames.each { targetName ->
             Closure target = targetMap.get(targetName)
@@ -74,7 +75,7 @@ class TargetManager {
             def targetHasNotBeenCalled = !targetsRan.contains(targetName)
             if (targetHasNotBeenCalled) {
                 target.delegate = this
-                target.resolveStrategy = DELEGATE_FIRST
+                target.resolveStrategy = Closure.DELEGATE_FIRST
                 target.call()
                 targetsRan.add(targetName)
             }

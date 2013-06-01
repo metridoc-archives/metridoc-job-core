@@ -2,13 +2,6 @@ package metridoc.core.tools
 
 import org.junit.Test
 
-/**
- * Created with IntelliJ IDEA.
- * User: tbarker
- * Date: 4/1/13
- * Time: 1:18 PM
- * To change this template use File | Settings | File Templates.
- */
 class RunnableToolTest {
 
     @Test
@@ -43,7 +36,7 @@ class RunnableToolTest {
     }
 
     @Test
-    void "setting the default target on the commanline will override the default target" () {
+    void "setting the default target on the commanline will override the default target"() {
         boolean barRan = false
         boolean fooRan = false
         def runnableTool = new RunnableTool() {

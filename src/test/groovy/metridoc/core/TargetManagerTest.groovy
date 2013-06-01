@@ -5,13 +5,6 @@ import metridoc.core.tools.HibernateTool
 import metridoc.core.tools.Tool
 import org.junit.Test
 
-/**
- * Created with IntelliJ IDEA.
- * User: tbarker
- * Date: 2/16/13
- * Time: 9:58 AM
- * To change this template use File | Settings | File Templates.
- */
 class TargetManagerTest {
 
     def targetManager = new TargetManager()
@@ -25,7 +18,7 @@ class TargetManagerTest {
 
             }
             assert false: "exception should have occurred"
-        } catch (JobInterruptionException e) {
+        } catch (JobInterruptionException ignored) {
         }
     }
 
@@ -99,7 +92,7 @@ class TargetManagerTest {
         assert "foo" == helper.bar
     }
 
-    class FooToolHelper implements Tool{
+    class FooToolHelper implements Tool {
         def bar
         String bam
         Integer foobar
@@ -116,7 +109,7 @@ class TargetManagerTest {
         def bar = "foo"
     }
 
-    class FooBarToolHelper extends DefaultTool{
+    class FooBarToolHelper extends DefaultTool {
         String foo
     }
 
