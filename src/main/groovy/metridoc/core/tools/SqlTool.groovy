@@ -1,7 +1,6 @@
 package metridoc.core.tools
 
 import groovy.sql.Sql
-import metridoc.core.Assert
 
 /**
  * Created with IntelliJ IDEA.
@@ -20,16 +19,16 @@ class SqlTool {
         }
 
         def dataSourceConfig = config."$dataSourceKey"
-        Assert.notNull(dataSourceConfig, "dataSource config does not exist")
+        assert dataSourceConfig != null: "dataSource config does not exist"
         def userName = dataSourceConfig.username
         def password = dataSourceConfig.password
         def url = dataSourceConfig.url
         def driver = dataSourceConfig.driverClassName
 
-        Assert.notNull(userName, "user name cannot be null")
-        Assert.notNull(password, "password cannot be null")
-        Assert.notNull(url, "url cannot be null")
-        Assert.notNull(driver, "driver cannot be null")
+        assert userName: "user name cannot be null"
+        assert password: "password cannot be null"
+        assert url: "url cannot be null"
+        assert driver: "driver cannot be null"
         binding.sql = Sql.newInstance(url, userName, password, driver)
     }
 }

@@ -17,6 +17,8 @@ package metridoc.camel
 
 /**
  *
+ * @deprecated use camel-groovy component instead
+ *
  * @author Tommy Barker
  */
 class GroovyRouteBuilder extends ManagedExceptionRouteBuilder {

@@ -7,9 +7,9 @@ import wslite.rest.RESTClientException
 apply plugin: 'groovy'
 apply plugin: 'maven'
 project.group = "com.googlecode.metridoc"
-project.version = "0.5.RC2"
-sourceCompatibility = "1.6"
-targetCompatibility = "1.6"
+project.version = "0.5.RC3-SNAPSHOT"
+sourceCompatibility = "1.7"
+targetCompatibility = "1.7"
 
 
 buildscript {
@@ -23,12 +23,17 @@ buildscript {
 
 repositories {
     mavenCentral()
+    maven {
+        //TODO: change this to jcenter once it gets accepted
+        url "http://dl.bintray.com/upennlib/camel"
+    }
 }
 
 dependencies {
     def camelVersion = "2.9.2"
     def slf4jVersion = "1.6.2"
 
+    compile("com.github.camel-glite:camel-glite:0.2.1")
     compile('com.google.guava:guava:13.0.1')
     compile('org.codehaus.groovy:groovy-all:2.0.5')
     compile("mysql:mysql-connector-java:5.1.20")

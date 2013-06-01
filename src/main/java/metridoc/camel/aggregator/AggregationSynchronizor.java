@@ -20,6 +20,8 @@ import org.apache.camel.spi.Synchronization;
 
 /**
  * @author tbarker
+ * @deprecated we are no longer supporting routing features since straight groovy
+ *             or camel can handle this just fine
  */
 public class AggregationSynchronizor implements Synchronization {
 

@@ -10,11 +10,9 @@ import org.apache.commons.lang.ObjectUtils
 import org.slf4j.LoggerFactory
 
 /**
- * Created with IntelliJ IDEA.
- * User: tbarker
- * Date: 12/28/12
- * Time: 12:10 PM
- * To change this template use File | Settings | File Templates.
+ * Never found this class particularily useful.  Going to move to camel-glite
+ *
+ * @deprecated
  */
 class CamelScript {
 

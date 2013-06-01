@@ -24,10 +24,10 @@ import org.apache.camel.model.FilterDefinition
 import org.apache.camel.model.ProcessorDefinition
 
 /**
- * Created by IntelliJ IDEA.
- * User: tbarker
- * Date: 9/12/11
- * Time: 10:12 AM
+ * Once the camel version is increasedm the camel-groovy module can do this and more.
+ * No reason ro replicate something that is already done
+ *
+ * @deprecated
  */
 class CamelExtensions {
 

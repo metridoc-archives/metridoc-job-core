@@ -19,7 +19,6 @@ import org.apache.camel.Consumer
 import org.apache.camel.Endpoint
 import org.apache.camel.Route
 import org.apache.camel.component.mock.MockEndpoint
-import org.apache.camel.component.seda.SedaEndpoint
 import org.apache.camel.spi.BrowsableEndpoint
 import org.apache.camel.spi.ShutdownAware
 import org.apache.camel.util.StopWatch
@@ -30,12 +29,12 @@ import java.util.concurrent.TimeUnit
 import java.util.concurrent.TimeoutException
 
 /**
- * Created by IntelliJ IDEA.
- * User: tbarker
- * Date: 8/26/11
- * Time: 3:45 PM
  *
  * Helpful utilities for Apache Camel
+ *
+ * @deprecated this hooks into pretty low level stuff and has become hard
+ * to maintain with new versions of camel.  Since we are rarely doing
+ * routing anymore, it is time to deprecate this
  *
  */
 class CamelUtils {
@@ -89,7 +88,7 @@ class CamelUtils {
                     for (Endpoint endpoint : endpoints) {
                         def notAMockEndpoint = !(endpoint instanceof MockEndpoint)
                         def isBrowsableEndpoint = endpoint instanceof BrowsableEndpoint
-                        def shouldCheck =  isBrowsableEndpoint && notAMockEndpoint
+                        def shouldCheck = isBrowsableEndpoint && notAMockEndpoint
                         if (shouldCheck) {
                             def browsable = endpoint as BrowsableEndpoint
                             size = browsable.exchanges.size()

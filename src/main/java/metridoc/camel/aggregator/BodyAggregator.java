@@ -27,15 +27,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- *
- * @author Thomas Barker
+ * @author tbarker
+ * @deprecated we are no longer supporting routing features since straight groovy
+ *             or camel can handle this just fine
  */
 public class BodyAggregator implements AggregationStrategy {
 
     @Override
     @SuppressWarnings("unchecked")
     public Exchange aggregate(Exchange oldExchange, Exchange newExchange) {
-        
+
         if (oldExchange == null) {
             oldExchange = new DefaultExchange(newExchange);
             oldExchange.getIn().setHeaders(newExchange.getIn().getHeaders());
@@ -44,7 +45,7 @@ public class BodyAggregator implements AggregationStrategy {
             oldExchange.getExchangeId();
         }
         oldExchange.getIn().getBody(List.class).add(newExchange.getIn().getBody());
-        
+
         return oldExchange;
     }
 

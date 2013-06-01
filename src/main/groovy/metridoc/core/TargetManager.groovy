@@ -51,7 +51,7 @@ class TargetManager {
 
     def target(Map data, Closure closure) {
         closure.delegate = this //required for imported targets
-        Assert.isTrue(data.size() == 1, "the map in target can only have one variable, which is the name and the description of the target")
+        assert data.size() == 1: "the map in target can only have one variable, which is the name and the description of the target"
         def key = (data.keySet() as List<String>)[0]
         String description = data[key]
         def closureToRun = {
@@ -69,12 +69,12 @@ class TargetManager {
     def depends(String... targetNames) {
         targetNames.each { targetName ->
             Closure target = targetMap.get(targetName)
-            Assert.isTrue(target != null, "target $targetName does not exist")
+            assert target != null: "target $targetName does not exist"
 
             def targetHasNotBeenCalled = !targetsRan.contains(targetName)
             if (targetHasNotBeenCalled) {
                 target.delegate = this
-                target.resolveStrategy = Closure.DELEGATE_FIRST
+                target.resolveStrategy = DELEGATE_FIRST
                 target.call()
                 targetsRan.add(targetName)
             }
@@ -92,7 +92,7 @@ class TargetManager {
     }
 
     /**
-     * the same as {@link #includeTargets(java.lang.Class)}, but a binding can be passed so more global variables can
+     * the same as {@link #includeTargets(Class)}, but a binding can be passed so more global variables can
      * be loaded
      *
      * @param scriptClass
@@ -150,7 +150,6 @@ class TargetManager {
 
     public <T> T includeTool(Class<T> tool) {
         def toolName = tool.simpleName
-        def toolInstance
         def toolNameUsed = StringUtils.uncapitalize(toolName)
         if (binding.hasVariable(toolNameUsed)) {
             log.debug "tool $toolNameUsed already exists"
@@ -182,11 +181,11 @@ class TargetManager {
                     } else {
                         try {
                             instance."$key" = binding.getVariable(key).asType(type)
-                        } catch (Throwable throwable) {
+                        } catch (Throwable ignored) {
                             //do nothing
                         }
                     }
-                } catch (NoSuchFieldException fieldException) {
+                } catch (NoSuchFieldException ignored) {
                     //ignore... handles issues when searching for field "class" for instance
                 }
             }

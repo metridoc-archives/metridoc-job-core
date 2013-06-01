@@ -1,16 +1,12 @@
 package metridoc.camel
 
-import org.apache.camel.builder.RouteBuilder
 import org.apache.camel.Exchange
+import org.apache.camel.builder.RouteBuilder
 
 /**
- * Created with IntelliJ IDEA.
- * User: tbarker
- * Date: 9/5/12
- * Time: 11:19 AM
- * To change this template use File | Settings | File Templates.
+ * @deprecated use camel-groovy component instead
  */
-abstract class ManagedExceptionRouteBuilder extends RouteBuilder{
+abstract class ManagedExceptionRouteBuilder extends RouteBuilder {
 
     Throwable routeException
     Closure exceptionHandler
@@ -22,7 +18,7 @@ abstract class ManagedExceptionRouteBuilder extends RouteBuilder{
 
         use(CamelExtensions) {
 
-            onException(Throwable.class).process {Exchange exchange ->
+            onException(Throwable.class).process { Exchange exchange ->
                 def exception = exchange.getException()
                 if (exception) {
                     handleException(exception, exchange)

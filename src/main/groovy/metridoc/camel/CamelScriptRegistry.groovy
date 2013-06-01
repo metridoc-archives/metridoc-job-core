@@ -4,11 +4,7 @@ import groovy.util.logging.Slf4j
 import org.apache.camel.spi.Registry
 
 /**
- * Created with IntelliJ IDEA.
- * User: tbarker
- * Date: 12/28/12
- * Time: 12:15 PM
- * To change this template use File | Settings | File Templates.
+ * @deprecated moving all new camel functionality to camel-glite
  */
 @Slf4j
 class CamelScriptRegistry implements Registry {

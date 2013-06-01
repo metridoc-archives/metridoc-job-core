@@ -19,13 +19,13 @@ import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 
 /**
- *
  * copied from https://svn.codehaus.org/grails-plugins/grails-camel/trunk/src/java/org/ix/grails/plugins/camel/ClosureProcessor.java
  * for project http://www.grails.org/plugin/camel.
- *
+ * <p/>
  * executes a processor closure
  *
  * @author Tommy Barker
+ * @deprecated
  */
 public class ClosureProcessor implements Processor {
 
