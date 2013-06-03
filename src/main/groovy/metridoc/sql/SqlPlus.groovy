@@ -137,7 +137,8 @@ class SqlPlus extends Sql {
                 value[PHASE_NAMES] = key
                 value.order = value.containsKey("order") ? value.order : defaultOrder
                 result.put(Double.valueOf(value.order.toString()), value)
-            } catch (Exception ex) {
+            }
+            catch (Exception ex) {
                 throw new RuntimeException("there was an error loading phase ${key}", ex)
             }
         }
@@ -162,6 +163,10 @@ class SqlPlus extends Sql {
             throw new IllegalArgumentException("record ${batch} must be of type Map to use batch inserting")
         }
 
+        if (batch.isEmpty()) {
+            slfLog.info "there is no data to insert"
+            return
+        }
         runListBatch([batch], insertOrTable, logEachBatch)
     }
 
@@ -173,6 +178,10 @@ class SqlPlus extends Sql {
         PreparedStatement preparedStatement
         int[] result
         try {
+            if (!batch) {
+                slfLog.info "there is no data to insert"
+                return
+            }
             withTransaction { Connection connection ->
                 Map firstRecord = batch.get(0)
                 def sql = getInsertStatement(insertOrTable, firstRecord)
@@ -207,7 +216,8 @@ class SqlPlus extends Sql {
                 result = preparedStatement.executeBatch()
                 logBatch(result, logEachBatch)
             }
-        } finally {
+        }
+        finally {
             closeResources(null, preparedStatement)
         }
 
@@ -287,6 +297,10 @@ class SqlPlus extends Sql {
         PreparedStatement preparedStatement
         int[] result
         try {
+            if (!batch) {
+                slfLog.info "there is no data to insert"
+                return
+            }
             withTransaction { Connection connection ->
                 Map firstRecord = batch.get(0)
                 def sql = getInsertStatement(insertOrTable, firstRecord)
@@ -321,7 +335,8 @@ class SqlPlus extends Sql {
                 result = preparedStatement.executeBatch()
                 logBatch(result, logEachBatch)
             }
-        } finally {
+        }
+        finally {
             closeResources(null, preparedStatement)
         }
 
