@@ -24,22 +24,20 @@ buildscript {
 repositories {
     mavenCentral()
     maven {
-        //TODO: change this to jcenter once it gets accepted
-        url "http://dl.bintray.com/upennlib/camel"
+        url "http://jcenter.bintray.com/"
     }
 }
 
 dependencies {
-    def camelVersion = "2.9.2"
+    def camelVersion = "2.11.0"
     def slf4jVersion = "1.6.2"
 
-    compile("com.github.camel-glite:camel-glite:0.2.1")
+    compile("com.github.camel-glite:camel-glite:0.3.1") {
+        exclude module: 'slf4j-api'
+    }
     compile('com.google.guava:guava:13.0.1')
     compile('org.codehaus.groovy:groovy-all:2.0.5')
     compile("mysql:mysql-connector-java:5.1.20")
-    compile("org.apache.camel:camel-core:$camelVersion") {
-        exclude module: 'slf4j-api'
-    }
     runtime('dom4j:dom4j:1.6.1')
     compile("org.apache.camel:camel-stream:$camelVersion") {
         exclude module: 'camel-core'
