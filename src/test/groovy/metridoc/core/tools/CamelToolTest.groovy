@@ -83,7 +83,7 @@ class CamelToolTest {
         createTempDirectoryAndFiles()
         tool.with {
             def context = tool.camelContext
-            mock = context.getEndpoint("mock:endFull", MockEndpoint)
+            def mock = context.getEndpoint("mock:endFull", MockEndpoint)
             mock.expectedMessageCount(4)
             Set fileNames = []
             //let's do 5 messages.  The fifth should be ignored because of the file filter
