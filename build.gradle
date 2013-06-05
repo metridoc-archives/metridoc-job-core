@@ -32,7 +32,7 @@ dependencies {
     def camelVersion = "2.11.0"
     def slf4jVersion = "1.6.2"
 
-    compile("com.github.camel-glite:camel-glite:0.3.1") {
+    compile("com.github.camel-glite:camel-glite:0.3.2") {
         exclude module: 'slf4j-api'
     }
     compile('com.google.guava:guava:13.0.1')

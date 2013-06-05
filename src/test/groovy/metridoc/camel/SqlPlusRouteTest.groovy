@@ -42,7 +42,7 @@ class SqlPlusRouteTest {
     void "test sql routing using the camel tool"() {
         def tool = new CamelTool()
         tool.binding = new Binding()
-        tool.binding.dataSource = embeddedDataSource
+        tool.bind("dataSource", embeddedDataSource)
 
         tool.with {
             consumeNoWait("sqlplus:foo?dataSource=dataSource") { ResultSet resultSet ->
