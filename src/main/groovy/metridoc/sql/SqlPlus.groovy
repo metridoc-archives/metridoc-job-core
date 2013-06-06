@@ -68,7 +68,7 @@ class SqlPlus extends Sql {
      */
     int bulkInsert(String from, String to, List<String> columns) {
         def sql = getBulkSqlCalls().getBulkInsert(from, to, columns)
-        slfLog.debug("executing bulk sql: {}", sql)
+        slfLog.debug("executing bulk response: {}", sql)
         super.executeUpdate(sql)
     }
 
@@ -84,7 +84,7 @@ class SqlPlus extends Sql {
      */
     int bulkInsert(String from, String to, Map<String, String> columnMap) {
         def sql = getBulkSqlCalls().getBulkInsert(from, to, columnMap)
-        slfLog.debug("executing bulk sql: {}", sql)
+        slfLog.debug("executing bulk response: {}", sql)
         super.executeUpdate(sql)
     }
 
@@ -101,7 +101,7 @@ class SqlPlus extends Sql {
      */
     int bulkInsertNoDup(String from, String to, String noDupColumn, List columns) {
         def sql = getBulkSqlCalls().getNoDuplicateBulkInsert(from, to, noDupColumn, columns)
-        slfLog.debug("executing bulk sql: {}", sql)
+        slfLog.debug("executing bulk response: {}", sql)
         super.executeUpdate(sql)
     }
 
@@ -117,12 +117,12 @@ class SqlPlus extends Sql {
      */
     int bulkInsertNoDup(String from, String to, String noDupColumn, Map<String, String> columnMap) {
         def sql = getBulkSqlCalls().getNoDuplicateBulkInsert(from, to, noDupColumn, columnMap)
-        slfLog.debug("executing bulk sql: {}", sql)
+        slfLog.debug("executing bulk response: {}", sql)
         super.executeUpdate(sql)
     }
 
     /**
-     * Used to be used to run sql scripts stored in config files, not really needed anymore
+     * Used to be used to run response scripts stored in config files, not really needed anymore
      *
      * @deprecated
      * @param configObject
@@ -175,53 +175,7 @@ class SqlPlus extends Sql {
     }
 
     int[] runBatch(String insertOrTable, List<Map<String, Object>> batch, boolean logEachBatch) {
-        PreparedStatement preparedStatement
-        int[] result
-        try {
-            if (!batch) {
-                slfLog.info "there is no data to insert"
-                return
-            }
-            withTransaction { Connection connection ->
-                Map firstRecord = batch.get(0)
-                def sql = getInsertStatement(insertOrTable, firstRecord)
-
-                preparedStatement = connection.prepareStatement(sql)
-
-                def sortedParams = new TreeSet(firstRecord.keySet())
-                if (insertOrTable.split().size() > 1) {
-                    sortedParams = orderedParamsFromInsert(insertOrTable)
-                }
-
-                batch.each { record ->
-                    logRecordInsert(record)
-                    if (record == null) {
-                        throw new IllegalArgumentException("a record must be a none null Map to use batch inserting")
-                    }
-
-                    if (!(record instanceof Map)) {
-                        throw new IllegalArgumentException("record ${record} must be of type Map to use batch inserting")
-                    }
-
-                    def params = []
-
-                    sortedParams.each {
-                        params.add(record[it])
-                    }
-
-                    setParameters(params, preparedStatement)
-                    preparedStatement.addBatch()
-                }
-                slfLog.debug("finished adding {} records to batch, now the batch will be executed", batch.size())
-                result = preparedStatement.executeBatch()
-                logBatch(result, logEachBatch)
-            }
-        }
-        finally {
-            closeResources(null, preparedStatement)
-        }
-
-        return result
+        return runListBatch(batch, insertOrTable, logEachBatch)
     }
 
     int[] runBatch(String insertOrTable, List<Map<String, Object>> batch) {
@@ -237,16 +191,25 @@ class SqlPlus extends Sql {
      */
     private static logBatch(int[] result, boolean logEachBatch) {
 
-        if (slfLog.isDebugEnabled()) {
+        if (logEachBatch) {
+            GString message = getMessage(result)
+            slfLog.info(message)
+        }
 
-            int recordCount = result.size()
-            int totalUpdates = 0
-            result.each {
-                totalUpdates += it
-            }
-            String message = "processed ${recordCount} records with ${totalUpdates} updates"
+        if (slfLog.isDebugEnabled()) {
+            GString message = getMessage(result)
             slfLog.debug(message)
         }
+    }
+
+    private static GString getMessage(int[] result) {
+        int recordCount = result.size()
+        int totalUpdates = 0
+        result.each {
+            totalUpdates += it
+        }
+        String message = "processed ${recordCount} records with ${totalUpdates} updates"
+        message
     }
 
     private def runMapBatch(String insertOrTable, Map batch) {
@@ -313,23 +276,7 @@ class SqlPlus extends Sql {
                 }
 
                 batch.each { record ->
-                    logRecordInsert(record)
-                    if (record == null) {
-                        throw new IllegalArgumentException("a record must be a none null Map to use batch inserting")
-                    }
-
-                    if (!(record instanceof Map)) {
-                        throw new IllegalArgumentException("record ${record} must be of type Map to use batch inserting")
-                    }
-
-                    def params = []
-
-                    sortedParams.each {
-                        params.add(record[it])
-                    }
-
-                    setParameters(params, preparedStatement)
-                    preparedStatement.addBatch()
+                    processRecord(preparedStatement, record, sortedParams)
                 }
                 slfLog.debug("finished adding {} records to batch, now the batch will be executed", batch.size())
                 result = preparedStatement.executeBatch()
@@ -343,11 +290,32 @@ class SqlPlus extends Sql {
         return result
     }
 
+    void processRecord(PreparedStatement preparedStatement, record, sortedParams) {
+
+        logRecordInsert(record)
+        if (record == null) {
+            throw new IllegalArgumentException("a record must be a none null Map to use batch inserting")
+        }
+
+        if (!(record instanceof Map)) {
+            throw new IllegalArgumentException("record ${record} must be of type Map to use batch inserting")
+        }
+
+        def params = []
+
+        sortedParams.each {
+            params.add(record[it])
+        }
+
+        setParameters(params, preparedStatement)
+        preparedStatement.addBatch()
+    }
+
     private static void logRecordInsert(record) {
         slfLog.debug("adding {} to batch inserts", record)
     }
 
-    private static String getInsertStatement(String tableOrInsert, Map values) {
+    static String getInsertStatement(String tableOrInsert, Map values) {
         def words = tableOrInsert.split()
 
         //must be an update statement of some sort (insert, update, etc.)

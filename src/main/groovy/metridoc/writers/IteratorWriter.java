@@ -1,7 +1,8 @@
 package metridoc.writers;
 
-import metridoc.iterators.RowIterator;
+import java.util.Iterator;
+import java.util.Map;
 
-public interface IteratorWriter<T> {
-    T write(RowIterator rowIterator);
+public interface IteratorWriter<T> extends Iterator<Map<String, Object>> {
+    T write();
 }

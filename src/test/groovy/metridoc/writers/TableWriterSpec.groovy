@@ -13,7 +13,7 @@ class TableWriterSpec extends Specification {
         ]
 
         when:
-        def table = new TableWriter().write(Iterators.toRowIterator(iterator))
+        def table = new TableIteratorWriter(rowIterator: Iterators.toRowIterator(iterator)).write()
 
         then:
         4 == table.size()
@@ -26,7 +26,7 @@ class TableWriterSpec extends Specification {
 
     void "error thrown if iterator is null"() {
         when:
-        new TableWriter().write(null)
+        new TableIteratorWriter().write()
 
         then:
         thrown AssertionError

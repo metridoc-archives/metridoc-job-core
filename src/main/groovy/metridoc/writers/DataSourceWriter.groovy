@@ -1,28 +1,63 @@
 package metridoc.writers
 
-import groovy.sql.Sql
-import metridoc.iterators.RowIterator
+import groovy.util.logging.Slf4j
 import metridoc.sql.SqlPlus
 
 import javax.sql.DataSource
+import java.sql.Connection
 
-class DataSourceWriter implements IteratorWriter<Sql> {
+@Slf4j
+class DataSourceWriter extends DefaultIteratorWriter<List<Integer>> {
+    public static final String DATASOURCE_MESSAGE = "dataSource cannot be null"
+    public static final String TABLE_NAME_ERROR = "tableName cannot be null"
+    public static final String ROW_ITERATOR_ERROR = "row Iterator cannot be null"
     DataSource dataSource
     String tableName
-    Closure resultsCallBack
+
+    List<Integer> response
+
+    @Lazy
+    Map<String, Object> firstRow = {
+        rowIterator.peek()
+    }()
+
+    @Lazy
+    SqlPlus sql = {
+        assert dataSource != null: "dataSource must not be null"
+        new SqlPlus(dataSource)
+    }()
+
+    @Lazy
+    SortedSet<String> sortedParams = {
+        new TreeSet(firstRow.keySet())
+    }()
+
+    @Lazy(soft = true)
+    RowWriter rowWriter = {
+        new DataSourceRowWriter(sortedParams: sortedParams, sql: sql)
+    }()
 
     @Override
-    Sql write(RowIterator rowIterator) {
-        assert dataSource != null: "dataSource must not be null"
-        assert tableName != null: "tableName must not be null"
-        def sql = new SqlPlus(dataSource)
-        List itemsToInsert = rowIterator.collect()
-        def results = sql.runBatch(tableName, itemsToInsert)
+    synchronized List<Integer> write() {
+        assert dataSource != null: DATASOURCE_MESSAGE
+        assert tableName != null: TABLE_NAME_ERROR
+        assert rowIterator != null: ROW_ITERATOR_ERROR
 
-        if (resultsCallBack) {
-            resultsCallBack.call(results)
+        try {
+            sql.withTransaction { Connection connection ->
+                def sql = SqlPlus.getInsertStatement(tableName, firstRow)
+                def preparedStatement = connection.prepareStatement(sql)
+                if (rowWriter instanceof DataSourceRowWriter) {
+                    rowWriter.preparedStatement = preparedStatement
+                }
+                super.write()
+
+                response = preparedStatement.executeBatch()
+            }
+        } finally {
+            sql.close()
         }
 
-        return sql
+        return response
     }
 }

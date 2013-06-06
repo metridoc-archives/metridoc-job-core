@@ -14,11 +14,12 @@
  */
 package metridoc.camel
 
+import org.apache.camel.CamelContext
 import org.apache.camel.Endpoint
 import org.apache.camel.impl.DefaultComponent
+import org.apache.commons.lang.StringUtils
 
 import javax.sql.DataSource
-import org.apache.camel.CamelContext
 
 /**
  * Created by IntelliJ IDEA.
@@ -26,7 +27,7 @@ import org.apache.camel.CamelContext
  * Date: 8/4/11
  * Time: 10:38 AM
  *
- * This will eventually be the groovy sql based component that will replace the current sqlplus component.  The
+ * This will eventually be the groovy response based component that will replace the current sqlplus component.  The
  * goal is to remove the dependency on spring so we can reduce our dependency madness we are dealing with right now
  *
  */
@@ -53,7 +54,7 @@ class SqlPlusComponent extends DefaultComponent {
         String[] columns = getColumns(parameters)
 
         return new SqlPlusEndpoint(uri, this, dataSource, batchSize, fetchSize, remaining, false, noDuplicateColumn,
-            columns as Set<String>)
+                columns as Set<String>)
     }
 
     private String[] getColumns(Map<String, Object> parameters) {
@@ -63,7 +64,7 @@ class SqlPlusComponent extends DefaultComponent {
             String[] columns = rawColumns.split(",")
 
             (0..columns.size() - 1).each {
-                columns[it] = org.apache.commons.lang.StringUtils.trim(columns[it])
+                columns[it] = StringUtils.trim(columns[it])
             }
 
             return columns
@@ -90,7 +91,7 @@ class SqlPlusComponent extends DefaultComponent {
 
     private DataSource getDataSource(Map<String, Object> parameters) {
         def reference = getDataSourceReference(parameters)
-        def dataSource = getCamelContext().registry.lookup(reference, DataSource.class)
+        def dataSource = getCamelContext().registry.lookupByNameAndType(reference, DataSource.class)
         assert dataSource: "a ${DataSource} could not be found for reference ${reference}"
 
         return dataSource
