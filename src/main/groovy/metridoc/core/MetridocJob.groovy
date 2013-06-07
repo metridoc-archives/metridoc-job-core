@@ -17,13 +17,15 @@ abstract class MetridocJob extends RunnableTool {
     static scope = "prototype"
 
     @Delegate
-    CamelTool camelTool
+    @Lazy
+    CamelTool camelTool = {
+        includeTool(CamelTool)
+    }()
 
     @Override
     def execute() {
-        if (camelTool == null) {
-            camelTool = includeTool(CamelTool)
-        }
-        return super.execute()    //To change body of overridden methods use File | Settings | File Templates.
+        def result = super.execute()
+        camelTool.camelContext.stop()
+        return result
     }
 }
