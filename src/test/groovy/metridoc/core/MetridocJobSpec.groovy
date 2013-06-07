@@ -8,25 +8,28 @@ import spock.lang.Specification
  */
 class MetridocJobSpec extends Specification {
 
-    def job = new MetridocJob() {
-        @Override
-        def configure() {
-            //do nothing
-        }
-    }
-
     def "basic to and from spec"() {
-        when: "when data is sent and consumed from a seda endpoint"
-        def fromCalled = false
-        job.with {
-            asyncSend("seda:test", "testBody")
-            consume("seda:test") {
-                assert "testBody" == it
-                fromCalled = true
-            }
-        }
+        given:
+        def metridocJob = new HelperJob()
+
+        when: "when data is sent and consumed from a seda endpoint by calling execute"
+        metridocJob.execute()
 
         then: "consumption of the data should happen"
-        fromCalled
+        metridocJob.fromCalled
+    }
+}
+
+class HelperJob extends MetridocJob {
+
+    boolean fromCalled = false
+
+    @Override
+    def configure() {
+        asyncSend("seda:test", "testBody")
+        consume("seda:test") {
+            assert "testBody" == it
+            fromCalled = true
+        }
     }
 }
