@@ -20,6 +20,7 @@ abstract class MetridocJob extends RunnableTool {
      * specific to grails.  Makes sure that all extensions are of prototype scope
      */
     static scope = "prototype"
+    def grailsApplication
 
     CamelTool getCamelTool() {
         def result = getVariable("camelTool", CamelTool)
@@ -32,6 +33,13 @@ abstract class MetridocJob extends RunnableTool {
 
     @Override
     void setBinding(Binding binding) {
+        if (grailsApplication) {
+            if (grailsApplication.mergedConfig) {
+                binding.config = grailsApplication.mergedConfig
+            } else {
+                binding.config = grailsApplication.config
+            }
+        }
         super.setBinding(binding)
         includeTool(CamelTool)
     }
