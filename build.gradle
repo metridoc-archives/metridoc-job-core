@@ -7,7 +7,7 @@ import wslite.rest.RESTClientException
 apply plugin: 'groovy'
 apply plugin: 'maven'
 project.group = "com.googlecode.metridoc"
-project.version = "0.5.RC4"
+project.version = "0.5.RC5"
 sourceCompatibility = "1.7"
 targetCompatibility = "1.7"
 
@@ -278,7 +278,8 @@ task publishBintrayPackages(dependsOn: "uploadArchives") << {
             text ""
         }
         println response.getContentAsString()
-    } catch (RESTClientException ex) {
+    }
+    catch (RESTClientException ex) {
         println ""
         println "COULD NOT PUBLISH"
         println ex.response.getContentAsString()
