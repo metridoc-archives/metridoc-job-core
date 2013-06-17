@@ -21,13 +21,14 @@ class ApacheLogParser extends LogParser {
     static final COMBINED_REGEX_MAP = COMMON_REGEX_MAP
     static {
         COMBINED_REGEX_MAP.putAll(
-            [
-                    refUrl: /\s"(.+)"\s/,
-                    agent: /"([^"]+)"/
-            ]
+                [
+                        refUrl: /\s"(.+)"\s/,
+                        agent: /"([^"]+)"/
+                ]
         )
     }
     private static final String APACHE_DATE_FORMAT = "dd/MMM/yyyy:hh:mm:ss Z"
+    private static final String APACHE_DATE_FORMAT_WITH_BRACKETS = "[${APACHE_DATE_FORMAT}]"
     private static final APACHE_COMMON_LOG_PARSER = new ApacheLogParser(regexMap: COMMON_REGEX_MAP)
     private static final APACHE_COMBINED_LOG_PARSER = new ApacheLogParser(regexMap: COMBINED_REGEX_MAP)
 
@@ -50,13 +51,15 @@ class ApacheLogParser extends LogParser {
         result.url = urlParams[1]
         try {
             result.httpStatus = Integer.valueOf(record.httpStatus)
-        } catch (NumberFormatException ex) {
+        }
+        catch (NumberFormatException ex) {
             result.httpStatus = null
         }
 
         try {
             result.fileSize = Integer.valueOf(record.fileSize)
-        } catch (NumberFormatException ex) {
+        }
+        catch (NumberFormatException ex) {
             result.fileSize = null
         }
 
@@ -64,12 +67,9 @@ class ApacheLogParser extends LogParser {
     }
 
     static Date parseLogDate(String date) {
-        try {
-            return new SimpleDateFormat(APACHE_DATE_FORMAT).parse(date)
-        } catch (Exception ex) {
-            //do nothing
+        if (date.startsWith("[")) {
+            return new SimpleDateFormat(APACHE_DATE_FORMAT_WITH_BRACKETS).parse(date)
         }
-
-        return null
+        return new SimpleDateFormat(APACHE_DATE_FORMAT).parse(date)
     }
 }
