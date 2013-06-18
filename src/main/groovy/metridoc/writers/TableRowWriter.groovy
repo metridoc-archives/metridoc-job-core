@@ -1,6 +1,7 @@
 package metridoc.writers
 
 import com.google.common.collect.Table
+import org.apache.commons.lang.ObjectUtils
 
 /**
  * Created with IntelliJ IDEA on 6/5/13
@@ -14,7 +15,7 @@ class TableRowWriter extends DefaultRowWriter {
         assert table != null: "table cannot be null"
 
         record.each { String columnKey, value ->
-            table.put(line, columnKey, value)
+            table.put(line, columnKey, value ?: ObjectUtils.NULL)
         }
     }
 }
