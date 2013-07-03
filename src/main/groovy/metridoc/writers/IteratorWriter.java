@@ -1,8 +1,13 @@
 package metridoc.writers;
 
 import java.util.Iterator;
-import java.util.Map;
 
-public interface IteratorWriter<T> extends Iterator<Map<String, Object>> {
-    T write();
+public interface IteratorWriter<T extends Iterator> {
+    /**
+     * should be a one time operation
+     *
+     * @param iterator to write
+     * @return itself to promote method chaining
+     */
+    WriteResponseTotals write(T iterator);
 }

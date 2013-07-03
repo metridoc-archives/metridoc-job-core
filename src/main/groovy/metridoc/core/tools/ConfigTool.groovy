@@ -37,4 +37,33 @@ class ConfigTool extends DefaultTool {
 
         return null
     }
+
+    ConfigTool addConfig(Closure closure) {
+        ConfigObject config = binding.variables.config ?: new ConfigObject()
+        binding.config = config
+        def slurper = new ConfigSlurper()
+        config.merge(slurper.parse(new ConfigScript(configClosure: closure)))
+
+        return this
+    }
+
+    ConfigTool addConfig(File file) {
+        ConfigObject config = binding.variables.config ?: new ConfigObject()
+        binding.config = config
+        def slurper = new ConfigSlurper()
+        config.merge(slurper.parse(file.toURI().toURL()))
+
+        return this
+    }
+}
+
+class ConfigScript extends Script {
+    Closure configClosure
+
+    @Override
+    def run() {
+        Closure clone = configClosure.clone() as Closure
+        clone.delegate = this
+        clone.run()
+    }
 }

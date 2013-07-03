@@ -1,5 +1,6 @@
 package metridoc.writers
 
+import com.google.common.collect.Table
 import metridoc.iterators.Iterators
 import spock.lang.Specification
 
@@ -13,7 +14,7 @@ class TableWriterSpec extends Specification {
         ]
 
         when:
-        def table = new TableIteratorWriter(rowIterator: Iterators.toRowIterator(iterator)).write()
+        def table = new TableIteratorWriter().write(Iterators.toRowIterator(iterator)).data.table as Table
 
         then:
         4 == table.size()
@@ -26,7 +27,7 @@ class TableWriterSpec extends Specification {
 
     void "error thrown if iterator is null"() {
         when:
-        new TableIteratorWriter().write()
+        new TableIteratorWriter().write(null)
 
         then:
         thrown AssertionError

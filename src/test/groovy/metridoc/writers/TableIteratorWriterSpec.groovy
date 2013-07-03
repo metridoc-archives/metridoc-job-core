@@ -1,5 +1,6 @@
 package metridoc.writers
 
+import com.google.common.collect.Table
 import metridoc.iterators.Iterators
 import spock.lang.Specification
 
@@ -22,10 +23,10 @@ class TableIteratorWriterSpec extends Specification {
         )
 
         and: "a table writer using the rowIterator"
-        def tableWriter = new TableIteratorWriter(rowIterator: rowIterator)
+        def tableWriter = new TableIteratorWriter()
 
         when: "write is called"
-        def table = tableWriter.write()
+        def table = tableWriter.write(rowIterator).data.table as Table
 
         then: "a table with correct data is created"
         table.containsRow(0)

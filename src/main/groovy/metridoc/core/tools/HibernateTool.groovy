@@ -5,22 +5,35 @@ import org.hibernate.Session
 import org.hibernate.SessionFactory
 import org.hibernate.cfg.Configuration
 
-import javax.validation.ConstraintViolation
-import javax.validation.Validation
-import javax.validation.ValidatorFactory
-
 class HibernateTool {
-    Properties hibernateProperties = new Properties()
+    @Lazy(soft = true)
+    Properties hibernateProperties = {
+        def result = new Properties()
+        result."hibernate.current_session_context_class" = "thread"
+        result."hibernate.hbm2ddl.auto" = "update"
+        result."hibernate.cache.provider_class" = "org.hibernate.cache.NoCacheProvider"
+
+        return result
+    }()
     String hibernatePrefix = "hibernate"
     String dataSourcePrefix = "dataSource"
-    SessionFactory sessionFactory
-    List<Class> entityClasses = []
-    ValidatorFactory validatorFactory = Validation.buildDefaultValidatorFactory()
 
-    List<ConstraintViolation> validate(value) {
-        def validator = validatorFactory.validator
-        validator.validate(value) as List
-    }
+    @Lazy(soft = true)
+    SessionFactory sessionFactory = {
+        def configuration = new Configuration()
+        def result
+        configuration.with {
+            entityClasses.each {
+                addAnnotatedClass(it)
+            }
+            addProperties(hibernateProperties)
+            result = buildSessionFactory()
+        }
+
+        return result
+    }()
+
+    List<Class> entityClasses = []
 
     void setBinding(Binding binding) {
         MetridocScript.includeTool(binding, ConfigTool)
@@ -28,11 +41,6 @@ class HibernateTool {
     }
 
     void setConfig(ConfigObject config) {
-        //defaults first
-        hibernateProperties."hibernate.current_session_context_class" = "thread"
-        hibernateProperties."hibernate.hbm2ddl.auto" = "update"
-        hibernateProperties."hibernate.cache.provider_class" = "org.hibernate.cache.NoCacheProvider"
-
         hibernateProperties.putAll(convertDataSourcePropsToHibernate(config))
         hibernateProperties.putAll(convertHibernateProperties(config))
         if (config.entityClasses) {
@@ -45,24 +53,14 @@ class HibernateTool {
         try {
             closure.call(session)
             transaction.commit()
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             transaction.rollback()
             throw e
         }
     }
 
     void withTransaction(Closure closure) {
-        if (sessionFactory == null) {
-            def configuration = new Configuration()
-            configuration.with {
-                entityClasses.each {
-                    addAnnotatedClass(it)
-                }
-                addProperties(hibernateProperties)
-                sessionFactory = buildSessionFactory()
-            }
-        }
-
         def session = sessionFactory.currentSession
         withTransaction(session, closure)
     }
@@ -107,5 +105,13 @@ class HibernateTool {
         }
 
         return result
+    }
+
+    void configureEmbeddedDatabase() {
+        hibernateProperties."hibernate.dialect" = "org.hibernate.dialect.H2Dialect"
+        hibernateProperties."hibernate.connection.driver_class" = "org.h2.Driver"
+        hibernateProperties."hibernate.connection.username" = "sa"
+        hibernateProperties."hibernate.connection.password" = ""
+        hibernateProperties."hibernate.connection.url" = "jdbc:h2:mem:devDb;MVCC=TRUE;LOCK_TIMEOUT=10000"
     }
 }

@@ -7,7 +7,7 @@ import wslite.rest.RESTClientException
 apply plugin: 'groovy'
 apply plugin: 'maven'
 project.group = "com.googlecode.metridoc"
-project.version = "0.5.RC8"
+project.version = "0.5.RC9-SNAPSHOT"
 sourceCompatibility = "1.6"
 targetCompatibility = "1.6"
 
@@ -36,7 +36,7 @@ dependencies {
         exclude module: 'slf4j-api'
     }
     compile('com.google.guava:guava:13.0.1')
-    compile('org.codehaus.groovy:groovy-all:2.0.5')
+    compile('org.codehaus.groovy:groovy-all:2.0.8')
     compile("mysql:mysql-connector-java:5.1.20")
     runtime('dom4j:dom4j:1.6.1')
     compile("org.apache.camel:camel-stream:$camelVersion") {
@@ -44,9 +44,6 @@ dependencies {
     }
     compile("org.apache.camel:camel-ftp:$camelVersion") {
         exclude module: 'camel-core'
-    }
-    compile('org.hibernate:hibernate-validator:4.1.0.Final') {
-        exclude module: 'slf4j-api'
     }
     compile('org.hibernate:hibernate-core:3.6.10.Final') {
         exclude module: 'slf4j-api'

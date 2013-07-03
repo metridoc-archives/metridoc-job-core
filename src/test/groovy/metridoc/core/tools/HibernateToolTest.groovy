@@ -2,7 +2,6 @@ package metridoc.core.tools
 
 import org.junit.Test
 
-import javax.validation.constraints.NotNull
 
 /**
  * Created with IntelliJ IDEA.
@@ -42,15 +41,11 @@ class HibernateToolTest {
     }
 
     @Test
-    void "test the validator"() {
+    void "test configuring a basic embedded database"() {
         def tool = new HibernateTool()
-        assert 0 == tool.validate(new BeanForValidation(foo: "bar")).size()
-        def violations = tool.validate(new BeanForValidation())
-        assert 1 == violations.size()
+        tool.configureEmbeddedDatabase()
+        assert "org.hibernate.dialect.H2Dialect" == tool.hibernateProperties."hibernate.dialect"
+        assert "org.h2.Driver" == tool.hibernateProperties."hibernate.connection.driver_class"
     }
 }
 
-class BeanForValidation {
-    @NotNull
-    String foo
-}
