@@ -18,15 +18,15 @@ class DelimitedLineIteratorSpec extends Specification {
         def next = iterator.next()
 
         then:
-        "blah" == next[0]
-        "blam" == next[1]
+        "blah" == next.body[0]
+        "blam" == next.body[1]
 
         when:
         next = iterator.next()
 
         then:
-        "bloom" == next[0]
-        "blim" == next[1]
+        "bloom" == next.body[0]
+        "blim" == next.body[1]
 
         when:
         iterator.next()

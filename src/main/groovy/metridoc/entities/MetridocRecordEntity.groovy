@@ -1,5 +1,7 @@
 package metridoc.entities
 
+import metridoc.iterators.Record
+
 import javax.persistence.MappedSuperclass
 
 /**
@@ -11,7 +13,7 @@ abstract class MetridocRecordEntity extends MetridocEntity {
     abstract void validate()
 
     @SuppressWarnings("GrMethodMayBeStatic")
-    boolean acceptRecord(Map record) {
+    boolean acceptRecord(Record record) {
         return true
     }
 
@@ -20,8 +22,8 @@ abstract class MetridocRecordEntity extends MetridocEntity {
         return true
     }
 
-    void populate(Map record) {
-        def dataOfInterest = record.findAll { this.properties.keySet().contains(it.key) }
+    void populate(Record record) {
+        def dataOfInterest = record.body.findAll { this.properties.keySet().contains(it.key) }
         try {
             dataOfInterest.each {
                 this."$it.key" = it.value

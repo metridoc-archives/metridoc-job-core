@@ -8,4 +8,4 @@ import com.google.common.collect.AbstractIterator
  *
  * The class that all {@link Iterator} should extend
  */
-abstract class RowIterator extends AbstractIterator<Map> {}
+abstract class RecordIterator extends AbstractIterator<Record> {}

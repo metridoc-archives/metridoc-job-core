@@ -15,7 +15,7 @@ class XlsxIteratorTest {
     void "testing basic iteration"() {
         assert "LOCATION_ID" == iterator.headers.get(0)
         def row = iterator.next()
-        assert 1 == row.get("LOCATION_ID")
+        assert 1 == row.body.get("LOCATION_ID")
     }
 
     @SuppressWarnings("GroovyVariableNotAssigned")
@@ -26,13 +26,14 @@ class XlsxIteratorTest {
             next = iterator.next()
         }
 
-        assert 359 == next.get("LOCATION_ID")
+        assert 359 == next.body.get("LOCATION_ID")
         assert !iterator.hasNext()
 
         try {
             iterator.next()
             assert false: "exception should have occurred"
-        } catch (NoSuchElementException ignored) {
+        }
+        catch (NoSuchElementException ignored) {
 
         }
     }

@@ -1,6 +1,7 @@
 package metridoc.writers
 
-import metridoc.iterators.RowIterator
+import metridoc.iterators.Record
+import metridoc.iterators.RecordIterator
 import org.slf4j.LoggerFactory
 
 import static metridoc.writers.WrittenRecordStat.Status.*
@@ -9,27 +10,19 @@ import static metridoc.writers.WrittenRecordStat.Status.*
  * Created with IntelliJ IDEA on 6/5/13
  * @author Tommy Barker
  */
-abstract class DefaultIteratorWriter implements IteratorWriter<RowIterator> {
+abstract class DefaultIteratorWriter implements IteratorWriter<RecordIterator> {
 
-    Map<String, Object> firstRow
-
-    int offset = 0
-
-    WriteResponse write(RowIterator rowIterator) {
-        assert rowIterator != null: "row iterator cannot be null"
+    WriteResponse write(RecordIterator recordIterator) {
+        assert recordIterator != null: "record iterator cannot be null"
         def totals = new WriteResponse()
         def log = LoggerFactory.getLogger(this.getClass())
-        if (!rowIterator.hasNext()) {
+        if (!recordIterator.hasNext()) {
             log.warn "iterator does not have anymore values, there is nothing to write"
             return totals
         }
         try {
-            if (rowIterator) {
-                firstRow = rowIterator.peek()
-            }
-
-            rowIterator.eachWithIndex { Map row, int lineNumber ->
-                def response = write(lineNumber + offset, row)
+            recordIterator.eachWithIndex { Record record, int lineNumber ->
+                def response = writeRecord(lineNumber, record)
                 handleResponse(response)
                 totals.addAll(response)
             }
@@ -37,8 +30,8 @@ abstract class DefaultIteratorWriter implements IteratorWriter<RowIterator> {
             return totals
         }
         finally {
-            if (rowIterator instanceof Closeable) {
-                silentClose(rowIterator as Closeable)
+            if (recordIterator instanceof Closeable) {
+                silentClose(recordIterator as Closeable)
             }
 
             if (this instanceof Closeable) {
@@ -54,12 +47,14 @@ abstract class DefaultIteratorWriter implements IteratorWriter<RowIterator> {
                 case INVALID:
                     log.warn "" +
                             "Invalid record\n" +
+                            "   --> line: $response.line\n" +
                             "   --> record: $response.record\n" +
                             "   --> message: $response.throwable.message"
                     break
                 case ERROR:
                     log.error "" +
                             "Unexpected exception occurred processing record\n" +
+                            "   --> line: $response.line\n" +
                             "   --> record: $response.record\n" +
                             "   --> message: $response.throwable.message"
                     throw response.throwable
@@ -73,26 +68,12 @@ abstract class DefaultIteratorWriter implements IteratorWriter<RowIterator> {
         }
         catch (Exception e) {
             def log = LoggerFactory.getLogger(this.getClass())
-            log.warn "could not close $closeable properl, ignoring", e
+            log.warn "could not close $closeable properly, ignoring", e
         }
     }
 
-    @SuppressWarnings("GroovyVariableNotAssigned")
-    protected List<WrittenRecordStat> writeRecord(Map record) {
-        assert record.containsKey("lineNumber") || record.containsKey("line"): "record must contain integer value with name [line] or [lineNumber]"
-        int lineNumber
-        try {
-            lineNumber = (record.lineNumber ?: record.line) as int
-        }
-        catch (NumberFormatException ignored) {
-            throw new IllegalArgumentException("line number [$lineNumber] is not an integer")
-        }
-
-        write(lineNumber, record)
-    }
-
-    protected List<WrittenRecordStat> write(int line, Map record) {
-        def response = new WrittenRecordStat(scope: this.getClass(), record: record)
+    protected List<WrittenRecordStat> writeRecord(int line, Record record) {
+        def response = new WrittenRecordStat(scope: this.getClass(), record: record, line: line)
         try {
             boolean written = doWrite(line, record)
             if (written) {
@@ -120,5 +101,5 @@ abstract class DefaultIteratorWriter implements IteratorWriter<RowIterator> {
         }
     }
 
-    abstract boolean doWrite(int lineNumber, Map record)
+    abstract boolean doWrite(int lineNumber, Record record)
 }

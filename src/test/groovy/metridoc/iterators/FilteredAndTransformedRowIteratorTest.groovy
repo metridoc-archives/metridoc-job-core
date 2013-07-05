@@ -21,10 +21,11 @@ class FilteredAndTransformedRowIteratorTest extends Specification {
                 [foo: "bar", bar: 1]
         ]
 
-        and: "a filter transform row iterator that ignores odd numbers"
-        def fooBarRow = toFilteredAndTransformedIterator(toRowIterator(fooBar)) { Map map ->
-            if (map.bar % 2 == 0) {
-                return map
+        and: "a filter transform record iterator that ignores odd numbers"
+        def fooBarRow = toFilteredAndTransformedIterator(toRowIterator(fooBar)) { Record record ->
+
+            if (record.body.bar % 2 == 0) {
+                return record
             }
 
             return null
@@ -35,8 +36,8 @@ class FilteredAndTransformedRowIteratorTest extends Specification {
 
         then: "there are only two items with correct data"
         2 == collection.size()
-        ["bar", "bar"] == collection.collect { it.foo }
-        [2, 4] == collection.collect { it.bar }
+        ["bar", "bar"] == collection.collect { it.body.foo }
+        [2, 4] == collection.collect { it.body.bar }
     }
 
 }

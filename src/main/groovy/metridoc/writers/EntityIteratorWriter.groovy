@@ -1,7 +1,8 @@
 package metridoc.writers
 
 import metridoc.entities.MetridocRecordEntity
-import metridoc.iterators.RowIterator
+import metridoc.iterators.Record
+import metridoc.iterators.RecordIterator
 import org.hibernate.SessionFactory
 
 /**
@@ -14,12 +15,12 @@ class EntityIteratorWriter extends DefaultIteratorWriter {
     Class<? extends MetridocRecordEntity> recordEntityClass
 
     @Override
-    WriteResponse write(RowIterator rowIterator) {
+    WriteResponse write(RecordIterator recordIterator) {
         def session = sessionFactory.currentSession
         def transaction = session.beginTransaction()
 
         try {
-            def response = super.write(rowIterator)
+            def response = super.write(recordIterator)
             transaction.commit()
             return response
         }
@@ -35,7 +36,7 @@ class EntityIteratorWriter extends DefaultIteratorWriter {
     }
 
     @Override
-    boolean doWrite(int lineNumber, Map record) {
+    boolean doWrite(int lineNumber, Record record) {
         def instance = recordEntityClass.newInstance()
         if (instance.acceptRecord(record)) {
             instance.populate(record)

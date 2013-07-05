@@ -20,9 +20,9 @@ class CsvIteratorSpec extends Specification {
         expect:
         while (iterator.hasNext()) {
             def next = iterator.next()
-            value1 == next.a
-            value2 == next.b
-            value3 == next.c
+            value1 == next.body.a
+            value2 == next.body.b
+            value3 == next.body.c
         }
 
         where:
@@ -39,9 +39,9 @@ class CsvIteratorSpec extends Specification {
         expect:
         while (iterator.hasNext()) {
             def next = iterator.next()
-            value1 == next.a
-            value2 == next.b
-            value3 == next.c
+            value1 == next.body.a
+            value2 == next.body.b
+            value3 == next.body.c
         }
 
         where:

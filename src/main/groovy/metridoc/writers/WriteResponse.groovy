@@ -33,7 +33,7 @@ class WriteResponse {
         }
 
         if (possibilities.size() > 1) {
-            def message = new StrBuilder("Could not convert response to $clazz, there were more than one possible solution")
+            def message = new StrBuilder("Could not convert response to $clazz, there was more than one possible solution")
             possibilities.each {
                 message.appendln("  --> $it")
             }

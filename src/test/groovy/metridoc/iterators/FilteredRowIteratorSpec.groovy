@@ -31,8 +31,8 @@ class FilteredRowIteratorSpec extends Specification {
         })
 
         and: "construct a filtered iterator from it"
-        def filteredIterator = toFilteredRowIterator(toRowIterator(iterator)) { Map row ->
-            row[0] == 0
+        def filteredIterator = toFilteredRowIterator(toRowIterator(iterator)) { Record record ->
+            record.body[0] == 0
         }
 
         when: "I call the iterator twice"
@@ -40,8 +40,8 @@ class FilteredRowIteratorSpec extends Specification {
         def next2 = filteredIterator.next()
 
         then: "I get the correct output"
-        0 == next1[0]
-        0 == next2[0]
+        0 == next1.body[0]
+        0 == next2.body[0]
         next1 == next2
 
         when: "I call the iterator a third time"

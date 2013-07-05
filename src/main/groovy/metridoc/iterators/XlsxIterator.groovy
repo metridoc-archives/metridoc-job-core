@@ -26,6 +26,7 @@ import javax.xml.stream.XMLStreamReader
 class XlsxIterator extends BaseExcelIterator {
 
     private static log = LoggerFactory.getLogger(XlsxIterator)
+    public static final String ROW = "row"
 
     @Lazy
     XMLStreamReader reader = {
@@ -56,7 +57,8 @@ class XlsxIterator extends BaseExcelIterator {
     private static closeXmlStreamReader(XMLStreamReader xmlReader) {
         try {
             xmlReader.close()
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             log.warn("An exception occurred closing the xml reader", e)
         }
     }
@@ -81,7 +83,7 @@ class XlsxIterator extends BaseExcelIterator {
         boolean atEnd = !reader.hasNext()
         boolean atRow = false
         if (reader.startElement) {
-            atRow = reader.localName == "row"
+            atRow = reader.localName == ROW
         }
         return atEnd || atRow
     }
@@ -119,7 +121,8 @@ class XlsxIterator extends BaseExcelIterator {
                     workbookReader.next()
                 }
             }
-        } finally {
+        }
+        finally {
             closeXmlStreamReader(workbookReader)
         }
         return null
@@ -134,6 +137,7 @@ class XlsxIterator extends BaseExcelIterator {
         }
     }
 
+    @SuppressWarnings("GroovyAssignabilityCheck")
     private static String getSheetReferenceByIndex(XMLStreamReader workbookReader, int index) {
         return getSheetReference(workbookReader) { Map attributeMap ->
             def oneBaseIndex = index + 1
@@ -172,7 +176,7 @@ class XlsxIterator extends BaseExcelIterator {
 
             if (reader.endElement) {
                 def name = reader.localName
-                if (name == "row") {
+                if (name == ROW) {
                     gettingCells = false
                 }
             }
@@ -183,7 +187,7 @@ class XlsxIterator extends BaseExcelIterator {
     }
 
     @Override
-    protected Map computeNext() {
+    protected Record computeNext() {
         def headerSize = headers.size()
         def row = getNextRow(getReader())
         def result = [:]
@@ -192,7 +196,8 @@ class XlsxIterator extends BaseExcelIterator {
             (0..headerSize - 1).each {
                 result[headers[it]] = data[it]
             }
-            return result
+            def record = new Record(body: result)
+            return record
         }
 
         close()

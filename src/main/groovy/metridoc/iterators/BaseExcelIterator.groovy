@@ -28,7 +28,7 @@ abstract class BaseExcelIterator extends FileIterator {
 
     @SuppressWarnings("GroovyAssignabilityCheck")
     protected static int convertColumnToNumber(String column) {
-        def m = (column =~ /(\D+)\d*/)  //strip out row numbers
+        def m = (column =~ /(\D+)\d*/)  //strip out record numbers
         m.find()
         def justColumn = m.group(1)
 

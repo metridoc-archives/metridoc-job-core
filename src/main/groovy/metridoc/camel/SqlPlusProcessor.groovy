@@ -15,6 +15,7 @@
 package metridoc.camel
 
 import metridoc.iterators.BatchIterator
+import metridoc.iterators.RecordIterator
 import metridoc.iterators.SqlIterator
 import metridoc.utils.ColumnConstrainedList
 import metridoc.utils.ColumnConstrainedMap
@@ -39,7 +40,7 @@ class SqlPlusProcessor extends SqlPlusMixin implements Processor {
     void process(Exchange exchange) {
         def body = exchange.in.body
 
-        if (body instanceof Iterator) {
+        if (body instanceof RecordIterator) {
             handleBatchIteration(query, body)
             return;
         }
@@ -76,10 +77,12 @@ class SqlPlusProcessor extends SqlPlusMixin implements Processor {
         throw new IllegalArgumentException("Sqlplus can only process a Map, List, ResultSet or Iterator")
     }
 
+    @SuppressWarnings("GroovyAssignabilityCheck")
     private void handleListOrMap(String tableOrInsert, Object records) {
         try {
             sql.runBatch(tableOrInsert, records, logBatches)
-        } finally {
+        }
+        finally {
             sql.close()
         }
     }
@@ -93,16 +96,17 @@ class SqlPlusProcessor extends SqlPlusMixin implements Processor {
         handleBatchIteration(tableOrInsert, resultSetIterator)
     }
 
-    private void handleBatchIteration(String tableOrInsert, Iterator iterator) {
+    private void handleBatchIteration(String tableOrInsert, RecordIterator iterator) {
         def batchIterator = new BatchIterator(iterator, getBatchSize())
         def sql = getSql()
 
         try {
             while (batchIterator.hasNext()) {
-                def next = batchIterator.next()
+                def next = batchIterator.next().collect { it.body }
                 sql.runBatch(tableOrInsert, next, logBatches)
             }
-        } finally {
+        }
+        finally {
             sql.close()
         }
     }

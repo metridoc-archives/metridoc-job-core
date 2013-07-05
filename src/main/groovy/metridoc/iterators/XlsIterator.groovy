@@ -63,10 +63,10 @@ class XlsIterator extends BaseExcelIterator {
         }
     }
 
-    protected Map computeNext() {
+    protected Record computeNext() {
         def result = [:]
 
-        log.debug("retrieving row {} for sheet {}", rowNum, getSheet().sheetName)
+        log.debug("retrieving record {} for sheet {}", rowNum, getSheet().sheetName)
         def row = getRow(rowNum)
 
         if (row == null) {
@@ -81,11 +81,11 @@ class XlsIterator extends BaseExcelIterator {
         }
 
         rowNum++
-        return result
+        return new Record(body: result)
     }
 
     private List getRow(int rowNumber) {
-        Row row = getSheet().getRow(rowNum)
+        def row = getSheet().getRow(rowNumber)
 
         if (row) {
             def lastCellIndex = row.lastCellNum

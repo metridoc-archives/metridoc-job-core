@@ -4,18 +4,18 @@ package metridoc.iterators
  * Created with IntelliJ IDEA on 5/31/13
  * @author Tommy Barker
  */
-class FilteredRowIterator extends RowIterator {
+class FilteredRecordIterator extends RecordIterator {
     Closure<Boolean> filter
-    RowIterator iterator
+    RecordIterator iterator
 
     @Override
-    protected Map computeNext() {
+    protected Record computeNext() {
         assert filter: "filter cannot be null"
         assert iterator != null: "iterator cannot be null"
 
         while (iterator.hasNext()) {
             def next = iterator.next()
-            if (filter.call(next)) {
+            if (filter.call(next.clone())) {
                 return next
             }
         }

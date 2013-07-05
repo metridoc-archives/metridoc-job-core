@@ -44,7 +44,7 @@ class DelimitedLineIterator extends FileIterator {
 
     @SuppressWarnings("GroovyAssignabilityCheck")
     @Override
-    protected Map computeNext() {
+    protected Record computeNext() {
         if (delimiter == null) {
             throw new IllegalArgumentException("delimiter must be specified")
         }
@@ -75,7 +75,7 @@ class DelimitedLineIterator extends FileIterator {
                 result[headers[it]] = splitLine[it]
             }
 
-            return result
+            return new Record(body: result)
         }
 
         close()

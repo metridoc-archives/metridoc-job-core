@@ -32,11 +32,11 @@ class IteratorsSpec extends Specification {
 
         then: "we can iterate over the file contents"
 
-        "a" == next1[0]
-        "b" == next1[1]
+        "a" == next1.body[0]
+        "b" == next1.body[1]
 
-        "b" == next2[0]
-        "c" == next2[1]
+        "b" == next2.body[0]
+        "c" == next2.body[1]
 
         try {
             iterator.next()

@@ -1,7 +1,8 @@
 package metridoc.writers
 
 import groovy.util.logging.Slf4j
-import metridoc.iterators.RowIterator
+import metridoc.iterators.Record
+import metridoc.iterators.RecordIterator
 import metridoc.sql.SqlPlus
 
 import javax.sql.DataSource
@@ -12,11 +13,9 @@ import java.sql.PreparedStatement
 class DataSourceIteratorWriter extends DefaultIteratorWriter {
     public static final String DATASOURCE_MESSAGE = "dataSource cannot be null"
     public static final String TABLE_NAME_ERROR = "tableName cannot be null"
-    public static final String ROW_ITERATOR_ERROR = "row Iterator cannot be null"
+    public static final String ROW_ITERATOR_ERROR = "record Iterator cannot be null"
     DataSource dataSource
     String tableName
-
-    List<Integer> response
 
     @Lazy
     SqlPlus sql = {
@@ -25,28 +24,27 @@ class DataSourceIteratorWriter extends DefaultIteratorWriter {
     }()
 
     @Override
-    WriteResponse write(RowIterator rowIterator) {
+    WriteResponse write(RecordIterator recordIterator) {
         assert dataSource != null: DATASOURCE_MESSAGE
         assert tableName != null: TABLE_NAME_ERROR
-        assert rowIterator != null: ROW_ITERATOR_ERROR
-        def firstRow = rowIterator.peek()
-        def sortedParams = new TreeSet(firstRow.keySet())
-
-
+        assert recordIterator != null: ROW_ITERATOR_ERROR
+        def firstRow = recordIterator.peek()
+        def sortedParams = new TreeSet(firstRow.body.keySet())
 
         try {
             def totals = null
             sql.withTransaction { Connection connection ->
-                def sql = SqlPlus.getInsertStatement(tableName, firstRow)
+                def sql = SqlPlus.getInsertStatement(tableName, firstRow.body)
                 def preparedStatement = connection.prepareStatement(sql)
 
-                def rowIteratorToUse = new RowIterator() {
+                def rowIteratorToUse = new RecordIterator() {
                     @Override
-                    protected Map computeNext() {
-                        if (rowIterator.hasNext()) {
-                            def result = rowIterator.next()
-                            result.sortedParams = sortedParams
-                            result.preparedStatement = preparedStatement
+                    protected Record computeNext() {
+                        if (recordIterator.hasNext()) {
+                            def result = recordIterator.next()
+                            def headers = result.headers
+                            headers.sortedParams = sortedParams
+                            headers.preparedStatement = preparedStatement
 
                             return result
                         }
@@ -67,11 +65,12 @@ class DataSourceIteratorWriter extends DefaultIteratorWriter {
     }
 
     @Override
-    boolean doWrite(int lineNumber, Map record) {
+    boolean doWrite(int lineNumber, Record record) {
         validateState(sql, "sqlPlus service cannot be null")
-        def preparedStatement = record.remove("preparedStatement") as PreparedStatement
-        def sortedParams = record.remove("sortedParams")
-        sql.processRecord(preparedStatement, record, sortedParams)
+        def headers = record.headers
+        def preparedStatement = headers.preparedStatement as PreparedStatement
+        def sortedParams = headers.sortedParams
+        sql.processRecord(preparedStatement, record.body, sortedParams)
 
         return true
     }

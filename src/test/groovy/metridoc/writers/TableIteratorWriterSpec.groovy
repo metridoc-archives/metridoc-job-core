@@ -11,7 +11,7 @@ import spock.lang.Specification
 class TableIteratorWriterSpec extends Specification {
 
     def "writing to a table specification"() {
-        given: "a simple row iterator"
+        given: "a simple record iterator"
         def rowIterator = Iterators.toRowIterator(
                 [
                         [foo: "bar", bar: 5],

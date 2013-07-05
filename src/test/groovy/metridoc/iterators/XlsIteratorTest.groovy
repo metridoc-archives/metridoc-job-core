@@ -27,7 +27,7 @@ class XlsIteratorTest {
     void "testing cell conversion issues we were seeing with formulas"() {
         iterator.next()
         def row = iterator.next()
-        assert 2 == row.get("LOCATION_ID")
+        assert 2 == row.body.get("LOCATION_ID")
     }
 
     @Test
@@ -44,13 +44,14 @@ class XlsIteratorTest {
             next = iterator.next()
         }
 
-        assert 359 == next.get("LOCATION_ID")
+        assert 359 == next.body.get("LOCATION_ID")
         assert !iterator.hasNext()
 
         try {
             iterator.next()
             assert false: "exception should have occurred"
-        } catch (NoSuchElementException ignored) {
+        }
+        catch (NoSuchElementException ignored) {
 
         }
     }

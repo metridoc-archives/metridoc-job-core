@@ -16,14 +16,14 @@ package metridoc.iterators
 
 import java.sql.ResultSet
 
-class SqlIterator extends RowIterator {
+class SqlIterator extends RecordIterator {
 
     ResultSet resultSet
 
     @Override
-    protected Map computeNext() {
+    protected Record computeNext() {
         if (resultSet.next()) {
-            return resultSet.toRowResult()
+            return new Record(body: resultSet.toRowResult())
         }
 
         return endOfData()

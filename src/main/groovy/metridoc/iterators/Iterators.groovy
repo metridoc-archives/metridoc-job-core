@@ -23,13 +23,13 @@ class Iterators {
             split: SplitIteratorWriter
     ]
 
-    static RowIterator toRowIterator(Iterator<Map> iterator) {
+    static RecordIterator toRowIterator(Iterator<Map> iterator) {
         assert iterator: "iterator must not be null or empty"
-        new RowIterator() {
+        new RecordIterator() {
             @Override
-            protected Map computeNext() {
+            protected Record computeNext() {
                 if (iterator.hasNext()) {
-                    return iterator.next()
+                    return new Record(body: iterator.next())
                 }
 
                 return endOfData()
@@ -37,16 +37,16 @@ class Iterators {
         }
     }
 
-    static RowIterator toRowIterator(List<Map> iterator) {
+    static RecordIterator toRowIterator(List<Map> iterator) {
         assert iterator: "iterator must not be null or empty"
         toRowIterator(iterator.iterator())
     }
 
-    static RowIterator toFilteredRowIterator(RowIterator iterator, Closure<Boolean> filter) {
+    static RecordIterator toFilteredRowIterator(RecordIterator iterator, Closure<Boolean> filter) {
         assert iterator: "iterator must not be null"
         assert filter: "filter must not be null"
 
-        new FilteredRowIterator(
+        new FilteredRecordIterator(
                 filter: filter,
                 iterator: iterator
         )
@@ -58,21 +58,21 @@ class Iterators {
      * @param transformer should return null if it should not be collected, otherwise should return a Map
      * @return
      */
-    static RowIterator toFilteredAndTransformedIterator(RowIterator rowIterator, Closure<Map> transformer) {
-        new FilteredAndTransformedRowIterator(
+    static RecordIterator toFilteredAndTransformedIterator(RecordIterator rowIterator, Closure<Record> transformer) {
+        new FilteredAndTransformedRecordIterator(
                 iterator: rowIterator,
                 transformer: transformer
         )
     }
 
     @SuppressWarnings("GrMethodMayBeStatic")
-    static WrappedIterator createIterator(LinkedHashMap properties, Class<RowIterator> iteratorClass) {
+    static WrappedIterator createIterator(LinkedHashMap properties, Class<RecordIterator> iteratorClass) {
         def iterator = iteratorClass.newInstance(properties)
         new WrappedIterator(iterator: iterator)
     }
 
     static WrappedIterator createIterator(LinkedHashMap properties, String name) {
-        createIterator(properties, ITERATORS[name] as Class<RowIterator>)
+        createIterator(properties, ITERATORS[name] as Class<RecordIterator>)
     }
 
     static IteratorWriter createWriter(LinkedHashMap properties, String name) {
@@ -82,11 +82,15 @@ class Iterators {
     static IteratorWriter createWriter(LinkedHashMap properties, Class<IteratorWriter> writerClass) {
         writerClass.newInstance(properties)
     }
+
+    static IteratorWriter createWriter(String name) {
+        createWriter([:], WRITERS[name] as Class<IteratorWriter>)
+    }
 }
 
 class WrappedIterator {
     @Delegate
-    RowIterator iterator
+    RecordIterator iterator
 
     WriteResponse writeTo(LinkedHashMap properties, Class<IteratorWriter> writerClass) {
         def writer = Iterators.createWriter(properties, writerClass)

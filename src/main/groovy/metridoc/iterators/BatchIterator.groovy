@@ -20,10 +20,10 @@ class BatchIterator extends AbstractIterator<List<Map<String, Object>>> {
     /**
      * the wrapped iterator
      */
-    RowIterator iterator
+    RecordIterator iterator
     int batchSize
 
-    BatchIterator(RowIterator iterator, int batchSize) {
+    BatchIterator(RecordIterator iterator, int batchSize) {
         assert iterator: "iterator cannot be null"
         assert batchSize > 0: "batch size must be greater than 0"
         this.iterator = iterator

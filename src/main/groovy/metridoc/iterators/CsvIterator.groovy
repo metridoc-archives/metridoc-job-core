@@ -31,7 +31,7 @@ class CsvIterator extends FileIterator {
     List headers = { csvReader.readNext() as List }()
 
     @Override
-    protected Map computeNext() {
+    protected Record computeNext() {
 
         def headersSize = headers.size()
         def next = csvReader.readNext()
@@ -54,7 +54,7 @@ class CsvIterator extends FileIterator {
             return endOfData()
         }
 
-        return result
+        return new Record(body: result)
     }
 }
 
