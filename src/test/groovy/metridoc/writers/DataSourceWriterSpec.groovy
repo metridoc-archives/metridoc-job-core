@@ -52,7 +52,7 @@ class DataSourceWriterSpec extends Specification {
         error.message.startsWith(DataSourceIteratorWriter.DATASOURCE_MESSAGE)
 
         when: "a dataSource writer writes against null"
-        new DataSourceIteratorWriter(dataSource: [:] as DataSource).writeRecord(null)
+        new DataSourceIteratorWriter(dataSource: [:] as DataSource).write(null)
 
         then: "an AssertionError is thrown"
         error = thrown()
