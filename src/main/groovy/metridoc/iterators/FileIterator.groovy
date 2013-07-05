@@ -18,7 +18,30 @@ import metridoc.utils.IOUtils
 
 abstract class FileIterator extends RowIterator implements Closeable {
 
-    InputStream inputStream
+    String path
+
+    @Lazy(soft = true)
+    File file = {
+        if (path) {
+            return new File(path)
+        }
+
+        return null
+    }()
+
+    @Lazy
+    String fileName = {
+        if (file) {
+            return file.name
+        }
+
+        return null
+    }()
+
+    @Lazy(soft = true)
+    InputStream inputStream = {
+        file.newInputStream()
+    }()
 
     void close() {
         IOUtils.closeQuietly(inputStream)

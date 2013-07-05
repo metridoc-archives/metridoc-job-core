@@ -1,5 +1,6 @@
 package metridoc.writers
 
+import com.google.common.collect.Table
 import com.google.common.collect.TreeBasedTable
 import metridoc.iterators.RowIterator
 import org.apache.commons.lang.ObjectUtils
@@ -7,8 +8,8 @@ import org.apache.commons.lang.ObjectUtils
 class TableIteratorWriter extends DefaultIteratorWriter {
 
     @Override
-    WriteResponseTotals write(RowIterator rowIterator) {
-        TreeBasedTable<Integer, String, Object> table = TreeBasedTable.create()
+    WriteResponse write(RowIterator rowIterator) {
+        TreeBasedTable<Integer, Object, Object> table = TreeBasedTable.create()
         assert rowIterator: "rowIterator cannot be null"
         def wrappedRowIterator = new RowIterator() {
             @Override
@@ -23,15 +24,15 @@ class TableIteratorWriter extends DefaultIteratorWriter {
             }
         }
         def response = super.write(wrappedRowIterator)
-        response.data.table = table
+        response.response.table = table
 
         return response
     }
 
     @Override
-    boolean doWrite(int lineNumber, Map<String, Object> record) {
-        def table = record.remove("table")
-        record.each { String columnKey, value ->
+    boolean doWrite(int lineNumber, Map record) {
+        def table = record.remove("table") as Table
+        record.each { columnKey, value ->
             table.put(lineNumber, columnKey, value ?: ObjectUtils.NULL)
         }
 

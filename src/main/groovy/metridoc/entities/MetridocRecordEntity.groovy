@@ -10,15 +10,17 @@ import javax.persistence.MappedSuperclass
 abstract class MetridocRecordEntity extends MetridocEntity {
     abstract void validate()
 
-    boolean acceptRecord(Map<String, Object> record) {
+    @SuppressWarnings("GrMethodMayBeStatic")
+    boolean acceptRecord(Map record) {
         return true
     }
 
+    @SuppressWarnings("GrMethodMayBeStatic")
     boolean shouldSave() {
         return true
     }
 
-    void populate(Map<String, Object> record) {
+    void populate(Map record) {
         def dataOfInterest = record.findAll { this.properties.keySet().contains(it.key) }
         try {
             dataOfInterest.each {

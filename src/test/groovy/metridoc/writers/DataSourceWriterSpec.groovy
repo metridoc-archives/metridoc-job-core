@@ -10,7 +10,7 @@ import javax.sql.DataSource
 import java.sql.BatchUpdateException
 import java.sql.SQLException
 
-import static metridoc.writers.WriteResponse.Type.WRITTEN
+import static metridoc.writers.WrittenRecordStat.Status.WRITTEN
 
 class DataSourceWriterSpec extends Specification {
 
@@ -31,13 +31,13 @@ class DataSourceWriterSpec extends Specification {
 
     def "test basic dataSource writing"() {
         when: "data is written to the foo table"
-        def writer = new DataSourceWriter(dataSource: dataSource, tableName: "foo")
+        def writer = new DataSourceIteratorWriter(dataSource: dataSource, tableName: "foo")
         def results = writer.write(iterator)
 
         then: "foo will have data from the iterator stored"
         2 == sql.firstRow("select count(*) as total from foo").total
         2 == results.aggregateStats[WRITTEN]
-        int[] batchResults = results.data.batchResponse
+        int[] batchResults = results as int[]
         2 == batchResults.size()
         1 == batchResults[0]
         1 == batchResults[1]
@@ -45,18 +45,18 @@ class DataSourceWriterSpec extends Specification {
 
     def "dataSource and tableName must be set"() {
         when: "a dataSource writer is created without a dataSource"
-        new DataSourceWriter().write(iterator)
+        new DataSourceIteratorWriter().write(iterator)
 
         then: "an AssertionError is thrown"
         AssertionError error = thrown()
-        error.message.startsWith(DataSourceWriter.DATASOURCE_MESSAGE)
+        error.message.startsWith(DataSourceIteratorWriter.DATASOURCE_MESSAGE)
 
         when: "a dataSource writer writes against null"
-        new DataSourceWriter(dataSource: [:] as DataSource).write(null)
+        new DataSourceIteratorWriter(dataSource: [:] as DataSource).writeRecord(null)
 
         then: "an AssertionError is thrown"
         error = thrown()
-        error.message.startsWith(DataSourceWriter.TABLE_NAME_ERROR)
+        error.message.startsWith(DataSourceIteratorWriter.TABLE_NAME_ERROR)
 
 
     }
@@ -72,13 +72,13 @@ class DataSourceWriterSpec extends Specification {
         def iterator2 = Iterators.toRowIterator(data)
 
         when: "a record in a batch is too long"
-        new DataSourceWriter(tableName: "foo", dataSource: dataSource).write(iterator1)
+        new DataSourceIteratorWriter(tableName: "foo", dataSource: dataSource).write(iterator1)
 
         then: "a batch error occurs"
         thrown BatchUpdateException
 
         when: "a the table name does not exist"
-        new DataSourceWriter(tableName: "foobar", dataSource: dataSource).write(iterator2)
+        new DataSourceIteratorWriter(tableName: "foobar", dataSource: dataSource).write(iterator2)
 
         then: "an response exception occurs"
         thrown SQLException

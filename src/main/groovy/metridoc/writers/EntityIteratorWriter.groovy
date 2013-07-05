@@ -11,10 +11,10 @@ import org.hibernate.SessionFactory
 class EntityIteratorWriter extends DefaultIteratorWriter {
 
     SessionFactory sessionFactory
-    Class<MetridocRecordEntity> recordEntityClass
+    Class<? extends MetridocRecordEntity> recordEntityClass
 
     @Override
-    WriteResponseTotals write(RowIterator rowIterator) {
+    WriteResponse write(RowIterator rowIterator) {
         def session = sessionFactory.currentSession
         def transaction = session.beginTransaction()
 
@@ -35,7 +35,7 @@ class EntityIteratorWriter extends DefaultIteratorWriter {
     }
 
     @Override
-    boolean doWrite(int lineNumber, Map<String, Object> record) {
+    boolean doWrite(int lineNumber, Map record) {
         def instance = recordEntityClass.newInstance()
         if (instance.acceptRecord(record)) {
             instance.populate(record)

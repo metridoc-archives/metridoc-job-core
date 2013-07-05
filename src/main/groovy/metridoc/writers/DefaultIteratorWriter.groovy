@@ -3,7 +3,7 @@ package metridoc.writers
 import metridoc.iterators.RowIterator
 import org.slf4j.LoggerFactory
 
-import static metridoc.writers.WriteResponse.Type.*
+import static metridoc.writers.WrittenRecordStat.Status.*
 
 /**
  * Created with IntelliJ IDEA on 6/5/13
@@ -15,9 +15,9 @@ abstract class DefaultIteratorWriter implements IteratorWriter<RowIterator> {
 
     int offset = 0
 
-    WriteResponseTotals write(RowIterator rowIterator) {
+    WriteResponse write(RowIterator rowIterator) {
         assert rowIterator != null: "row iterator cannot be null"
-        def totals = new WriteResponseTotals()
+        def totals = new WriteResponse()
         def log = LoggerFactory.getLogger(this.getClass())
         if (!rowIterator.hasNext()) {
             log.warn "iterator does not have anymore values, there is nothing to write"
@@ -47,10 +47,10 @@ abstract class DefaultIteratorWriter implements IteratorWriter<RowIterator> {
         }
     }
 
-    void handleResponse(List<WriteResponse> writeResponses) {
+    protected void handleResponse(List<WrittenRecordStat> writeResponses) {
         def log = LoggerFactory.getLogger(this.getClass())
         writeResponses.each { response ->
-            switch (response.type) {
+            switch (response.status) {
                 case INVALID:
                     log.warn "" +
                             "Invalid record\n" +
@@ -67,7 +67,7 @@ abstract class DefaultIteratorWriter implements IteratorWriter<RowIterator> {
         }
     }
 
-    void silentClose(Closeable closeable) {
+    protected void silentClose(Closeable closeable) {
         try {
             closeable.close()
         }
@@ -78,7 +78,7 @@ abstract class DefaultIteratorWriter implements IteratorWriter<RowIterator> {
     }
 
     @SuppressWarnings("GroovyVariableNotAssigned")
-    List<WriteResponse> write(Map<String, Object> record) {
+    protected List<WrittenRecordStat> writeRecord(Map record) {
         assert record.containsKey("lineNumber") || record.containsKey("line"): "record must contain integer value with name [line] or [lineNumber]"
         int lineNumber
         try {
@@ -91,33 +91,34 @@ abstract class DefaultIteratorWriter implements IteratorWriter<RowIterator> {
         write(lineNumber, record)
     }
 
-    List<WriteResponse> write(int line, Map<String, Object> record) {
-        def response = new WriteResponse(scope: this.getClass(), record: record)
+    protected List<WrittenRecordStat> write(int line, Map record) {
+        def response = new WrittenRecordStat(scope: this.getClass(), record: record)
         try {
             boolean written = doWrite(line, record)
             if (written) {
-                response.type = WRITTEN
+                response.status = WRITTEN
             } else {
-                response.type = IGNORED
+                response.status = IGNORED
             }
         }
         catch (AssertionError error) {
-            response.type = INVALID
+            response.status = INVALID
             response.throwable = error
         }
         catch (Throwable throwable) {
-            response.type = ERROR
+            response.status = ERROR
             response.throwable = throwable
         }
 
         return [response]
     }
 
-    void validateState(field, String message) {
+    @SuppressWarnings("GrMethodMayBeStatic")
+    protected void validateState(field, String message) {
         if (field == null) {
             throw new IllegalStateException(message)
         }
     }
 
-    abstract boolean doWrite(int lineNumber, Map<String, Object> record)
+    abstract boolean doWrite(int lineNumber, Map record)
 }

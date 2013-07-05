@@ -8,7 +8,7 @@ import spock.lang.Specification
 
 import javax.persistence.Entity
 
-import static metridoc.writers.WriteResponse.Type.*
+import static metridoc.writers.WrittenRecordStat.Status.*
 
 /**
  * Created with IntelliJ IDEA on 7/3/13

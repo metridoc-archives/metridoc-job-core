@@ -18,7 +18,8 @@ class TargetManagerTest {
 
             }
             assert false: "exception should have occurred"
-        } catch (JobInterruptionException ignored) {
+        }
+        catch (JobInterruptionException ignored) {
         }
     }
 
@@ -61,7 +62,7 @@ class TargetManagerTest {
         binding.bam = "foo"
         binding.foobar = "55" //requires conversion
         binding.blammo = "55" //does not exist in tool
-        binding.something = "foobar" //wrong type
+        binding.something = "foobar" //wrong status
 
         targetManager.includeTool(FooToolHelper)
         FooToolHelper helper = binding.fooToolHelper

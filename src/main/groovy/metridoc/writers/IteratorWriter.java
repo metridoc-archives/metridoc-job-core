@@ -4,10 +4,10 @@ import java.util.Iterator;
 
 public interface IteratorWriter<T extends Iterator> {
     /**
-     * should be a one time operation
+     * Should iterate over the iterator and write all the records
      *
      * @param iterator to write
      * @return itself to promote method chaining
      */
-    WriteResponseTotals write(T iterator);
+    WriteResponse write(T iterator);
 }

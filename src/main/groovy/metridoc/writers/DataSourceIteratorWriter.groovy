@@ -9,7 +9,7 @@ import java.sql.Connection
 import java.sql.PreparedStatement
 
 @Slf4j
-class DataSourceWriter extends DefaultIteratorWriter {
+class DataSourceIteratorWriter extends DefaultIteratorWriter {
     public static final String DATASOURCE_MESSAGE = "dataSource cannot be null"
     public static final String TABLE_NAME_ERROR = "tableName cannot be null"
     public static final String ROW_ITERATOR_ERROR = "row Iterator cannot be null"
@@ -25,7 +25,7 @@ class DataSourceWriter extends DefaultIteratorWriter {
     }()
 
     @Override
-    WriteResponseTotals write(RowIterator rowIterator) {
+    WriteResponse write(RowIterator rowIterator) {
         assert dataSource != null: DATASOURCE_MESSAGE
         assert tableName != null: TABLE_NAME_ERROR
         assert rowIterator != null: ROW_ITERATOR_ERROR
@@ -57,7 +57,7 @@ class DataSourceWriter extends DefaultIteratorWriter {
 
 
                 totals = super.write(rowIteratorToUse)
-                totals.data.batchResponse = preparedStatement.executeBatch()
+                totals.response.batchResponse = preparedStatement.executeBatch()
             }
             return totals
         }
@@ -67,7 +67,7 @@ class DataSourceWriter extends DefaultIteratorWriter {
     }
 
     @Override
-    boolean doWrite(int lineNumber, Map<String, Object> record) {
+    boolean doWrite(int lineNumber, Map record) {
         validateState(sql, "sqlPlus service cannot be null")
         def preparedStatement = record.remove("preparedStatement") as PreparedStatement
         def sortedParams = record.remove("sortedParams")
