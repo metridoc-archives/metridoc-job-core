@@ -10,7 +10,7 @@ import spock.lang.Specification
  */
 class WriteResponseSpec extends Specification {
 
-    def response = new WriteResponse(response: [foo: "bar", bar: 5, foobar: 1.0, foobaz: 2.0])
+    def response = new WriteResponse(body: [foo: "bar", bar: 5, foobar: 1.0, foobaz: 2.0])
 
     def "asType should return a representation of the response based on info stored in response"() {
         expect:

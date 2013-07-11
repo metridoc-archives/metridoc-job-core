@@ -21,12 +21,16 @@ abstract class DefaultIteratorWriter implements IteratorWriter<RecordIterator> {
             return totals
         }
         try {
+            def headers = recordIterator.recordHeaders //headers are persisted through the entire write
             recordIterator.eachWithIndex { Record record, int lineNumber ->
+                headers.putAll(record.headers)
+                record.headers = headers
                 def response = writeRecord(lineNumber, record)
                 handleResponse(response)
                 totals.addAll(response)
             }
 
+            totals.headers = headers
             return totals
         }
         finally {
@@ -78,7 +82,8 @@ abstract class DefaultIteratorWriter implements IteratorWriter<RecordIterator> {
             boolean written = doWrite(line, record)
             if (written) {
                 response.status = WRITTEN
-            } else {
+            }
+            else {
                 response.status = IGNORED
             }
         }

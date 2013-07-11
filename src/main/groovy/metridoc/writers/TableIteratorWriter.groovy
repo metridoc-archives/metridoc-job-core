@@ -9,29 +9,18 @@ class TableIteratorWriter extends DefaultIteratorWriter {
 
     @Override
     WriteResponse write(RecordIterator recordIterator) {
-        TreeBasedTable<Integer, Object, Object> table = TreeBasedTable.create()
         assert recordIterator != null: "rowIterator cannot be null"
-        def wrappedRowIterator = new RecordIterator() {
-            @Override
-            protected Record computeNext() {
-                if (recordIterator.hasNext()) {
-                    def result = recordIterator.next()
-                    result.headers.table = table
-                    return result
-                }
-
-                endOfData()
-            }
-        }
-        def response = super.write(wrappedRowIterator)
-        response.response.table = table
+        recordIterator.recordHeaders.table = TreeBasedTable.create()
+        def response = super.write(recordIterator)
+        response.body.table = response.headers.table
 
         return response
     }
 
     @Override
     boolean doWrite(int lineNumber, Record record) {
-        def table = record.headers.table
+        def headers = record.headers
+        def table = headers.table
         record.body.each { columnKey, value ->
             table.put(lineNumber, columnKey, value ?: ObjectUtils.NULL)
         }

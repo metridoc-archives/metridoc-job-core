@@ -11,7 +11,8 @@ import static metridoc.writers.WrittenRecordStat.Status.*
  */
 class WriteResponse {
     EnumMap<WrittenRecordStat.Status, Integer> aggregateStats = new EnumMap<WrittenRecordStat.Status, Integer>(WrittenRecordStat.Status)
-    Map<String, Object> response = [:]
+    Map<String, Object> body = [:]
+    Map<String, Object> headers = [:]
 
     WriteResponse() {
         aggregateStats[ERROR] = 0
@@ -27,7 +28,7 @@ class WriteResponse {
     }
 
     def asType(Class clazz) {
-        def possibilities = response.values().findAll { clazz.isAssignableFrom(it.getClass()) }
+        def possibilities = body.values().findAll { clazz.isAssignableFrom(it.getClass()) }
         if (possibilities.size() == 0) {
             super.asType(clazz) //let the normal implementation fail on this
         }

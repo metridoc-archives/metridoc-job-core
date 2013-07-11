@@ -14,7 +14,7 @@ class TableWriterSpec extends Specification {
         ]
 
         when:
-        def table = new TableIteratorWriter().write(Iterators.toRowIterator(iterator)).response.table as Table
+        def table = new TableIteratorWriter().write(Iterators.toRowIterator(iterator)).body.table as Table
 
         then:
         4 == table.size()

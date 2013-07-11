@@ -26,7 +26,7 @@ class TableIteratorWriterSpec extends Specification {
         def tableWriter = new TableIteratorWriter()
 
         when: "write is called"
-        def table = tableWriter.write(rowIterator).response.table as Table
+        def table = tableWriter.write(rowIterator).body.table as Table
 
         then: "a table with correct data is created"
         table.containsRow(0)

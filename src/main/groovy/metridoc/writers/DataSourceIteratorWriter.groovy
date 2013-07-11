@@ -30,32 +30,17 @@ class DataSourceIteratorWriter extends DefaultIteratorWriter {
         assert recordIterator != null: ROW_ITERATOR_ERROR
         def firstRow = recordIterator.peek()
         def sortedParams = new TreeSet(firstRow.body.keySet())
+        def headers = recordIterator.recordHeaders
+        headers.sortedParams = sortedParams
 
         try {
             def totals = null
             sql.withTransaction { Connection connection ->
                 def sql = SqlPlus.getInsertStatement(tableName, firstRow.body)
                 def preparedStatement = connection.prepareStatement(sql)
-
-                def rowIteratorToUse = new RecordIterator() {
-                    @Override
-                    protected Record computeNext() {
-                        if (recordIterator.hasNext()) {
-                            def result = recordIterator.next()
-                            def headers = result.headers
-                            headers.sortedParams = sortedParams
-                            headers.preparedStatement = preparedStatement
-
-                            return result
-                        }
-
-                        endOfData()
-                    }
-                }
-
-
-                totals = super.write(rowIteratorToUse)
-                totals.response.batchResponse = preparedStatement.executeBatch()
+                headers.preparedStatement = preparedStatement
+                totals = super.write(recordIterator)
+                totals.body.batchResponse = preparedStatement.executeBatch()
             }
             return totals
         }
@@ -68,6 +53,7 @@ class DataSourceIteratorWriter extends DefaultIteratorWriter {
     boolean doWrite(int lineNumber, Record record) {
         validateState(sql, "sqlPlus service cannot be null")
         def headers = record.headers
+
         def preparedStatement = headers.preparedStatement as PreparedStatement
         def sortedParams = headers.sortedParams
         sql.processRecord(preparedStatement, record.body, sortedParams)
