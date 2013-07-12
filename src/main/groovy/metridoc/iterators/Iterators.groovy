@@ -34,7 +34,7 @@ class Iterators {
                         return next
                     }
                     assert next instanceof Map: "$next is neither a Record nor a Map"
-                    return new Record(body: iterator.next())
+                    return new Record(body: next)
                 }
 
                 return endOfData()
