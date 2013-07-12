@@ -53,14 +53,16 @@ abstract class DefaultIteratorWriter implements IteratorWriter<RecordIterator> {
                             "Invalid record\n" +
                             "   --> line: $response.line\n" +
                             "   --> record: $response.record\n" +
-                            "   --> message: $response.throwable.message"
+                            "   --> message: $response.throwable.message\n" +
+                            "   --> scope: $response.scope.simpleName"
                     break
                 case ERROR:
                     log.error "" +
                             "Unexpected exception occurred processing record\n" +
                             "   --> line: $response.line\n" +
                             "   --> record: $response.record\n" +
-                            "   --> message: $response.throwable.message"
+                            "   --> message: $response.throwable.message\n" +
+                            "   --> scope: $response.scope.simpleName"
                     throw response.throwable
             }
         }
@@ -79,6 +81,9 @@ abstract class DefaultIteratorWriter implements IteratorWriter<RecordIterator> {
     protected List<WrittenRecordStat> writeRecord(int line, Record record) {
         def response = new WrittenRecordStat(scope: this.getClass(), record: record, line: line)
         try {
+            if (record.throwable) {
+                throw record.throwable
+            }
             boolean written = doWrite(line, record)
             if (written) {
                 response.status = WRITTEN

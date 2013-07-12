@@ -23,12 +23,17 @@ class Iterators {
             split: SplitIteratorWriter
     ]
 
-    static RecordIterator toRowIterator(Iterator<Map> iterator) {
+    static RecordIterator toRowIterator(Iterator iterator) {
         assert iterator: "iterator must not be null or empty"
         new RecordIterator() {
             @Override
             protected Record computeNext() {
                 if (iterator.hasNext()) {
+                    def next = iterator.next()
+                    if (next instanceof Record) {
+                        return next
+                    }
+                    assert next instanceof Map: "$next is neither a Record nor a Map"
                     return new Record(body: iterator.next())
                 }
 

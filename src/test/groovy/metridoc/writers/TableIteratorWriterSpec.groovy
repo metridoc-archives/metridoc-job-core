@@ -2,6 +2,7 @@ package metridoc.writers
 
 import com.google.common.collect.Table
 import metridoc.iterators.Iterators
+import metridoc.iterators.Record
 import spock.lang.Specification
 
 /**
@@ -40,5 +41,28 @@ class TableIteratorWriterSpec extends Specification {
         5 == rowMap[0].bar
         "baasdfhr" == rowMap[4].foo
         10 == rowMap[4].bar
+    }
+
+    def "if a record has an error, nothing is written"() {
+        given: "a collection of records"
+        def assertionRecords = [new Record(throwable: new AssertionError("error"))]
+        def assertionRecordIterator = Iterators.toRowIterator(assertionRecords.iterator())
+        def runtimeRecords = [new Record(throwable: new RuntimeException("error"))]
+        def runtimeRecordIterator = Iterators.toRowIterator(runtimeRecords.iterator())
+
+        and: "a table writer using the rowIterator"
+        def tableWriter = new TableIteratorWriter()
+
+        when: "write is called on the assertion failure records"
+        def assertionResponse = tableWriter.write(assertionRecordIterator)
+
+        then: "an appropriate response is handed back"
+        assertionResponse.aggregateStats[WrittenRecordStat.Status.INVALID] == 1
+
+        when: "write is called on runtime error records"
+        tableWriter.write(runtimeRecordIterator)
+
+        then:
+        thrown RuntimeException
     }
 }

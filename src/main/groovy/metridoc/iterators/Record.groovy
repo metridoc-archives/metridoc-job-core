@@ -1,13 +1,22 @@
 package metridoc.iterators
 
+import groovy.transform.ToString
+
 /**
  * Created with IntelliJ IDEA on 7/9/13
  *
  * @author Tommy Barker
  */
+@ToString(includePackage = false, includeFields = true, includeNames = true)
 class Record implements Cloneable {
     Map body = [:]
     Map headers = [:]
+
+    /**
+     * When creating a record, a RecordIterator can set an exception if one occurred while
+     * creating the record instead of just throwing an exception
+     */
+    Throwable throwable
 
     @Override
     protected Object clone() throws CloneNotSupportedException {
