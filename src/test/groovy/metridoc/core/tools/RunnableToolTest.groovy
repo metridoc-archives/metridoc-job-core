@@ -60,4 +60,23 @@ class RunnableToolTest {
         assert barRan
         assert !fooRan
     }
+
+    @Test
+    void "a runnabel tool can only run once"() {
+        def runnableTool = new RunnableTool() {
+
+            @Override
+            def configure() {
+                //do nothing
+            }
+        }
+
+        runnableTool.execute()
+        try {
+            runnableTool.execute()
+            assert false: "exception should have occurred"
+        }
+        catch (ToolException ignored) {
+        }
+    }
 }
