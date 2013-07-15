@@ -19,7 +19,12 @@ import static metridoc.writers.WrittenRecordStat.Status.*
 class SplitIteratorWriter extends DefaultIteratorWriter {
 
     List<DefaultIteratorWriter> writers = []
-
+    /**
+     * {@inheritDoc}
+     *
+     * <p>as opposed to other writers, this is set to false by default for the split writer</p>
+     */
+    boolean logResult = false
     int threads = 10
 
     @Override

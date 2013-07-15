@@ -23,8 +23,8 @@ class SplitIteratorWriterSpec extends Specification {
                 .createIterator("delimited", delimiter: /\|/, inputStream: data)
 
         when: "written to two writers"
-        def writer1 = Iterators.createWriter("table")
-        def writer2 = Iterators.createWriter("table")
+        def writer1 = Iterators.createWriter("table", name: "table1")
+        def writer2 = Iterators.createWriter("table", name: "table2")
         def result = iterator.writeTo("split", writers: [writer1, writer2])
 
         then: "we should be able to get appropriate data"

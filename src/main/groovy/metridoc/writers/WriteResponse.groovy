@@ -1,5 +1,6 @@
 package metridoc.writers
 
+import groovy.transform.ToString
 import org.apache.commons.lang.text.StrBuilder
 import org.codehaus.groovy.runtime.typehandling.GroovyCastException
 
@@ -9,6 +10,7 @@ import static metridoc.writers.WrittenRecordStat.Status.*
  * Created with IntelliJ IDEA on 7/3/13
  * @author Tommy Barker
  */
+@ToString(includePackage = false, includes = ["aggregateStats"])
 class WriteResponse {
     EnumMap<WrittenRecordStat.Status, Integer> aggregateStats = new EnumMap<WrittenRecordStat.Status, Integer>(WrittenRecordStat.Status)
     Map<String, Object> body = [:]

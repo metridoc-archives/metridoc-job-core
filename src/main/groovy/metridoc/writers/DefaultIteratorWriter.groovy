@@ -12,6 +12,16 @@ import static metridoc.writers.WrittenRecordStat.Status.*
  */
 abstract class DefaultIteratorWriter implements IteratorWriter<RecordIterator> {
 
+    /**
+     * if <code>true</code>, results are logged at <code>info</code> level, otherwise
+     * <code>debug</code> level
+     */
+    boolean logResult = true
+    /**
+     * When logging, this name is used.  Defaults to the short class name
+     */
+    String name = this.getClass().simpleName
+
     WriteResponse write(RecordIterator recordIterator) {
         assert recordIterator != null: "record iterator cannot be null"
         def totals = new WriteResponse()
@@ -43,6 +53,13 @@ abstract class DefaultIteratorWriter implements IteratorWriter<RecordIterator> {
             }
 
             totals.headers = headers
+
+            if (logResult) {
+                log.info("written results for ${name} are: $totals")
+            }
+            else {
+                log.debug("written results for ${name} are: $totals")
+            }
             return totals
         }
         finally {
