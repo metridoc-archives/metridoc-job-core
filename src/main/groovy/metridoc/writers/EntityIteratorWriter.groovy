@@ -44,6 +44,7 @@ class EntityIteratorWriter extends DefaultIteratorWriter {
     @Override
     boolean doWrite(int lineNumber, Record record) {
         def instance = recordEntityClass.newInstance()
+        record.headers.sessionFactory = sessionFactory
         if (instance.acceptRecord(record)) {
             instance.populate(record)
             if (instance.shouldSave()) {
