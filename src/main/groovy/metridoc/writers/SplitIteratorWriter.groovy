@@ -1,7 +1,7 @@
 package metridoc.writers
 
 import metridoc.iterators.QueueBasedRecordIterator
-import metridoc.iterators.QueueData
+import metridoc.iterators.QueueRecordIteratorManager
 import metridoc.iterators.Record
 import metridoc.iterators.RecordIterator
 
@@ -9,7 +9,6 @@ import javax.naming.OperationNotSupportedException
 import java.util.concurrent.Callable
 import java.util.concurrent.Executors
 import java.util.concurrent.Future
-import java.util.concurrent.TimeUnit
 
 import static metridoc.writers.WrittenRecordStat.Status.*
 
@@ -19,20 +18,19 @@ import static metridoc.writers.WrittenRecordStat.Status.*
  */
 class SplitIteratorWriter extends DefaultIteratorWriter {
 
-    public static final int DEFAULT_TIMEOUT = 3000
     List<DefaultIteratorWriter> writers = []
 
     int threads = 10
-    long queueOfferTimeout = DEFAULT_TIMEOUT
-    long queuePollTimeout = DEFAULT_TIMEOUT
 
     @Override
     WriteResponse write(RecordIterator recordIterator) {
+        assert recordIterator: "record iterator should not be null or empty"
         def service = Executors.newFixedThreadPool(threads)
         List<QueueBasedRecordIterator> queueRowIterators = []
         List<Future<WriteResponse>> futures = []
+        def iteratorManager = new QueueRecordIteratorManager(wrappedIterator: recordIterator)
         writers.each { writer ->
-            def queueRowIterator = new QueueBasedRecordIterator(timeout: queuePollTimeout)
+            def queueRowIterator = iteratorManager.createChild()
             queueRowIterators << queueRowIterator
 
             futures << service.submit({
@@ -40,33 +38,17 @@ class SplitIteratorWriter extends DefaultIteratorWriter {
             } as Callable)
         }
 
-        recordIterator.each { record ->
-            def qData = new QueueData(record: record)
-            queueRowIterators.each { queueRowIterator ->
-                offerData(queueRowIterator, qData, futures)
-            }
-        }
-
-        queueRowIterators.each { queueRowIterator ->
-            def qData = new QueueData(done: true)
-            offerData(queueRowIterator, qData, futures)
-        }
+        //noinspection GroovyAssignabilityCheck
+        iteratorManager.each {}
 
         def splitResponse = new SplitWriteResponse()
-        futures.each { future ->
-            def response = future.get()
-            splitResponse.addResponse(response)
+        futures.each {
+            future ->
+                def response = future.get()
+                splitResponse.addResponse(response)
         }
 
         return splitResponse
-    }
-
-    protected void offerData(QueueBasedRecordIterator queueRowIterator, QueueData qData, List<Future<WriteResponse>> futures) {
-        def dataAdded = queueRowIterator.queue.offer(qData, queueOfferTimeout, TimeUnit.MILLISECONDS)
-        if (!dataAdded) {
-            futures.each { it.get() }
-            throw new IllegalStateException("queue could not take data, maybe the queueOfferTime needs to be increased")
-        }
     }
 
     @Override
@@ -74,6 +56,7 @@ class SplitIteratorWriter extends DefaultIteratorWriter {
         //do nothing, everything handled in write above
         throw new OperationNotSupportedException("not supported")
     }
+
 }
 
 class SplitWriteResponse extends WriteResponse {
@@ -88,5 +71,8 @@ class SplitWriteResponse extends WriteResponse {
         aggregateStats[WRITTEN] += stats[WRITTEN]
         aggregateStats[INVALID] += stats[INVALID]
         responses.add(writeResponse)
+        if (writeResponse.fatalErrors) {
+            this.fatalErrors.addAll(writeResponse.fatalErrors)
+        }
     }
 }

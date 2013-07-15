@@ -1,9 +1,8 @@
 package metridoc.iterators
 
-import java.util.concurrent.ArrayBlockingQueue
-import java.util.concurrent.BlockingQueue
-import java.util.concurrent.TimeUnit
-import java.util.concurrent.TimeoutException
+import groovy.transform.ToString
+
+import java.util.concurrent.*
 
 /**
  * Created with IntelliJ IDEA on 7/9/13
@@ -11,38 +10,45 @@ import java.util.concurrent.TimeoutException
  */
 class QueueBasedRecordIterator extends RecordIterator {
 
-    public static final int DEFAULT_TIMEOUT = 1000 * 60
+    //one second time limit for offer
+    public static final long DEFAULT_TIMEOUT = 1000
     BlockingQueue<QueueData> queue = new ArrayBlockingQueue<QueueData>(1)
-
-    /**
-     * a timeout for polling.  Generally record processing should be quick, if the timeout is met
-     * an exception should occur.  If timeout is less than 1 then it will poll forever.  Default
-     * timeout is 1 minute
-     */
-    long timeout = DEFAULT_TIMEOUT
+    long offerWait = DEFAULT_TIMEOUT
 
     @Override
     protected Record computeNext() {
 
         QueueData data
-        if (timeout > 0) {
-            data = queue.poll(timeout, TimeUnit.MILLISECONDS)
-        } else {
-            data = queue.poll()
-        }
+        try {
+            data = queue.take()
+            if (data.exception) {
+                throw data.exception
+            }
 
-        if (data == null) {
-            throw new TimeoutException("The QueueBasedRecordIterator has not processed a record within $timeout milliseconds")
-        }
+            if (data.done) {
+                return endOfData()
+            }
 
-        if (data.done) {
-            return endOfData()
+            return data.record.clone() as Record
         }
+        finally {
+            if (data) {
+                def latch = data.latch
+                if (latch) {
+                    latch.countDown()
+                }
+            }
+        }
+    }
 
-        return data.row.clone() as Record
+    void offer(QueueData queueData) {
+        if (!queue.offer(queueData, offerWait, TimeUnit.MILLISECONDS)) {
+            throw new TimeoutException("Could not put $queueData in queue within time limit, Exception probably occurred during processing")
+        }
     }
 }
 
+@ToString(includePackage = false, includeNames = true)
 class QueueData {
     /**
      * indicates that all data has been processed.  When done is true record should be null
@@ -51,9 +57,14 @@ class QueueData {
     /**
      * the data that should be sent to next
      */
-    Record row
+    Record record
+    CountDownLatch latch
+    /**
+     * forces an exception to occur
+     */
+    Throwable exception
 
-    void setRecord(Record row) {
-        this.row = row.clone() as Record
+    void setRecord(Record record) {
+        this.record = record.clone() as Record
     }
 }

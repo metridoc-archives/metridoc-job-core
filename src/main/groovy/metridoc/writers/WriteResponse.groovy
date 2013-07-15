@@ -13,6 +13,8 @@ class WriteResponse {
     EnumMap<WrittenRecordStat.Status, Integer> aggregateStats = new EnumMap<WrittenRecordStat.Status, Integer>(WrittenRecordStat.Status)
     Map<String, Object> body = [:]
     Map<String, Object> headers = [:]
+    List<Throwable> fatalErrors = []
+    List<AssertionError> validationErrors = []
 
     WriteResponse() {
         aggregateStats[ERROR] = 0
@@ -24,6 +26,12 @@ class WriteResponse {
     void addAll(List<WrittenRecordStat> stats) {
         stats.each {
             aggregateStats[it.status] = aggregateStats[it.status] + 1
+            if (it.fatalError) {
+                fatalErrors << it.fatalError
+            }
+            if (it.validationError) {
+                validationErrors << it.validationError
+            }
         }
     }
 
@@ -43,5 +51,40 @@ class WriteResponse {
         }
 
         possibilities[0]
+    }
+
+    int getTotal() {
+        int total = 0
+        aggregateStats.values().each {
+            total += it
+        }
+
+        return total
+    }
+
+    int getErrorTotal() {
+        aggregateStats[ERROR]
+    }
+
+    int getInvalidTotal() {
+        aggregateStats[INVALID]
+    }
+
+    int getWrittenTotal() {
+        aggregateStats[WRITTEN]
+    }
+
+    int getIgnoredTotal() {
+        aggregateStats[IGNORED]
+    }
+
+    void addError(Throwable throwable) {
+        aggregateStats[ERROR] += 1
+        fatalErrors << throwable
+    }
+
+    void addInvalid(AssertionError assertionError) {
+        validationErrors << assertionError
+        aggregateStats[INVALID] += 1
     }
 }

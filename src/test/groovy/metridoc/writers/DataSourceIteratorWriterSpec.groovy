@@ -12,7 +12,7 @@ import java.sql.SQLException
 
 import static metridoc.writers.WrittenRecordStat.Status.WRITTEN
 
-class DataSourceWriterSpec extends Specification {
+class DataSourceIteratorWriterSpec extends Specification {
 
     def dataSource = new EmbeddedDatabaseBuilder().setType(EmbeddedDatabaseType.H2).build()
     def sql = new Sql(dataSource)
@@ -72,15 +72,21 @@ class DataSourceWriterSpec extends Specification {
         def iterator2 = Iterators.toRowIterator(data)
 
         when: "a record in a batch is too long"
-        new DataSourceIteratorWriter(tableName: "foo", dataSource: dataSource).write(iterator1)
+        def response = new DataSourceIteratorWriter(tableName: "foo", dataSource: dataSource).write(iterator1)
+        def throwables = response.fatalErrors
 
         then: "a batch error occurs"
-        thrown BatchUpdateException
+        1 == response.total
+        1 == throwables.size()
+        throwables[0] instanceof BatchUpdateException
 
         when: "a the table name does not exist"
-        new DataSourceIteratorWriter(tableName: "foobar", dataSource: dataSource).write(iterator2)
+        response = new DataSourceIteratorWriter(tableName: "foobar", dataSource: dataSource).write(iterator2)
+        throwables = response.fatalErrors
 
         then: "an response exception occurs"
-        thrown SQLException
+        1 == response.total
+        1 == throwables.size()
+        throwables[0] instanceof SQLException
     }
 }

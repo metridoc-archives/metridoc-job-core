@@ -12,7 +12,8 @@ class WrittenRecordStat {
     }
     Record record
     Status status
-    Throwable throwable
+    Throwable fatalError
+    AssertionError validationError
     Class scope
     int line
 }

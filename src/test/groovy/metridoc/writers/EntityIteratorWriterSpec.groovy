@@ -16,12 +16,14 @@ import static metridoc.writers.WrittenRecordStat.Status.*
  */
 class EntityIteratorWriterSpec extends Specification {
 
-    def "test basic entity writing workflow"() {
-        given: "an embedded database"
-        def hTool = new HibernateTool(entityClasses: [EntityHelper])
-        hTool.configureEmbeddedDatabase()
+    def hTool = new HibernateTool(entityClasses: [EntityHelper])
 
-        and: "some data"
+    def setup() {
+        hTool.configureEmbeddedDatabase()
+    }
+
+    def "test basic entity writing workflow"() {
+        given: "some valid data"
         def data = [
                 [foo: "asd"],
                 [foo: "sdf"],
@@ -44,6 +46,48 @@ class EntityIteratorWriterSpec extends Specification {
             4 == session.createQuery("from EntityHelper").list().size()
         }
     }
+
+    def "test validation errors"() {
+        given: "some invalid data"
+        def data = [
+                [foo: "asd"],
+                [foo: "sdf"],
+                [foo: "invalid"],
+                [foo: "dfgh"]
+        ]
+        def rowIterator = Iterators.toRowIterator(data)
+
+        when: "data is written"
+        def writer = new EntityIteratorWriter(sessionFactory: hTool.sessionFactory, recordEntityClass: EntityHelper)
+        def response = writer.write(rowIterator)
+
+        then: "three records are written and one is invalid"
+        1 == response.invalidTotal
+        3 == response.writtenTotal
+        4 == response.getTotal()
+    }
+
+    def "test errors"() {
+        given: "bad data"
+        def data = [
+                [foo: "asd"],
+                [foo: "sdf"],
+                [foo: "error"],
+                [foo: "dfgh"]
+        ]
+        def rowIterator = Iterators.toRowIterator(data)
+
+        when: "data is written"
+        def writer = new EntityIteratorWriter(sessionFactory: hTool.sessionFactory, recordEntityClass: EntityHelper)
+        def response = writer.write(rowIterator)
+        def throwables = response.fatalErrors
+
+        then: "one error is recorded into the response"
+        1 == response.errorTotal
+        1 == response.getTotal()
+        1 == throwables.size()
+        throwables[0] instanceof RuntimeException
+    }
 }
 
 
@@ -54,6 +98,9 @@ class EntityHelper extends MetridocRecordEntity {
 
     @Override
     void validate() {
-        //To change body of implemented methods use File | Settings | File Templates.
+        assert foo != "invalid"
+        if (foo == "error") {
+            throw new RuntimeException("error")
+        }
     }
 }

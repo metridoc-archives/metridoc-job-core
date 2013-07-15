@@ -60,9 +60,11 @@ class TableIteratorWriterSpec extends Specification {
         assertionResponse.aggregateStats[WrittenRecordStat.Status.INVALID] == 1
 
         when: "write is called on runtime error records"
-        tableWriter.write(runtimeRecordIterator)
+        def response = tableWriter.write(runtimeRecordIterator)
 
         then:
-        thrown RuntimeException
+        def throwables = response.fatalErrors
+        1 == throwables.size()
+        throwables[0] instanceof RuntimeException
     }
 }

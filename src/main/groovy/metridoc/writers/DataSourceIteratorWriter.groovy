@@ -35,12 +35,24 @@ class DataSourceIteratorWriter extends DefaultIteratorWriter {
 
         try {
             def totals = null
-            sql.withTransaction { Connection connection ->
-                def sql = SqlPlus.getInsertStatement(tableName, firstRow.body)
-                def preparedStatement = connection.prepareStatement(sql)
-                headers.preparedStatement = preparedStatement
-                totals = super.write(recordIterator)
-                totals.body.batchResponse = preparedStatement.executeBatch()
+            try {
+                sql.withTransaction { Connection connection ->
+                    def sql = SqlPlus.getInsertStatement(tableName, firstRow.body)
+                    def preparedStatement = connection.prepareStatement(sql)
+                    headers.preparedStatement = preparedStatement
+                    totals = super.write(recordIterator)
+                    if (totals.fatalErrors) {
+                        //throw the first one
+                        throw totals.fatalErrors[0]
+                    }
+                    totals.body.batchResponse = preparedStatement.executeBatch()
+                }
+            }
+            catch (Throwable throwable) {
+                //no records were written... start from scratch
+                totals = new WriteResponse()
+                totals.aggregateStats[WrittenRecordStat.Status.ERROR] = 1
+                totals.fatalErrors << throwable
             }
             return totals
         }

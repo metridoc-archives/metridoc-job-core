@@ -22,12 +22,24 @@ abstract class DefaultIteratorWriter implements IteratorWriter<RecordIterator> {
         }
         try {
             def headers = recordIterator.recordHeaders //headers are persisted through the entire write
+            Throwable throwable
             recordIterator.eachWithIndex { Record record, int lineNumber ->
                 headers.putAll(record.headers)
                 record.headers = headers
-                def response = writeRecord(lineNumber, record)
-                handleResponse(response)
-                totals.addAll(response)
+                def response
+                if (!throwable) {
+                    response = writeRecord(lineNumber, record)
+                    response.each {
+                        if (it.fatalError && it.status != INVALID) {
+                            throwable = it.fatalError
+                        }
+                    }
+                    if (throwable) {
+                        log.error "the error [$throwable.message] occurred, no more records will be written"
+                    }
+                    handleResponse(response)
+                    totals.addAll(response)
+                }
             }
 
             totals.headers = headers
@@ -53,7 +65,7 @@ abstract class DefaultIteratorWriter implements IteratorWriter<RecordIterator> {
                             "Invalid record\n" +
                             "   --> line: $response.line\n" +
                             "   --> record: $response.record\n" +
-                            "   --> message: $response.throwable.message\n" +
+                            "   --> message: $response.validationError.message\n" +
                             "   --> scope: $response.scope.simpleName"
                     break
                 case ERROR:
@@ -61,9 +73,8 @@ abstract class DefaultIteratorWriter implements IteratorWriter<RecordIterator> {
                             "Unexpected exception occurred processing record\n" +
                             "   --> line: $response.line\n" +
                             "   --> record: $response.record\n" +
-                            "   --> message: $response.throwable.message\n" +
+                            "   --> message: $response.fatalError.message\n" +
                             "   --> scope: $response.scope.simpleName"
-                    throw response.throwable
             }
         }
     }
@@ -94,11 +105,11 @@ abstract class DefaultIteratorWriter implements IteratorWriter<RecordIterator> {
         }
         catch (AssertionError error) {
             response.status = INVALID
-            response.throwable = error
+            response.validationError = error
         }
         catch (Throwable throwable) {
             response.status = ERROR
-            response.throwable = throwable
+            response.fatalError = throwable
         }
 
         return [response]

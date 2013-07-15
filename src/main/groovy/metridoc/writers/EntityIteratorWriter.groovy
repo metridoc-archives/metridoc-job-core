@@ -18,15 +18,21 @@ class EntityIteratorWriter extends DefaultIteratorWriter {
     WriteResponse write(RecordIterator recordIterator) {
         def session = sessionFactory.currentSession
         def transaction = session.beginTransaction()
-
+        def response
         try {
-            def response = super.write(recordIterator)
+            response = super.write(recordIterator)
+            if (response.errorTotal) {
+                throw response.fatalErrors[0]
+            }
             transaction.commit()
             return response
         }
-        catch (Exception e) {
+        catch (Throwable e) {
             transaction.rollback()
-            throw e
+            response = new WriteResponse()
+            response.addError(e)
+
+            return response
         }
         finally {
             if (session.isOpen()) {
