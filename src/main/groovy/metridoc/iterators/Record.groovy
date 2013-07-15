@@ -59,4 +59,16 @@ class Record implements Cloneable {
         result = 31 * result + (headers != null ? headers.hashCode() : 0)
         return result
     }
+
+    def <T> T getHeader(String headerName, Class<T> type) {
+        if (headers.containsKey(headerName)) {
+            try {
+                return headers[headerName].asType(type)
+            }
+            catch (ClassCastException ignore) {
+            }
+        }
+
+        return null
+    }
 }
