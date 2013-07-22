@@ -29,6 +29,16 @@ class HibernateToolTest {
         assert "org.hibernate.dialect.MySQL5InnoDBDialect" == properties.get("hibernate.dialect")
         assert "com.mysql.jdbc.Driver" == properties.get("hibernate.connection.driver_class")
         assert "create-drop" == properties.get("hibernate.hbm2ddl.auto")
+
+        //what if we use classes instead of strings?
+        configObject.dataSource.dialect = org.hibernate.dialect.MySQL5InnoDBDialect
+        configObject.dataSource.driverClassName = com.mysql.jdbc.Driver
+        configObject.dataSource.dbCreate = "create-drop"
+
+        properties = new HibernateTool().convertDataSourcePropsToHibernate(configObject)
+        assert "org.hibernate.dialect.MySQL5InnoDBDialect" == properties.get("hibernate.dialect")
+        assert "com.mysql.jdbc.Driver" == properties.get("hibernate.connection.driver_class")
+        assert "create-drop" == properties.get("hibernate.hbm2ddl.auto")
     }
 
     @Test

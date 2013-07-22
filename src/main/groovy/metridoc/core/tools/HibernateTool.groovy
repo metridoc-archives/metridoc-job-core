@@ -71,10 +71,20 @@ class HibernateTool {
         if (dataSourceConfig) {
             dataSourceConfig.with {
                 if (dialect) {
-                    properties."hibernate.dialect" = dialect.toString()
+                    if (dialect instanceof Class) {
+                        properties."hibernate.dialect" = dialect.name
+                    }
+                    else {
+                        properties."hibernate.dialect" = dialect.toString()
+                    }
                 }
                 if (driverClassName) {
-                    properties."hibernate.connection.driver_class" = driverClassName.toString()
+                    if (driverClassName instanceof Class) {
+                        properties."hibernate.connection.driver_class" = driverClassName.name
+                    }
+                    else {
+                        properties."hibernate.connection.driver_class" = driverClassName.toString()
+                    }
                 }
                 if (dbCreate) {
                     properties."hibernate.hbm2ddl.auto" = dbCreate.toString()
