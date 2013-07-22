@@ -11,7 +11,10 @@ import metridoc.core.MetridocScript
  */
 class ConfigTool extends DefaultTool {
 
+    Binding binding = new Binding()
+
     void setBinding(Binding binding) {
+        this.binding = binding
         if (!binding.hasVariable("config")) {
             use(MetridocScript) {
                 binding.includeTool(ParseArgsTool)

@@ -1,5 +1,6 @@
 package metridoc.core.tools
 
+import metridoc.core.MetridocScript
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
@@ -8,7 +9,7 @@ import spock.lang.Specification
  * Created with IntelliJ IDEA on 7/2/13
  * @author Tommy Barker
  */
-class ConfigToolTest extends Specification {
+class ConfigToolSpec extends Specification {
 
     @Rule
     public TemporaryFolder folder = new TemporaryFolder()
@@ -35,5 +36,19 @@ class ConfigToolTest extends Specification {
 
         then: "the variable can be extracted"
         "foobar" == variable
+    }
+
+    def "test that the correct binding is used"() {
+        given:
+        def binding = new Binding()
+
+        when:
+        use(MetridocScript) {
+            def configTool = binding.includeTool(ConfigTool)
+            configTool.binding.foo = "bar"
+        }
+
+        then:
+        binding.hasVariable("foo")
     }
 }
