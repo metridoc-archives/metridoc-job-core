@@ -21,7 +21,7 @@ abstract class DefaultIteratorWriter implements IteratorWriter<RecordIterator> {
      * When logging, this name is used.  Defaults to the short class name
      */
     String name = this.getClass().simpleName
-    private int printAt = 10000
+    int printAt = 10000
 
     WriteResponse write(RecordIterator recordIterator) {
         assert recordIterator != null: "record iterator cannot be null"
