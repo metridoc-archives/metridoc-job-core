@@ -50,7 +50,7 @@ abstract class DefaultIteratorWriter implements IteratorWriter<RecordIterator> {
                     }
                     handleResponse(response)
                     totals.addAll(response)
-                    if (lineNumber % printAt) {
+                    if (lineNumber % printAt == 0) {
                         log.info "processed $lineNumber records with stats $totals"
                     }
                 }
