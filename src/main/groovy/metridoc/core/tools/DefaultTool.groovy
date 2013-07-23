@@ -93,6 +93,12 @@ abstract class DefaultTool implements Tool {
         }
     }
 
+    public <T> T includeTool(LinkedHashMap args, Class<T> tool) {
+        use(MetridocScript) {
+            return getBinding().includeTool(args, tool)
+        }
+    }
+
     void includeTargets(Class<Script> targets) {
         use(MetridocScript) {
             return getBinding().includeTargets(targets)

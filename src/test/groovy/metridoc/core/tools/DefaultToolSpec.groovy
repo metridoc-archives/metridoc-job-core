@@ -1,6 +1,6 @@
 package metridoc.core.tools
 
-import org.junit.Test
+import spock.lang.Specification
 
 /**
  * Created with IntelliJ IDEA.
@@ -10,80 +10,129 @@ import org.junit.Test
  * To change this template use File | Settings | File Templates.
  */
 @SuppressWarnings("GroovyAccessibility")
-class DefaultToolTest {
+class DefaultToolSpec extends Specification {
 
     def tool = new DefaultToolHelper()
 
-    @Test
     void "converting a map to a map just returns the original config"() {
-        Map foo = [bar: "foobar"]
-        //if a map then it is already done
-        assert foo == DefaultTool.convertConfig(foo)
+        given:
+        Map expected = [bar: "foobar"]
+
+        when:
+        def foo = DefaultTool.convertConfig(expected)
+
+        then:
+        foo == DefaultTool.convertConfig(expected)
     }
 
-    @Test
     void "converting a config object flattens it"() {
+        given:
         ConfigObject foo = new ConfigObject()
         foo.bar.baz = "foobar"
-        assert "foobar" == DefaultTool.convertConfig(foo)["bar.baz"]
+
+        when:
+        def foobar = DefaultTool.convertConfig(foo)["bar.baz"]
+
+        then:
+        "foobar" == foobar
     }
 
-    @Test
-    void "conerting a binding just returns the variable map"() {
+    void "converting a binding just returns the variable map"() {
+        given:
         Binding foo = new Binding()
         foo.bar = "bam"
 
-        assert "bam" == DefaultTool.convertConfig(foo)["bar"]
+        when:
+        def bam = DefaultTool.convertConfig(foo)["bar"]
+
+        then:
+        "bam" == bam
     }
 
-    @Test
     void "get variable directly returns the value if the expected type is null"() {
+        given:
         Map config = [bar: "foobar"]
-        assert "foobar" == DefaultTool.getVariableHelper(config, "bar", null)
+
+        when:
+        def foobar = DefaultTool.getVariableHelper(config, "bar", null)
+
+        then:
+        "foobar" == foobar
     }
 
-    @Test
     void "if the variable does not exist, variable helper returns null"() {
+        given:
         Map config = [bar: "foobar"]
-        assert null == DefaultTool.getVariableHelper(config, "blam", null)
+
+        when:
+        def blam = DefaultTool.getVariableHelper(config, "blam", null)
+
+        then:
+        blam == null
     }
 
-    @Test
     void "if the variable exists and expected type is provided, then the converted value is provided, otherwise null is returned"() {
+        given:
         Map config = [bar: "foobar"]
-        assert null == DefaultTool.getVariableHelper(config, "bar", Integer)
-        assert "foobar" == DefaultTool.getVariableHelper(config, "bar", String)
+
+        when:
+        def bar = DefaultTool.getVariableHelper(config, "bar", Integer)
+
+        then:
+        null == bar
+        "foobar" == DefaultTool.getVariableHelper(config, "bar", String)
     }
 
-    @Test
     void "argsMap trumps binding when getting a variable"() {
+        given:
         def binding = new Binding()
         tool.setBinding(binding)
         binding.argsMap = [bar: "foo"]
         binding.bar = "foobar"
 
-        assert "foo" == tool.getVariable("bar")
+        when:
+        def bar = tool.getVariable("bar")
+
+        then:
+        "foo" == bar
     }
 
-    @Test
     void "binding trumps config"() {
+        given:
         def config = new ConfigObject()
         config.foo = "bar"
         def binding = new Binding()
         binding.foo = "foobar"
         binding.config = config
         tool.setBinding(binding)
-        assert "foobar" == tool.getVariable("foo")
+
+        when:
+        def foo = tool.getVariable("foo")
+
+        then:
+        "foobar" == foo
     }
 
-    @Test
     void "if a config is set and a non available variable is searched for, null is returned"() {
+        given:
         def config = new ConfigObject()
         def binding = new Binding()
         binding.config = config
         tool.setBinding(binding)
 
-        assert null == tool.getVariable("bar")
+        when:
+        def bar = tool.getVariable("bar")
+
+        then:
+        null == bar
+    }
+
+    void "test including tool with args"() {
+        when:
+        tool.includeTool(HibernateTool, entityClasses: [this.class])
+
+        then:
+        noExceptionThrown()
     }
 }
 
