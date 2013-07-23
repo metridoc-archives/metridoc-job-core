@@ -55,6 +55,7 @@ abstract class DefaultIteratorWriter implements IteratorWriter<RecordIterator> {
             totals.headers = headers
 
             if (logResult) {
+                log.info("total records processed are: $totals.total")
                 log.info("written results for ${name} are: $totals")
             }
             else {
