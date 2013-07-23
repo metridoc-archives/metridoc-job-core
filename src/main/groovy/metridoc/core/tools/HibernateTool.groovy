@@ -70,7 +70,13 @@ class HibernateTool {
         withTransaction(session, closure)
     }
 
+    SessionFactory getSessionFactory() {
+        if (sessionFactory) {
+            return sessionFactory
+        }
 
+        sessionFactory = createSessionFactory()
+    }
 
     @SuppressWarnings("GroovyMissingReturnStatement")
     Properties convertDataSourcePropsToHibernate(ConfigObject configObject) {
