@@ -1,31 +1,50 @@
 package metridoc.core
 
 import metridoc.core.tools.HibernateTool
-import org.junit.Test
+import spock.lang.Specification
 
-class MetridocScriptTest {
+class MetridocScriptTest extends Specification {
 
     Script script = new MetridocScriptHelper()
 
-    @Test
     void "test initializing the targetManager"() {
+        when:
         MetridocScript.initializeTargetManagerIfNotThere(script)
-        assert script.targetManager
+
+        then:
+        script.targetManager
     }
 
-    @Test
     void "target manager can only be initialize once"() {
+        when:
         MetridocScript.initializeTargetManagerIfNotThere(script)
         def targetManager = script.targetManager
         MetridocScript.initializeTargetManagerIfNotThere(script)
-        assert targetManager == script.targetManager
+
+        then:
+        targetManager == script.targetManager
     }
 
-    @Test
     void "include tool returns the tool that has been instantiated or instantiated in the past"() {
+        when:
         def tool = MetridocScript.includeTool(script, HibernateTool)
-        assert tool
-        assert tool == MetridocScript.includeTool(script, HibernateTool)
+
+        then:
+        tool
+        tool == MetridocScript.includeTool(script, HibernateTool)
+    }
+
+    void "test adding tools with arguments"() {
+        when:
+        def tool
+        use(MetridocScript) {
+            tool = script.includeTool(HibernateTool, entityClasses: [this.class])
+            tool = script.binding.includeTool(HibernateTool, entityClasses: [this.class])
+        }
+
+        then:
+        noExceptionThrown()
+        tool.entityClasses
     }
 }
 

@@ -18,8 +18,12 @@ class HibernateTool {
     String hibernatePrefix = "hibernate"
     String dataSourcePrefix = "dataSource"
 
-    @Lazy(soft = true)
-    SessionFactory sessionFactory = {
+    SessionFactory sessionFactory
+
+    List<Class> entityClasses = []
+
+    @SuppressWarnings("GroovyVariableNotAssigned")
+    SessionFactory createSessionFactory() {
         def configuration = new Configuration()
         def result
         configuration.with {
@@ -31,9 +35,7 @@ class HibernateTool {
         }
 
         return result
-    }()
-
-    List<Class> entityClasses = []
+    }
 
     void setBinding(Binding binding) {
         MetridocScript.includeTool(binding, ConfigTool)
@@ -61,10 +63,16 @@ class HibernateTool {
     }
 
     void withTransaction(Closure closure) {
+        if (!sessionFactory) {
+            sessionFactory = createSessionFactory()
+        }
         def session = sessionFactory.currentSession
         withTransaction(session, closure)
     }
 
+
+
+    @SuppressWarnings("GroovyMissingReturnStatement")
     Properties convertDataSourcePropsToHibernate(ConfigObject configObject) {
         def properties = new Properties()
         def dataSourceConfig = configObject."$dataSourcePrefix"

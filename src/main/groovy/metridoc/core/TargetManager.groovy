@@ -150,12 +150,18 @@ class TargetManager {
     }
 
     public <T> T includeTool(Class<T> tool) {
+        includeTool([:] as LinkedHashMap, tool)
+    }
+
+    public <T> T includeTool(LinkedHashMap args, Class<T> tool) {
         def toolName = tool.simpleName
         def toolNameUsed = StringUtils.uncapitalize(toolName)
         if (binding.hasVariable(toolNameUsed)) {
             log.debug "tool $toolNameUsed already exists"
-        } else {
-            def instance = tool.newInstance(binding: binding)
+        }
+        else {
+            def instance = tool.newInstance(args)
+            instance.binding = binding
             handlePropertyInjection(instance)
             if (!binding.hasVariable(toolNameUsed)) {
                 binding."$toolNameUsed" = instance
@@ -169,7 +175,8 @@ class TargetManager {
             def inBinding
             if (instance instanceof DefaultTool) {
                 inBinding = instance.getVariable(key) != null
-            } else {
+            }
+            else {
                 inBinding = binding.hasVariable(key)
             }
 
@@ -179,14 +186,17 @@ class TargetManager {
                     def type = field.type
                     if (instance instanceof DefaultTool) {
                         instance."$key" = instance.getVariable(key, type)
-                    } else {
+                    }
+                    else {
                         try {
                             instance."$key" = binding.getVariable(key).asType(type)
-                        } catch (Throwable ignored) {
+                        }
+                        catch (Throwable ignored) {
                             //do nothing
                         }
                     }
-                } catch (NoSuchFieldException ignored) {
+                }
+                catch (NoSuchFieldException ignored) {
                     //ignore... handles issues when searching for field "class" for instance
                 }
             }

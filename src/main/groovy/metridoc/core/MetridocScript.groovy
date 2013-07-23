@@ -62,6 +62,14 @@ class MetridocScript {
         getManager(self).includeTool(tool)
     }
 
+    static <T> T includeTool(Script self, LinkedHashMap args, Class<T> tool) {
+        getManager(self).includeTool(args, tool)
+    }
+
+    static <T> T includeTool(Binding self, LinkedHashMap args, Class<T> tool) {
+        getManager(self).includeTool(args, tool)
+    }
+
     static void runDefaultTarget(Script self) {
         getManager(self).runDefaultTarget()
     }
