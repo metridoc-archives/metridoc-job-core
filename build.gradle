@@ -240,14 +240,12 @@ task prepareForBintrayUpload << {
     if (version.contains("SNAPSHOT")) {
         println "bintray does not support SNAPSHOTs, skipping upload to bintray"
         uploadArchives.enabled = false
-        publishBintrayPackages.enabled = false
         return
     }
 
     if (!project.hasProperty("bintrayUsername")) {
         println "bintray credentials not setup, skipping upload to bintray"
         uploadArchives.enabled = false
-        publishBintrayPackages.enabled = false
         return
     }
 
@@ -259,6 +257,5 @@ task prepareForBintrayUpload << {
     if (versionAlreadyDeployed) {
         println "version $version has already been deployed to bintray, skipping upload to bintray"
         uploadArchives.enabled = false
-        publishBintrayPackages.enabled = false
     }
 }
