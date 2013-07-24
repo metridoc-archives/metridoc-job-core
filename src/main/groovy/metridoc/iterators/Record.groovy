@@ -7,7 +7,7 @@ import groovy.transform.ToString
  *
  * @author Tommy Barker
  */
-@ToString(includePackage = false, includeFields = true, includeNames = true)
+@ToString(includePackage = false, includeFields = true, includeNames = true, includes = ["body"])
 class Record implements Cloneable {
     Map body = [:]
     Map headers = [:]
