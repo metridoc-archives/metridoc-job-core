@@ -1,6 +1,7 @@
 package metridoc.core.tools
 
 import groovy.text.SimpleTemplateEngine
+import org.slf4j.LoggerFactory
 
 /**
  * Created with IntelliJ IDEA on 7/25/13
@@ -8,13 +9,29 @@ import groovy.text.SimpleTemplateEngine
  */
 class MainTool extends RunnableTool {
     Map<String, Class<RunnableTool>> runnableTools
+    boolean stacktrace = false
+    boolean exitOnError = true
 
     @Override
     def configure() {
-        assert runnableTools: "runnableTools cannot be null or empty"
-        List params = getVariable("params") as List
-        assert params: "params cannot be null or empty"
-        includeTool(runnableTools[params[0] as String]).execute()
+        try {
+            assert runnableTools: "runnableTools cannot be null or empty"
+            List params = getVariable("params") as List
+            assert params: "params cannot be null or empty"
+            includeTool(runnableTools[params[0] as String]).execute()
+        }
+        catch (Throwable throwable) {
+            if (stacktrace) {
+                LoggerFactory.getLogger(MainTool).error("error occurred running job", throwable)
+            }
+            else {
+                LoggerFactory.getLogger(MainTool).error(throwable.message)
+            }
+
+            if (exitOnError) {
+                System.exit(-1)
+            }
+        }
     }
 
     String usage = '\n' +
