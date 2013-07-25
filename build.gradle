@@ -30,7 +30,7 @@ repositories {
 
 dependencies {
     def camelVersion = "2.11.0"
-    def slf4jVersion = "1.6.2"
+    def slf4jVersion = "1.7.5"
 
     compile("com.github.camel-glite:camel-glite:0.4") {
         exclude module: 'slf4j-api'
@@ -62,9 +62,7 @@ dependencies {
         exclude module: 'dom4j'
     }
     testCompile "org.spockframework:spock-core:0.7-groovy-2.0"
-    testCompile("org.slf4j:slf4j-simple:$slf4jVersion") {
-        exclude module: 'slf4j-api'
-    }
+    compile("org.slf4j:slf4j-simple:$slf4jVersion")
     compile("org.slf4j:slf4j-api:$slf4jVersion")
     compile("org.slf4j:jcl-over-slf4j:$slf4jVersion") {
         exclude module: 'slf4j-api'

@@ -15,6 +15,7 @@ class MainTool extends RunnableTool {
     @Override
     def configure() {
         try {
+            includeTool(LogTool)
             assert runnableTools: "runnableTools cannot be null or empty"
             List params = getVariable("params") as List
             assert params: "params cannot be null or empty"

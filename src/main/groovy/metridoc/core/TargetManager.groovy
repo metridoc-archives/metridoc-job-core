@@ -166,6 +166,9 @@ class TargetManager {
             if (!binding.hasVariable(toolNameUsed)) {
                 binding."$toolNameUsed" = instance
             }
+            if (instance.metaClass.respondsTo(instance, "init")) {
+                instance.init()
+            }
         }
         return binding."${toolNameUsed}"
     }
