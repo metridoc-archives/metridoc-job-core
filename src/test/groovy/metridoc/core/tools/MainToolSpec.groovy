@@ -56,7 +56,6 @@ class MainToolSpec extends Specification {
 
         then:
         usage.contains("Possible Jobs")
-        println usage
     }
 }
 
