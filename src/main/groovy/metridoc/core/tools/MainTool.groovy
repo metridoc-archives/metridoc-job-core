@@ -21,15 +21,17 @@ class MainTool extends RunnableTool {
             includeTool(runnableTools[params[0] as String]).execute()
         }
         catch (Throwable throwable) {
-            if (stacktrace) {
-                LoggerFactory.getLogger(MainTool).error("error occurred running job", throwable)
+            if (exitOnError) {
+                if (stacktrace) {
+                    LoggerFactory.getLogger(MainTool).error("error occurred running job", throwable)
+                }
+                else {
+                    LoggerFactory.getLogger(MainTool).error(throwable.message)
+                }
             }
             else {
-                LoggerFactory.getLogger(MainTool).error(throwable.message)
-            }
-
-            if (exitOnError) {
-                System.exit(-1)
+                //let someone else take care of it
+                throw throwable
             }
         }
     }

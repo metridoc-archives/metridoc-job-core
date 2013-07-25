@@ -30,7 +30,7 @@ class MainToolSpec extends Specification {
 
     void "MainTool has to have runnableTools"() {
         when: "execute is called on the tool with no tools set"
-        new MainTool().execute()
+        new MainTool(exitOnError: false).execute()
 
         then:
         thrown(AssertionError)
@@ -38,7 +38,7 @@ class MainToolSpec extends Specification {
 
     void "MainTool has to have params"() {
         when: "execute is called while having runnableTools but no params"
-        new MainTool(runnableTools: [foo: RunnableTool]).execute()
+        new MainTool(runnableTools: [foo: RunnableTool], exitOnError: false).execute()
 
         then:
         thrown(AssertionError)
