@@ -23,6 +23,7 @@ class MetridocJobSpec extends Specification {
 class HelperJob extends MetridocJob {
 
     boolean fromCalled = false
+    String usage = "helper job"
 
     @Override
     def configure() {

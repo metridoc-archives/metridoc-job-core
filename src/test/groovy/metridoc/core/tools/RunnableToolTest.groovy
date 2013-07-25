@@ -8,6 +8,11 @@ class RunnableToolTest {
     void "dealing with bug where the runnable tool crashes since it is trying to deal with property injection incorrectly"() {
         def runnableTool = new RunnableTool() {
             @Override
+            String getUsage() {
+                return null  //To change body of implemented methods use File | Settings | File Templates.
+            }
+
+            @Override
             def configure() {
                 //do nothing
             }
@@ -20,6 +25,11 @@ class RunnableToolTest {
     void "test a basic job withthe runnable tool"() {
         boolean fooRan = false
         def runnableTool = new RunnableTool() {
+            @Override
+            String getUsage() {
+                return null  //To change body of implemented methods use File | Settings | File Templates.
+            }
+
             @Override
             def configure() {
                 target(foo: "run foo") {
@@ -40,6 +50,11 @@ class RunnableToolTest {
         boolean barRan = false
         boolean fooRan = false
         def runnableTool = new RunnableTool() {
+            @Override
+            String getUsage() {
+                return null  //To change body of implemented methods use File | Settings | File Templates.
+            }
+
             @Override
             def configure() {
                 target(foo: "run foo") {
@@ -64,6 +79,11 @@ class RunnableToolTest {
     @Test
     void "a runnabel tool can only run once"() {
         def runnableTool = new RunnableTool() {
+
+            @Override
+            String getUsage() {
+                return null  //To change body of implemented methods use File | Settings | File Templates.
+            }
 
             @Override
             def configure() {

@@ -3,16 +3,11 @@ package metridoc.core.tools
 import metridoc.core.MetridocScript
 import org.apache.commons.lang.StringUtils
 
-/**
- * Created with IntelliJ IDEA.
- * User: tbarker
- * Date: 3/18/13
- * Time: 12:38 PM
- * To change this template use File | Settings | File Templates.
- */
 abstract class RunnableTool extends DefaultTool {
 
     private hasRun = false
+
+    abstract String getUsage()
 
     void setDefaultTarget(String target) {
         MetridocScript.getManager(binding).defaultTarget = target
