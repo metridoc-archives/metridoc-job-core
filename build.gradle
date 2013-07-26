@@ -7,7 +7,7 @@ import wslite.rest.RESTClientException
 apply plugin: 'groovy'
 apply plugin: 'maven'
 project.group = "com.googlecode.metridoc"
-project.version = "0.6-SNAPSHOT"
+project.version = "0.6"
 sourceCompatibility = "1.6"
 targetCompatibility = "1.6"
 
