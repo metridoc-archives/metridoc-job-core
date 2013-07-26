@@ -14,7 +14,10 @@ abstract class DefaultTool implements Tool {
 
     void setBinding(Binding binding) {
         this.binding = binding
-        MetridocScript.includeTool(binding, ConfigTool)
+        if (!(this instanceof LogTool)) {
+            MetridocScript.includeTool(binding, LogTool)
+            MetridocScript.includeTool(binding, ConfigTool)
+        }
     }
 
     def getVariable(String variableName) {

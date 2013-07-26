@@ -1,15 +1,11 @@
 package metridoc.core
 
-import groovy.util.logging.Slf4j
 import metridoc.core.tools.DefaultTool
 import org.apache.commons.lang.StringUtils
+import org.slf4j.LoggerFactory
 
 import java.lang.reflect.Field
 
-/**
- *
- */
-@Slf4j
 class TargetManager {
     static final String DEFAULT_TARGET = "default"
     String defaultTarget = DEFAULT_TARGET
@@ -139,6 +135,7 @@ class TargetManager {
         if (interrupted) {
             throw new JobInterruptionException(this.getClass().name)
         }
+        def log = LoggerFactory.getLogger(TargetManager)
         def start = System.currentTimeMillis()
         log.info "profiling [$description] start"
         closure.call()
@@ -157,6 +154,7 @@ class TargetManager {
         def toolName = tool.simpleName
         def toolNameUsed = StringUtils.uncapitalize(toolName)
         if (binding.hasVariable(toolNameUsed)) {
+            def log = LoggerFactory.getLogger(TargetManager)
             log.debug "tool $toolNameUsed already exists"
         }
         else {

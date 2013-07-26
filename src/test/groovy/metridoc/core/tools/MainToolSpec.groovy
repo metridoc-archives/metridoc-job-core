@@ -1,5 +1,7 @@
 package metridoc.core.tools
 
+import org.junit.Rule
+import org.junit.contrib.java.lang.system.StandardOutputStreamLog
 import spock.lang.Specification
 
 /**
@@ -7,6 +9,9 @@ import spock.lang.Specification
  * @author Tommy Barker
  */
 class MainToolSpec extends Specification {
+
+    @Rule
+    public final StandardOutputStreamLog log = new StandardOutputStreamLog()
 
     void "run tool spec"() {
         given: "binding containing args"
@@ -56,6 +61,47 @@ class MainToolSpec extends Specification {
 
         then:
         usage.contains("Possible Jobs")
+
+
+    }
+
+    void "-h cli usage spec"() {
+        given:
+        def binding = new Binding()
+        binding.args = ["-h"] as String[]
+
+        when:
+        new MainTool(binding: binding).execute()
+
+        then:
+        log.log.contains("<job>")
+        noExceptionThrown()
+    }
+
+    void "-h foo cli usage spec"() {
+        given:
+        def binding = new Binding()
+        binding.args = ["-h", "foo"] as String[]
+
+        when:
+        new MainTool(runnableTools: [foo: FooTool], binding: binding).execute()
+
+        then:
+        log.log.contains("foo tool")
+        noExceptionThrown()
+    }
+
+    void "-h bar cli usage, where bar does not exist spec"() {
+        given:
+        def binding = new Binding()
+        binding.args = ["-h", "bar"] as String[]
+
+        when:
+        new MainTool(runnableTools: [foo: FooTool], binding: binding).execute()
+
+        then:
+        log.log.contains("<job>")
+        noExceptionThrown()
     }
 }
 
