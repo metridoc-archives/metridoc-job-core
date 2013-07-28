@@ -103,6 +103,16 @@ class MainToolSpec extends Specification {
         log.log.contains("<job>")
         noExceptionThrown()
     }
+
+    void "if a param isn't available then wthe default tool is run"() {
+        when:
+        def mainTool = new MainTool(runnableTools: [foo: FooTool], defaultTool: "foo")
+        mainTool.execute()
+
+        then:
+        mainTool.binding.fooTool.fooRan
+        noExceptionThrown()
+    }
 }
 
 
