@@ -11,6 +11,7 @@ class MainTool extends RunnableTool {
     Map<String, Class<RunnableTool>> runnableTools
     boolean stacktrace = false
     boolean exitOnError = true
+    String defaultTool
 
     boolean getHelp() {
         def argsMap = getVariable("argsMap", Map)
@@ -44,25 +45,31 @@ class MainTool extends RunnableTool {
         template.make(templateBinding).toString()
     }
 
+    @SuppressWarnings("GroovyVariableNotAssigned")
     @Override
     def configure() {
+        def logger
         try {
             includeTool(LogTool)
+            logger = LoggerFactory.getLogger(MainTool)
             if (getHelp()) {
                 logUsage()
             }
             assert runnableTools: "runnableTools cannot be null or empty"
             List params = getVariable("params") as List
-            assert params: "params cannot be null or empty"
-            includeTool(runnableTools[params[0] as String]).execute()
+            assert params || defaultTool : "params cannot be null or empty, or a defaultTool must be specified"
+            String toolToRun = params ? params[0] : defaultTool
+            logger.info "running $toolToRun"
+            def tool = includeTool(runnableTools[toolToRun])
+            tool.execute()
         }
         catch (Throwable throwable) {
             if (exitOnError) {
                 if (stacktrace) {
-                    LoggerFactory.getLogger(MainTool).error("error occurred running job", throwable)
+                    logger.error("error occurred running job", throwable)
                 }
                 else {
-                    LoggerFactory.getLogger(MainTool).error(throwable.message)
+                    logger.error(throwable.message)
                 }
             }
             else {
