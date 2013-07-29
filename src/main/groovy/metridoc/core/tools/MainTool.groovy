@@ -59,13 +59,15 @@ class MainTool extends RunnableTool {
                     System.exit(0)
                 }
             }
-            assert runnableTools: "runnableTools cannot be null or empty"
-            List params = getVariable("params") as List
-            assert params || defaultTool : "params cannot be null or empty, or a defaultTool must be specified"
-            String toolToRun = params ? params[0] : defaultTool
-            logger.info "running $toolToRun"
-            def tool = includeTool(runnableTools[toolToRun])
-            tool.execute()
+            else {
+                assert runnableTools: "runnableTools cannot be null or empty"
+                List params = getVariable("params") as List
+                assert params || defaultTool: "params cannot be null or empty, or a defaultTool must be specified"
+                String toolToRun = params ? params[0] : defaultTool
+                logger.info "running $toolToRun"
+                def tool = includeTool(runnableTools[toolToRun])
+                tool.execute()
+            }
         }
         catch (Throwable throwable) {
             if (exitOnError) {
@@ -75,6 +77,7 @@ class MainTool extends RunnableTool {
                 else {
                     logger.error(throwable.message)
                 }
+                System.exit(1)
             }
             else {
                 //let someone else take care of it
