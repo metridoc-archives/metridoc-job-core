@@ -1,5 +1,6 @@
 package metridoc.core.tools
 
+import metridoc.core.MetridocScript
 import org.junit.Test
 
 /**
@@ -8,7 +9,7 @@ import org.junit.Test
 class ParseArgsToolTest {
 
     Binding binding = new Binding()
-    ParseArgsTool tool = new ParseArgsTool()
+    ParseArgsTool tool
 
     @Test
     void "test parsing basic arguments"() {
@@ -44,8 +45,7 @@ class ParseArgsToolTest {
 
     Map primeTool(List args) {
         binding.args = args as String[]
-        tool.setBinding(binding)
-        tool.init()
+        tool = MetridocScript.includeTool(binding, ParseArgsTool)
         return binding.argsMap
     }
 }
