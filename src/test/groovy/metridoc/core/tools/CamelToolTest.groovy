@@ -1,5 +1,6 @@
 package metridoc.core.tools
 
+import metridoc.core.MetridocScript
 import metridoc.core.TargetManager
 import org.apache.camel.Exchange
 import org.apache.camel.Processor
@@ -11,15 +12,11 @@ import org.apache.commons.lang.SystemUtils
 import org.junit.Test
 
 /**
- * Created with IntelliJ IDEA.
- * User: tbarker
- * Date: 2/16/13
- * Time: 2:59 PM
- * To change this template use File | Settings | File Templates.
+ * @author Tommy Barker
  */
 class CamelToolTest {
     def binding = new Binding()
-    def tool = new CamelTool(binding: binding)
+    def tool = MetridocScript.includeTool(binding, CamelTool)
 
     @Test
     void "do basic from and to test"() {
@@ -112,7 +109,8 @@ class CamelToolTest {
                     throw new RuntimeException("meant to fail for testing")
                 }
                 assert false: "exception should have occurred"
-            } catch (RuntimeException ignored) {
+            }
+            catch (RuntimeException ignored) {
                 assert new File("${tmpDirectory.path}/.error").listFiles()
             }
         }

@@ -4,11 +4,8 @@ import org.junit.Test
 
 
 /**
- * Created with IntelliJ IDEA.
- * User: tbarker
- * Date: 2/21/13
- * Time: 3:35 PM
- * To change this template use File | Settings | File Templates.
+ * @author Tommy Barker
+ *
  */
 class HibernateToolTest {
 

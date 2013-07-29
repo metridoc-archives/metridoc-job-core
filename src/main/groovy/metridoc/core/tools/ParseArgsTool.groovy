@@ -3,11 +3,7 @@ package metridoc.core.tools
 import java.util.regex.Matcher
 
 /**
- * Created with IntelliJ IDEA.
- * User: tbarker
- * Date: 2/22/13
- * Time: 1:48 PM
- * To change this template use File | Settings | File Templates.
+ * @author Tommy Barker
  */
 class ParseArgsTool {
     static final String ARGS = "args"
@@ -15,8 +11,10 @@ class ParseArgsTool {
     static final KEY_NO_VALUE = /^[\-]+([^=]+)$/
     static final ONLY_PARAM = /^([^\-]+)$/
 
+    Binding binding
+
     @SuppressWarnings("GrMethodMayBeStatic")
-    void setBinding(Binding binding) {
+    void init() {
         def argsMap = [:]
         binding.argsMap = argsMap
 
