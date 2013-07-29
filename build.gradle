@@ -7,7 +7,7 @@ import wslite.rest.RESTClientException
 apply plugin: 'groovy'
 apply plugin: 'maven'
 apply plugin: 'application'
-project.group = "com.googlecode.metridoc"
+project.group = "com.github.metridoc"
 project.version = "0.6"
 sourceCompatibility = "1.6"
 targetCompatibility = "1.6"
@@ -195,10 +195,10 @@ def configurePom(pom) {
     pom.project {
         name = project.description
         description = project.description
-        url = 'http://metridoc.googlecode.com/'
+        url = 'https://github.com/metridoc'
         organization {
             name = 'Upenn Libraries'
-            url = 'http://metridoc.googlecode.com/'
+            url = 'https://github.com/metridoc'
         }
         licenses {
             license {
@@ -209,9 +209,9 @@ def configurePom(pom) {
             }
         }
         scm {
-            url = 'https://metridoc.googlecode.com/svn/trunk/metridoc-job-core/'
-            connection = 'scm:svn:https://metridoc.googlecode.com/svn/trunk/metridoc-job-core/'
-            developerConnection = 'scm:svn:https://metridoc.googlecode.com/svn/trunk/metridoc-job-core/'
+            url = 'https://github.com/metridoc/metridoc-job-core'
+            connection = 'https://github.com/metridoc/metridoc-job-core'
+            developerConnection = 'https://github.com/metridoc/metridoc-job-core'
         }
         developers {
             developer {
