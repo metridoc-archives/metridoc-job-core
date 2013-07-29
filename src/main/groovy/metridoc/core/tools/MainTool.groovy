@@ -14,6 +14,13 @@ class MainTool extends RunnableTool {
     boolean exitOnHelp = true
     String defaultTool
 
+    public static void main(String[] args) {
+        Binding binding = new Binding()
+        binding.args = args
+        def mainTool = new MainTool(binding: binding)
+        mainTool.execute()
+    }
+
     boolean getHelp() {
         def argsMap = getVariable("argsMap", Map)
         if (!argsMap) {
@@ -30,13 +37,13 @@ class MainTool extends RunnableTool {
     private String usage = '\n' +
             '<run method> <job> options\n' +
             '<run method> [-h|-help] [job]\n' +
-            '<% if(runnableTools) { %>\n' +
+            '<% if(runnableTools) { %>' +
             'Possible Jobs\n' +
             '=============\n' +
-            '<% runnableTools.keySet().each { %>\n' +
-            '<% println " --> $it" %>\n' +
-            '<% } %>\n' +
-            '<% } %>\n'
+            '<% runnableTools.keySet().each { %>' +
+            '<% println " --> $it" %>' +
+            '<% } %>' +
+            '<% } %>'
 
 
     String getUsage() {
