@@ -1,7 +1,6 @@
 package metridoc.core.tools
 
 import org.junit.Rule
-import org.junit.contrib.java.lang.system.ExpectedSystemExit
 import org.junit.contrib.java.lang.system.StandardOutputStreamLog
 import spock.lang.Specification
 
@@ -13,8 +12,6 @@ class MainToolSpec extends Specification {
 
     @Rule
     public final StandardOutputStreamLog log = new StandardOutputStreamLog()
-    @Rule
-    public final ExpectedSystemExit exit = ExpectedSystemExit.none();
 
     void "run tool spec"() {
         given: "binding containing args"
@@ -87,7 +84,7 @@ class MainToolSpec extends Specification {
         binding.args = ["-h", "foo"] as String[]
 
         when:
-        new MainTool(runnableTools: [foo: FooTool], binding: binding).execute()
+        new MainTool(runnableTools: [foo: FooTool], binding: binding, exitOnHelp: false).execute()
 
         then:
         log.log.contains("foo tool")
@@ -107,20 +104,7 @@ class MainToolSpec extends Specification {
         noExceptionThrown()
     }
 
-    void "exits on help spec"() {
-        given:
-        def binding = new Binding()
-        binding.args = ["-h"] as String[]
-
-        when:
-        exit.expectSystemExitWithStatus(0)
-        new MainTool(binding: binding).execute()
-
-        then:
-        noExceptionThrown()
-    }
-
-    void "if a param isn't available then wthe default tool is run"() {
+    void "if a param isn't available then the default tool is run"() {
         when:
         def mainTool = new MainTool(runnableTools: [foo: FooTool], defaultTool: "foo")
         mainTool.execute()
