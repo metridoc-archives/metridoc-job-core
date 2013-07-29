@@ -1,6 +1,7 @@
 package metridoc.core.tools
 
 import org.junit.Rule
+import org.junit.contrib.java.lang.system.ExpectedSystemExit
 import org.junit.contrib.java.lang.system.StandardOutputStreamLog
 import spock.lang.Specification
 
@@ -12,6 +13,8 @@ class MainToolSpec extends Specification {
 
     @Rule
     public final StandardOutputStreamLog log = new StandardOutputStreamLog()
+    @Rule
+    public final ExpectedSystemExit exit = ExpectedSystemExit.none();
 
     void "run tool spec"() {
         given: "binding containing args"
@@ -71,7 +74,7 @@ class MainToolSpec extends Specification {
         binding.args = ["-h"] as String[]
 
         when:
-        new MainTool(binding: binding).execute()
+        new MainTool(binding: binding, exitOnHelp: false).execute()
 
         then:
         log.log.contains("<job>")
@@ -97,10 +100,23 @@ class MainToolSpec extends Specification {
         binding.args = ["-h", "bar"] as String[]
 
         when:
-        new MainTool(runnableTools: [foo: FooTool], binding: binding).execute()
+        new MainTool(runnableTools: [foo: FooTool], binding: binding, exitOnHelp: false).execute()
 
         then:
         log.log.contains("<job>")
+        noExceptionThrown()
+    }
+
+    void "exits on help spec"() {
+        given:
+        def binding = new Binding()
+        binding.args = ["-h"] as String[]
+
+        when:
+        exit.expectSystemExitWithStatus(0)
+        new MainTool(binding: binding).execute()
+
+        then:
         noExceptionThrown()
     }
 

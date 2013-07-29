@@ -11,6 +11,7 @@ class MainTool extends RunnableTool {
     Map<String, Class<RunnableTool>> runnableTools
     boolean stacktrace = false
     boolean exitOnError = true
+    boolean exitOnHelp = true
     String defaultTool
 
     boolean getHelp() {
@@ -54,6 +55,9 @@ class MainTool extends RunnableTool {
             logger = LoggerFactory.getLogger(MainTool)
             if (getHelp()) {
                 logUsage()
+                if (exitOnHelp) {
+                    System.exit(0)
+                }
             }
             assert runnableTools: "runnableTools cannot be null or empty"
             List params = getVariable("params") as List
