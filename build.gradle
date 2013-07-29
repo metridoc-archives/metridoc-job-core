@@ -6,11 +6,19 @@ import wslite.rest.RESTClientException
 
 apply plugin: 'groovy'
 apply plugin: 'maven'
+apply plugin: 'application'
 project.group = "com.googlecode.metridoc"
 project.version = "0.6"
 sourceCompatibility = "1.6"
 targetCompatibility = "1.6"
 
+mainClassName = "metridoc.core.tools.MainTool"
+
+run {
+    if (project.hasProperty("appArgs")) {
+        args appArgs
+    }
+}
 
 buildscript {
     repositories {
