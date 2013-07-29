@@ -3,16 +3,13 @@ package metridoc.core.tools
 import groovy.sql.Sql
 
 /**
- * Created with IntelliJ IDEA.
- * User: tbarker
- * Date: 2/21/13
- * Time: 7:26 PM
- * To change this template use File | Settings | File Templates.
+ * @author Tommy Barker
  */
 class SqlTool {
     String dataSourceKey = "dataSource"
+    Binding binding
 
-    void setBinding(Binding binding) {
+    void init() {
         def config = binding.config
         if (config && config instanceof ConfigObject) {
             config.putAll(binding.variables)

@@ -19,7 +19,7 @@ class HibernateTool {
     String dataSourcePrefix = "dataSource"
 
     SessionFactory sessionFactory
-
+    Binding binding
     List<Class> entityClasses = []
 
     @SuppressWarnings("GroovyVariableNotAssigned")
@@ -37,7 +37,7 @@ class HibernateTool {
         return result
     }
 
-    void setBinding(Binding binding) {
+    void init() {
         MetridocScript.includeTool(binding, ConfigTool)
         setConfig(binding.config)
     }

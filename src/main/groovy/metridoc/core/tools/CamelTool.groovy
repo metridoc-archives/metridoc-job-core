@@ -10,10 +10,11 @@ import camelscript.CamelGLite
  */
 class CamelTool {
 
+    Binding binding
     @Delegate
     CamelGLite delegate
 
-    void setBinding(Binding binding) {
+    void init() {
         delegate = new CamelGLite(binding)
     }
 }
