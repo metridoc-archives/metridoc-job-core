@@ -43,7 +43,7 @@ class HibernateToolTest {
         def configObject = new ConfigObject()
         configObject.hibernate.hbm2ddl.auto = "create-drop"
 
-        def properties = new HibernateTool().convertHibernateProperties(configObject)
+        def properties = new HibernateTool().convertDataSourcePropsToHibernate(configObject)
         assert "create-drop" == properties.get("hibernate.hbm2ddl.auto")
     }
 
