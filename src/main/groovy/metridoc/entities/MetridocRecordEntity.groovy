@@ -1,5 +1,6 @@
 package metridoc.entities
 
+import metridoc.core.RecordLoader
 import metridoc.iterators.Record
 
 import javax.persistence.MappedSuperclass
@@ -9,15 +10,13 @@ import javax.persistence.MappedSuperclass
  * @author Tommy Barker
  */
 @MappedSuperclass
-abstract class MetridocRecordEntity extends MetridocEntity {
+abstract class MetridocRecordEntity extends MetridocEntity implements RecordLoader {
     abstract void validate()
 
-    @SuppressWarnings("GrMethodMayBeStatic")
     boolean acceptRecord(Record record) {
         return true
     }
 
-    @SuppressWarnings("GrMethodMayBeStatic")
     boolean shouldSave() {
         return true
     }
