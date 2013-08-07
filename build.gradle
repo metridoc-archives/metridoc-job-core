@@ -1,14 +1,8 @@
-import groovy.json.JsonSlurper
-import wslite.http.auth.HTTPBasicAuthorization
-import wslite.rest.ContentType
-import wslite.rest.RESTClient
-import wslite.rest.RESTClientException
-
 apply plugin: 'groovy'
-apply plugin: 'maven'
+apply plugin: 'metridoc'
 apply plugin: 'application'
 project.group = "com.github.metridoc"
-project.version = "0.8-SNAPSHOT"
+project.version = "0.7.1"
 sourceCompatibility = "1.6"
 targetCompatibility = "1.6"
 
@@ -22,10 +16,17 @@ run {
 
 buildscript {
     repositories {
-        mavenCentral()
+        mavenLocal()
+        maven {
+            url = "http://dl.bintray.com/upennlib/metridoc"
+        }
+        maven {
+            url = "http://jcenter.bintray.com/"
+        }
     }
+
     dependencies {
-        classpath 'com.github.groovy-wslite:groovy-wslite:0.7.2'
+        classpath "com.github.metridoc:metridoc-gradle-plugin:0.1-SNAPSHOT"
     }
 }
 
@@ -97,33 +98,10 @@ dependencies {
 }
 
 task wrapper(type: Wrapper) {
-    gradleVersion = '1.5'
+    gradleVersion = '1.7'
 }
 
-
-install {
-    repositories.mavenInstaller { installer ->
-        configurePom(pom)
-    }
-}
-
-uploadArchives {
-    repositories {
-        mavenDeployer {
-
-            repository(
-                    id: "Metridoc bintray repo",
-                    url: "https://api.bintray.com/maven/upennlib/metridoc/metridoc-job-core",
-            ) {
-                authentication(userName: project.properties.bintrayUsername, password: project.properties.bintrayPassword)
-            }
-            configurePom(pom)
-
-        }
-    }
-}
-
-def configurePom(pom) {
+enableMaven { pom ->
     pom.artifactId = "metridoc-job-core"
     pom.whenConfigured { pomToConfigure ->
         pomToConfigure.dependencies.find { dep -> dep.artifactId == 'poi' }.optional = true
@@ -220,49 +198,5 @@ def configurePom(pom) {
                 email = 'tbarker@pobox.upenn.edu'
             }
         }
-    }
-}
-
-task packageJavadoc(type: Jar, dependsOn: 'javadoc') {
-    from javadoc.destinationDir
-    classifier = 'javadoc'
-}
-task packageSources(type: Jar) {
-    from sourceSets.main.allSource
-    classifier = 'sources'
-}
-
-artifacts {
-    archives(packageJavadoc) {
-        type = 'javadoc'
-    }
-
-    archives(packageSources)
-}
-
-task uploadToBintray(dependsOn: ["prepareForBintrayUpload", "uploadArchives"])
-
-task prepareForBintrayUpload << {
-
-    if (version.contains("SNAPSHOT")) {
-        println "bintray does not support SNAPSHOTs, skipping upload to bintray"
-        uploadArchives.enabled = false
-        return
-    }
-
-    if (!project.hasProperty("bintrayUsername")) {
-        println "bintray credentials not setup, skipping upload to bintray"
-        uploadArchives.enabled = false
-        return
-    }
-
-    def json = new URL("https://api.bintray.com/packages/upennlib/metridoc/metridoc-job-core").text
-    def slurper = new JsonSlurper()
-    def versions = slurper.parseText(json).versions
-    def versionAlreadyDeployed = versions.contains(version)
-
-    if (versionAlreadyDeployed) {
-        println "version $version has already been deployed to bintray, skipping upload to bintray"
-        uploadArchives.enabled = false
     }
 }
