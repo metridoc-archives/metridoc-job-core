@@ -2,11 +2,12 @@ apply plugin: 'groovy'
 apply plugin: 'metridoc'
 apply plugin: 'application'
 project.group = "com.github.metridoc"
-project.version = "0.7.1"
+project.version = "0.7.2"
 sourceCompatibility = "1.6"
 targetCompatibility = "1.6"
 
 mainClassName = "metridoc.core.tools.MainTool"
+archivesBaseName = "metridoc-job-core"
 
 run {
     if (project.hasProperty("appArgs")) {
@@ -26,7 +27,7 @@ buildscript {
     }
 
     dependencies {
-        classpath "com.github.metridoc:metridoc-gradle-plugin:0.1"
+        classpath "com.github.metridoc:metridoc-gradle-plugin:0.1.2"
     }
 }
 
@@ -97,12 +98,7 @@ dependencies {
     compile 'net.sf.opencsv:opencsv:2.3'
 }
 
-task wrapper(type: Wrapper) {
-    gradleVersion = '1.7'
-}
-
 enableMaven { pom ->
-    pom.artifactId = "metridoc-job-core"
     pom.whenConfigured { pomToConfigure ->
         pomToConfigure.dependencies.find { dep -> dep.artifactId == 'poi' }.optional = true
         pomToConfigure.dependencies.find { dep -> dep.artifactId == 'poi-ooxml' }.optional = true
