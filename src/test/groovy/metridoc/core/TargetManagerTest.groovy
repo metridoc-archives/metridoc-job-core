@@ -2,6 +2,7 @@ package metridoc.core
 
 import metridoc.core.tools.DefaultTool
 import metridoc.core.tools.HibernateTool
+import metridoc.core.InjectArg
 import metridoc.core.tools.Tool
 import org.junit.Test
 
@@ -93,6 +94,18 @@ class TargetManagerTest {
         assert "foo" == helper.bar
     }
 
+    @Test
+    void "fine grain injection can be controlled by InjectArg annotation"() {
+        def binding = targetManager.binding
+        binding.config = new ConfigObject()
+        binding.config.foo.bar = "fromConfig"
+        binding.baz = "shouldNotInject"
+        def helper = new PropertyInjectionHelper()
+        targetManager.handlePropertyInjection(helper)
+        assert "fromConfig" == helper.fooBar
+        assert null == helper.baz
+    }
+
     class FooToolHelper implements Tool {
         def bar
         String bam
@@ -106,8 +119,12 @@ class TargetManagerTest {
     }
 
     class PropertyInjectionHelper {
-        def foo = "bar"
         def bar = "foo"
+        def foo = "bar"
+        @InjectArg(config = "foo.bar", cli = "fooBaz")
+        def fooBar
+        @InjectArg(config = "foo.baz", injectByName = false)
+        def baz
     }
 
     class FooBarToolHelper extends DefaultTool {

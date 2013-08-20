@@ -1,10 +1,7 @@
 package metridoc.core
 
-import metridoc.core.tools.DefaultTool
 import org.apache.commons.lang.StringUtils
 import org.slf4j.LoggerFactory
-
-import java.lang.reflect.Field
 
 class TargetManager {
     static final String DEFAULT_TARGET = "default"
@@ -25,12 +22,13 @@ class TargetManager {
     void setBinding(Binding _binding) {
         this._binding = _binding
     }
-/**
- * If job is not run from the command line, use this to fire off an interuption.  This is not as
- * effective as killing a commandline job though.  Basically either the job will have to be aware of
- * the interuption or wait until it is checked in a progress closure
- * @return
- */
+
+    /**
+     * If job is not run from the command line, use this to fire off an interuption.  This is not as
+     * effective as killing a commandline job though.  Basically either the job will have to be aware of
+     * the interuption or wait until it is checked in a progress closure
+     * @return
+     */
     void interrupt() {
         interrupted = true
         getBinding().interrupted = true
@@ -171,37 +169,79 @@ class TargetManager {
         return binding."${toolNameUsed}"
     }
 
-    void handlePropertyInjection(instance) {
+    protected void handlePropertyInjection(instance) {
         instance.properties.each { String key, value ->
-            def inBinding
-            if (instance instanceof DefaultTool) {
-                inBinding = instance.getVariable(key) != null
+            InjectArg injectArg
+            try {
+                def field = instance.getClass().getDeclaredField(key)
+                injectArg = field.getAnnotation(InjectArg)
+
             }
-            else {
-                inBinding = binding.hasVariable(key)
+            catch (NoSuchFieldException ignored) {
+                //ignore... handles issues when searching for field "class" for instance
+                return
             }
 
-            if (inBinding) {
-                try {
-                    Field field = instance.getClass().getDeclaredField(key)
-                    def type = field.type
-                    if (instance instanceof DefaultTool) {
-                        instance."$key" = instance.getVariable(key, type)
-                    }
-                    else {
-                        try {
-                            instance."$key" = binding.getVariable(key).asType(type)
-                        }
-                        catch (Throwable ignored) {
-                            //do nothing
-                        }
-                    }
-                }
-                catch (NoSuchFieldException ignored) {
-                    //ignore... handles issues when searching for field "class" for instance
-                }
+            boolean ignoreInjection = injectArg ? injectArg.ignore() : false
+
+            if (ignoreInjection) return
+            if (injectWithCli(instance, key, injectArg)) return
+            if (injectWithConfig(instance, key, injectArg)) return
+
+            injectWithBinding(instance, key, injectArg)
+        }
+    }
+
+    protected void injectWithBinding(def instance, String fieldName, InjectArg injectArg) {
+        boolean injectByName = injectArg ? injectArg.injectByName() : true
+        if (injectByName) {
+            if(binding.hasVariable(fieldName)) {
+                setValueOnInstance(instance, fieldName, binding."$fieldName")
             }
         }
+    }
+
+    protected boolean injectWithConfig(def instance, String fieldName, InjectArg injectArg) {
+        def configObject = binding.variables.config
+        def usedName = injectArg ? injectArg.injectByName() ? fieldName : null : fieldName
+        def key = injectArg ? injectArg.config() ?: usedName : usedName
+
+        if(configObject instanceof ConfigObject) {
+            def flattened = configObject.flatten()
+            if (flattened.containsKey(key)) {
+                return setValueOnInstance(instance, usedName, flattened[key])
+            }
+        }
+
+        return false
+    }
+
+    protected boolean injectWithCli(instance, String fieldName, InjectArg injectArg) {
+        def argsMap = binding.variables.argsMap
+        def usedName = injectArg ? injectArg.injectByName() ? fieldName : null : fieldName
+        def key = injectArg ? injectArg.cli() ?: usedName : usedName
+        if (argsMap instanceof Map) {
+            if (argsMap.containsKey(key)) {
+                return setValueOnInstance(instance, usedName, argsMap[key])
+            }
+        }
+
+        return false
+    }
+
+    @SuppressWarnings("GrMethodMayBeStatic")
+    protected boolean setValueOnInstance(instance, String fieldName, value) {
+        try {
+            def field = instance.getClass().getDeclaredField(fieldName)
+            def type = field.type
+            instance."$fieldName" = value.asType(type)
+            return true
+        }
+        catch (Throwable ignored) {
+            //ignore, probably a casting issue
+        }
+
+        return false
     }
 
     def runDefaultTarget() {
