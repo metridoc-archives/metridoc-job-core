@@ -14,8 +14,7 @@ abstract class DefaultTool implements Tool {
 
     void setBinding(Binding binding) {
         this.binding = binding
-        if (!(this instanceof LogTool)) {
-            MetridocScript.includeTool(binding, LogTool)
+        if (!(this instanceof ConfigTool)) {
             MetridocScript.includeTool(binding, ConfigTool)
         }
     }

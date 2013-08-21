@@ -1,12 +1,13 @@
 package metridoc.core.tools
 
-import org.slf4j.impl.SimpleLogger
+import groovy.util.logging.Slf4j
 
 /**
  * Created with IntelliJ IDEA on 7/25/13
  * @author Tommy Barker
  */
-class LogTool extends DefaultTool {
+@Slf4j
+class SimpleLogTool extends DefaultTool {
 
     public static final String DEFAULT_LOG_LEVEL = "org.slf4j.simpleLogger.defaultLogLevel"
     public static final String METRIDOC_LOGGER = "org.slf4j.simpleLogger.log.metridoc"
@@ -15,9 +16,23 @@ class LogTool extends DefaultTool {
     boolean verboseLine = false
 
     void init() {
+        Class simpleLoggerClass
+        try {
+            simpleLoggerClass = Thread.currentThread().contextClassLoader.loadClass("org.slf4j.impl.SimpleLogger")
+        }
+        catch (ClassNotFoundException ignored) {
+            System.err.println("Could not find SimpleLogger on the classpath, [SimpleLogTool] will not be initialized")
+            return
+        }
+
+
+        String SHOW_THREAD_NAME_KEY = simpleLoggerClass.SHOW_THREAD_NAME_KEY
+        String SHOW_LOG_NAME_KEY = simpleLoggerClass.SHOW_THREAD_NAME_KEY
+        String SHOW_DATE_TIME_KEY = simpleLoggerClass.SHOW_DATE_TIME_KEY
+
         if (!verboseLine) {
-            System.setProperty(SimpleLogger.SHOW_THREAD_NAME_KEY, "false")
-            System.setProperty(SimpleLogger.SHOW_LOG_NAME_KEY, "false")
+            System.setProperty(SHOW_THREAD_NAME_KEY, "false")
+            System.setProperty(SHOW_LOG_NAME_KEY, "false")
         }
 
         if (logLevel) {
@@ -44,10 +59,10 @@ class LogTool extends DefaultTool {
             System.setProperty(LOG_FILE, "System.out")
         }
 
-        result = System.getProperty(SimpleLogger.SHOW_DATE_TIME_KEY)
+        result = System.getProperty(SHOW_DATE_TIME_KEY)
 
         if (!result) {
-            System.setProperty(SimpleLogger.SHOW_DATE_TIME_KEY, "true")
+            System.setProperty(SHOW_DATE_TIME_KEY, "true")
         }
     }
 }
