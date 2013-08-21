@@ -7,8 +7,6 @@ abstract class RunnableTool extends DefaultTool {
 
     private hasRun = false
 
-    abstract String getUsage()
-
     void setDefaultTarget(String target) {
         MetridocScript.getManager(binding).defaultTarget = target
     }

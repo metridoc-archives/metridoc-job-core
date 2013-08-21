@@ -35,7 +35,7 @@ class MainToolSpec extends Specification {
 
     void "MainTool has to have runnableTools"() {
         when: "execute is called on the tool with no tools set"
-        new MainTool(exitOnError: false).execute()
+        new MainTool().execute()
 
         then:
         thrown(AssertionError)
@@ -43,65 +43,10 @@ class MainToolSpec extends Specification {
 
     void "MainTool has to have params"() {
         when: "execute is called while having runnableTools but no params"
-        new MainTool(runnableTools: [foo: RunnableTool], exitOnError: false).execute()
+        new MainTool(runnableTools: [foo: RunnableTool]).execute()
 
         then:
         thrown(AssertionError)
-    }
-
-    void "usage spec"() {
-        when: "there are no runnableTools"
-        def usage = new MainTool().getUsage()
-
-        then:
-        !usage.contains("Possible Jobs")
-
-        when: "there are runnableTools"
-        usage = new MainTool(runnableTools: [foo: RunnableTool]).getUsage()
-
-        then:
-        usage.contains("Possible Jobs")
-
-
-    }
-
-    void "-h cli usage spec"() {
-        given:
-        def binding = new Binding()
-        binding.args = ["-h"] as String[]
-
-        when:
-        new MainTool(binding: binding, exitOnHelp: false).execute()
-
-        then:
-        log.log.contains("<job>")
-        noExceptionThrown()
-    }
-
-    void "-h foo cli usage spec"() {
-        given:
-        def binding = new Binding()
-        binding.args = ["-h", "foo"] as String[]
-
-        when:
-        new MainTool(runnableTools: [foo: FooTool], binding: binding, exitOnHelp: false).execute()
-
-        then:
-        log.log.contains("foo tool")
-        noExceptionThrown()
-    }
-
-    void "-h bar cli usage, where bar does not exist spec"() {
-        given:
-        def binding = new Binding()
-        binding.args = ["-h", "bar"] as String[]
-
-        when:
-        new MainTool(runnableTools: [foo: FooTool], binding: binding, exitOnHelp: false).execute()
-
-        then:
-        log.log.contains("<job>")
-        noExceptionThrown()
     }
 
     void "if a param isn't available then the default tool is run"() {
