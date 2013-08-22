@@ -104,6 +104,13 @@ class TargetManagerTest {
         targetManager.handlePropertyInjection(helper)
         assert "fromConfig" == helper.fooBar
         assert null == helper.baz
+
+        binding.argsMap = [fooBaz:"bam"]
+        targetManager.handlePropertyInjection(helper)
+        assert "bam" == helper.fooBar
+
+        helper = MetridocScript.includeTool(binding, PropertyInjectionHelper)
+        assert "bam" == helper.fooBar
     }
 
     class FooToolHelper implements Tool {
@@ -121,10 +128,12 @@ class TargetManagerTest {
     class PropertyInjectionHelper {
         def bar = "foo"
         def foo = "bar"
-        @InjectArg(config = "foo.bar", cli = "fooBaz")
+        @InjectArg(config = "foo.bar", cli = "fooBaz", injectByName = false)
         def fooBar
         @InjectArg(config = "foo.baz", injectByName = false)
         def baz
+
+        def binding
     }
 
     class FooBarToolHelper extends DefaultTool {
