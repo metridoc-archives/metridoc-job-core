@@ -209,7 +209,7 @@ class TargetManager {
         if(configObject instanceof ConfigObject) {
             def flattened = configObject.flatten()
             if (flattened.containsKey(key)) {
-                return setValueOnInstance(instance, usedName, flattened[key])
+                return setValueOnInstance(instance, fieldName, flattened[key])
             }
         }
 
@@ -222,7 +222,7 @@ class TargetManager {
         def key = injectArg ? injectArg.cli() ?: usedName : usedName
         if (argsMap instanceof Map) {
             if (argsMap.containsKey(key)) {
-                return setValueOnInstance(instance, usedName, argsMap[key])
+                return setValueOnInstance(instance, fieldName, argsMap[key])
             }
         }
 
