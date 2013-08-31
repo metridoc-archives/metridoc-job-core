@@ -33,13 +33,6 @@ abstract class MetridocJob extends RunnableTool {
 
     @Override
     void setBinding(Binding binding) {
-        if (grailsApplication) {
-            if (grailsApplication.mergedConfig) {
-                binding.config = grailsApplication.mergedConfig
-            } else {
-                binding.config = grailsApplication.config
-            }
-        }
         super.setBinding(binding)
         includeTool(CamelTool)
     }
@@ -49,6 +42,24 @@ abstract class MetridocJob extends RunnableTool {
         def result = super.execute()
         camelTool.close()
         return result
+    }
+
+    /**
+     * if using the grails job-runner plugin, this will be called
+     * without any inject of command line arguments.  The framework
+     * will use its own injection
+     *
+     * @param argsMap
+     * @return
+     */
+    def execute(Map argsMap) {
+        binding.argsMap = argsMap
+        if (grailsApplication?.config) {
+            binding.config = grailsApplication.config
+        }
+        def manager = MetridocScript.getManager(binding)
+        manager.handlePropertyInjection(this)
+        execute()
     }
 
     CamelGLite bind(object) {
