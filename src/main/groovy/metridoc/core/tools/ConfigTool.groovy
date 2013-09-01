@@ -2,6 +2,9 @@ package metridoc.core.tools
 
 import metridoc.core.MetridocScript
 
+import static org.apache.commons.lang.SystemUtils.FILE_SEPARATOR
+import static org.apache.commons.lang.SystemUtils.USER_HOME
+
 /**
  * Created with IntelliJ IDEA.
  * User: tbarker
@@ -12,6 +15,8 @@ import metridoc.core.MetridocScript
 class ConfigTool extends DefaultTool {
 
     Binding binding = new Binding()
+    boolean mergeMetridocConfig = true
+    private static final String METRIDOC_CONFIG = "${USER_HOME}${FILE_SEPARATOR}.metridoc${FILE_SEPARATOR}MetridocConfig.groovy"
 
     void setBinding(Binding binding) {
         this.binding = binding
@@ -27,6 +32,12 @@ class ConfigTool extends DefaultTool {
             def cliConfigObject = new ConfigObject()
             if (cliConfigLocation) {
                 cliConfigObject = configureFromFile(cliConfigLocation, configSlurper)
+            }
+
+            def metridocConfigFile = new File(METRIDOC_CONFIG)
+            if (metridocConfigFile.exists() && mergeMetridocConfig) {
+                def metridocConfigObject = configureFromFile(metridocConfigFile, configSlurper)
+                cliConfigObject.merge(metridocConfigObject)
             }
 
             binding.config = cliConfigObject
