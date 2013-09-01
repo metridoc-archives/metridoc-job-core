@@ -1,20 +1,21 @@
 package metridoc.core.tools
 
-import metridoc.core.MetridocScript
 import metridoc.utils.DataSourceConfigUtil
 import org.hibernate.Session
 import org.hibernate.SessionFactory
 import org.hibernate.cfg.Configuration
 
-class HibernateTool {
+class HibernateTool extends DataSourceTool {
     Properties hibernateProperties = [:]
 
     SessionFactory sessionFactory
-    Binding binding
     List<Class> entityClasses = []
 
     @SuppressWarnings("GroovyVariableNotAssigned")
     SessionFactory createSessionFactory() {
+        if (!hibernateProperties) {
+            init()
+        }
         def configuration = new Configuration()
         def result
         configuration.with {
@@ -29,12 +30,13 @@ class HibernateTool {
     }
 
     void init() {
-        MetridocScript.includeTool(binding, ConfigTool)
+        super.init()
         setConfig(binding.config)
     }
 
     void setConfig(ConfigObject config) {
-        hibernateProperties.putAll(convertDataSourcePropsToHibernate(config))
+        def hibernateProperties = convertDataSourcePropsToHibernate(config)
+        this.hibernateProperties.putAll(hibernateProperties)
         if (config.entityClasses) {
             entityClasses = config.entityClasses
         }
@@ -71,16 +73,5 @@ class HibernateTool {
     @SuppressWarnings("GroovyMissingReturnStatement")
     Properties convertDataSourcePropsToHibernate(ConfigObject configObject) {
         DataSourceConfigUtil.getHibernateOnlyProperties(configObject)
-    }
-
-    void configureEmbeddedDatabase() {
-        hibernateProperties."hibernate.current_session_context_class" = "thread"
-        hibernateProperties."hibernate.hbm2ddl.auto" = "update"
-        hibernateProperties."hibernate.cache.provider_class" = "org.hibernate.cache.NoCacheProvider"
-        hibernateProperties."hibernate.dialect" = "org.hibernate.dialect.H2Dialect"
-        hibernateProperties."hibernate.connection.driver_class" = "org.h2.Driver"
-        hibernateProperties."hibernate.connection.username" = "sa"
-        hibernateProperties."hibernate.connection.password" = ""
-        hibernateProperties."hibernate.connection.url" = "jdbc:h2:mem:devDb;MVCC=TRUE;LOCK_TIMEOUT=10000"
     }
 }

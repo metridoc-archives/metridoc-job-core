@@ -49,8 +49,8 @@ class HibernateToolTest {
 
     @Test
     void "test configuring a basic embedded database"() {
-        def tool = new HibernateTool()
-        tool.configureEmbeddedDatabase()
+        def tool = new HibernateTool(embeddedDataSource: true)
+        tool.init()
         assert "org.hibernate.dialect.H2Dialect" == tool.hibernateProperties."hibernate.dialect"
         assert "org.h2.Driver" == tool.hibernateProperties."hibernate.connection.driver_class"
     }

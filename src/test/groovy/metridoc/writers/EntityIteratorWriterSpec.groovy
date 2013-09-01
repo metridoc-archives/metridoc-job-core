@@ -16,11 +16,8 @@ import static metridoc.writers.WrittenRecordStat.Status.*
  */
 class EntityIteratorWriterSpec extends Specification {
 
-    def hTool = new HibernateTool(entityClasses: [EntityHelper])
+    def hTool = new HibernateTool(entityClasses: [EntityHelper], embeddedDataSource: true)
 
-    def setup() {
-        hTool.configureEmbeddedDatabase()
-    }
 
     def "test basic entity writing workflow"() {
         given: "some valid data"
