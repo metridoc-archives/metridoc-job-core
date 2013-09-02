@@ -1,7 +1,7 @@
 apply plugin: 'groovy'
 apply plugin: 'metridoc'
 project.group = "com.github.metridoc"
-project.version = "0.7.3"
+project.version = "0.7.4"
 sourceCompatibility = "1.6"
 targetCompatibility = "1.6"
 
