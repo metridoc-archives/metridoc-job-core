@@ -26,6 +26,13 @@ class ConfigTool extends DefaultTool {
             }
 
             String env = getVariable("env", String)
+            if ("prod" == env) {
+                env = "production"
+            }
+
+            if ("dev" == env) {
+                env = "development"
+            }
 
             def configSlurper = env ? new ConfigSlurper(env) : new ConfigSlurper()
             File cliConfigLocation = getVariable("config", File)
