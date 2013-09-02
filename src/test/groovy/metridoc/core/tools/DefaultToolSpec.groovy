@@ -1,5 +1,6 @@
 package metridoc.core.tools
 
+import metridoc.core.MetridocScript
 import spock.lang.Specification
 
 /**
@@ -13,6 +14,29 @@ import spock.lang.Specification
 class DefaultToolSpec extends Specification {
 
     def tool = new DefaultToolHelper()
+
+    void "check enabling mergeMetridocConfig"() {
+        given:
+        def binding = new Binding()
+
+        when:
+        use(MetridocScript) {
+            binding.includeTool(DefaultToolHelper)
+        }
+
+        then:
+        binding.configTool.mergeMetridocConfig
+
+        when:
+        binding = new Binding()
+        binding.args = ["-mergeMetridocConfig=false"] as String[]
+        use(MetridocScript) {
+            binding.includeTool(DefaultToolHelper)
+        }
+
+        then:
+        !binding.configTool.mergeMetridocConfig
+    }
 
     void "converting a map to a map just returns the original config"() {
         given:

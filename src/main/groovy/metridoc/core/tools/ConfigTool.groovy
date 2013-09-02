@@ -15,7 +15,6 @@ import static org.apache.commons.lang.SystemUtils.USER_HOME
 class ConfigTool extends DefaultTool {
 
     Binding binding = new Binding()
-    boolean mergeMetridocConfig = true
     private static final String METRIDOC_CONFIG = "${USER_HOME}${FILE_SEPARATOR}.metridoc${FILE_SEPARATOR}MetridocConfig.groovy"
 
     void setBinding(Binding binding) {

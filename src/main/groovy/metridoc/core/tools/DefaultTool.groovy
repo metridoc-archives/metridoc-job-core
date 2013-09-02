@@ -10,12 +10,23 @@ import metridoc.core.MetridocScript
  * To change this template use File | Settings | File Templates.
  */
 abstract class DefaultTool implements Tool {
+    boolean mergeMetridocConfig = true
     Binding binding = new Binding()
 
+    @SuppressWarnings("GroovyAssignabilityCheck")
     void setBinding(Binding binding) {
         this.binding = binding
         if (!(this instanceof ConfigTool)) {
-            MetridocScript.includeTool(binding, ConfigTool)
+            if (binding.hasVariable("args")) {
+                def argsMap = ParseArgsTool.parseCli(binding.args)
+                if (argsMap.containsKey("mergeMetridocConfig")) {
+                    mergeMetridocConfig = Boolean.valueOf(argsMap.mergeMetridocConfig)
+                }
+
+            }
+            use(MetridocScript) {
+                binding.includeTool(mergeMetridocConfig: mergeMetridocConfig, ConfigTool)
+            }
         }
     }
 
