@@ -16,16 +16,16 @@ abstract class DefaultTool implements Tool {
     @SuppressWarnings("GroovyAssignabilityCheck")
     void setBinding(Binding binding) {
         this.binding = binding
-        if (!(this instanceof ConfigTool)) {
-            if (binding.hasVariable("args")) {
-                def argsMap = ParseArgsTool.parseCli(binding.args)
-                if (argsMap.containsKey("mergeMetridocConfig")) {
-                    mergeMetridocConfig = Boolean.valueOf(argsMap.mergeMetridocConfig)
-                }
-
+        if (binding.hasVariable("args")) {
+            def argsMap = ParseArgsTool.parseCli(binding.args)
+            if (argsMap.containsKey("mergeMetridocConfig")) {
+                mergeMetridocConfig = Boolean.valueOf(argsMap.mergeMetridocConfig)
             }
+
+        }
+        if (!(this instanceof ConfigTool)) {
             use(MetridocScript) {
-                binding.includeTool(mergeMetridocConfig: mergeMetridocConfig, ConfigTool)
+                binding.includeTool(ConfigTool)
             }
         }
     }
