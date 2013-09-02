@@ -47,7 +47,27 @@ class ConfigTool extends DefaultTool {
                 cliConfigObject.merge(metridocConfigObject)
             }
 
+            addCliConfigArgs(configSlurper, cliConfigObject)
+
             binding.config = cliConfigObject
+        }
+    }
+
+    void addCliConfigArgs(ConfigSlurper slurper, ConfigObject configObject) {
+        if (binding.hasVariable("args")) {
+            String[] args = binding.args
+            File tempFile = File.createTempFile("cliConfig", null)
+            args.each {
+                if (it.startsWith("-config.") || it.startsWith("--config.")) {
+                    def propertyToWrite = it.replaceFirst(/-?-config\./, "")
+                    tempFile.append(propertyToWrite)
+                    tempFile.append("\n")
+                }
+            }
+
+            if (tempFile.text) {
+                configObject.merge(slurper.parse(tempFile.toURI().toURL()))
+            }
         }
     }
 

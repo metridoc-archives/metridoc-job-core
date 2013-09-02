@@ -51,4 +51,20 @@ class ConfigToolSpec extends Specification {
         then:
         binding.hasVariable("foo")
     }
+
+    void "test config cli args"() {
+        given:
+        Binding binding = new Binding()
+        binding.args = ["-config.foo.bar=5"] as String[]
+
+        when:
+        def configTool
+        use(MetridocScript) {
+            configTool = binding.includeTool(ConfigTool)
+        }
+        def config = binding.config
+
+        then:
+        5 == config.foo.bar
+    }
 }
