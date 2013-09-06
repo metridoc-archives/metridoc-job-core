@@ -3,6 +3,8 @@ package metridoc.core
 import org.apache.commons.lang.StringUtils
 import org.slf4j.LoggerFactory
 
+import java.lang.reflect.Field
+
 class TargetManager {
     static final String DEFAULT_TARGET = "default"
     String defaultTarget = DEFAULT_TARGET
@@ -172,14 +174,10 @@ class TargetManager {
     protected void handlePropertyInjection(instance) {
         instance.properties.each { String key, value ->
             InjectArg injectArg
-            try {
-                def field = instance.getClass().getDeclaredField(key)
-                injectArg = field.getAnnotation(InjectArg)
 
-            }
-            catch (NoSuchFieldException ignored) {
-                //ignore... handles issues when searching for field "class" for instance
-                return
+            def field = getField(instance, key)
+            if (field) {
+                injectArg = field.getAnnotation(InjectArg)
             }
 
             boolean ignoreInjection = injectArg ? injectArg.ignore() : false
@@ -195,7 +193,7 @@ class TargetManager {
     protected void injectWithBinding(def instance, String fieldName, InjectArg injectArg) {
         boolean injectByName = injectArg ? injectArg.injectByName() : true
         if (injectByName) {
-            if(binding.hasVariable(fieldName)) {
+            if (binding.hasVariable(fieldName)) {
                 setValueOnInstance(instance, fieldName, binding."$fieldName")
             }
         }
@@ -206,7 +204,7 @@ class TargetManager {
         def usedName = injectArg ? injectArg.injectByName() ? fieldName : null : fieldName
         def key = injectArg ? injectArg.config() ?: usedName : usedName
 
-        if(configObject instanceof ConfigObject) {
+        if (configObject instanceof ConfigObject) {
             def flattened = configObject.flatten()
             if (flattened.containsKey(key)) {
                 return setValueOnInstance(instance, fieldName, flattened[key])
@@ -232,7 +230,7 @@ class TargetManager {
     @SuppressWarnings("GrMethodMayBeStatic")
     protected boolean setValueOnInstance(instance, String fieldName, value) {
         try {
-            def field = instance.getClass().getDeclaredField(fieldName)
+            def field = getField(instance, fieldName)
             def type = field.type
             instance."$fieldName" = value.asType(type)
             return true
@@ -246,5 +244,21 @@ class TargetManager {
 
     def runDefaultTarget() {
         depends(defaultTarget)
+    }
+
+    protected Field getField(instance, String fieldName) {
+        def clazz = instance.getClass()
+        def field = null
+
+        while (clazz && field == null) {
+            try {
+                field = clazz.getDeclaredField(fieldName)
+            }
+            catch (NoSuchFieldException ignored) {
+                clazz = clazz.superclass
+            }
+        }
+
+        return field
     }
 }
