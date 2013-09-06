@@ -41,7 +41,9 @@ dependencies {
     compile('org.codehaus.groovy:groovy-all:2.0.8')
     compile('org.apache.ivy:ivy:2.2.0')
     compile("mysql:mysql-connector-java:5.1.20")
-    runtime('dom4j:dom4j:1.6.1')
+    runtime('dom4j:dom4j:1.6.1') {
+        exclude module: "xml-apis"
+    }
     compile("org.apache.camel:camel-stream:$camelVersion") {
         exclude module: 'camel-core'
     }
@@ -107,7 +109,14 @@ enableMaven { pom ->
                 artifactId: "dom4j",
                 groupId: "dom4j"
         )
+
+        def xmlApisExclusion = Exclusion.newInstance(
+                artifactId: "xml-apis",
+                groupId: "xml-apis"
+        )
+
         pomToConfigure.dependencies.each { dep ->
+            dep.exclusions.add(xmlApisExclusion)
             def artifactId = dep.artifactId
             def camelCore = artifactId == 'camel-core'
             def notCoreCamelDependency = !camelCore && dep.groupId == 'org.apache.camel'
