@@ -173,7 +173,7 @@ class TargetManager {
 
     protected void handlePropertyInjection(instance) {
         instance.properties.each { String key, value ->
-            InjectArg injectArg
+            InjectArg injectArg = null
 
             def field = getField(instance, key)
             if (field) {
@@ -232,7 +232,14 @@ class TargetManager {
         try {
             def field = getField(instance, fieldName)
             def type = field.type
-            instance."$fieldName" = value.asType(type)
+
+            def isBoolean = type instanceof Boolean || type.name == "boolean"
+            if(isBoolean) {
+                instance."$fieldName" = Boolean.valueOf(value)
+            }
+            else {
+                instance."$fieldName" = value.asType(type)
+            }
             return true
         }
         catch (Throwable ignored) {
@@ -246,7 +253,7 @@ class TargetManager {
         depends(defaultTarget)
     }
 
-    protected Field getField(instance, String fieldName) {
+    protected static Field getField(instance, String fieldName) {
         def clazz = instance.getClass()
         def field = null
 
