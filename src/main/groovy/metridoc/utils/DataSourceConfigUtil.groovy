@@ -9,13 +9,16 @@ import javax.sql.DataSource
  */
 class DataSourceConfigUtil {
 
-    static Properties getHibernatePoperties(ConfigObject config) {
+    public static final String DEFAULT_DATASOURCE = "dataSource"
+
+    static Properties getHibernatePoperties(ConfigObject config, String dataSourceName) {
+        String dataSourceNameUsed = dataSourceName ?: DEFAULT_DATASOURCE
         def result = [:]
         result."hibernate.current_session_context_class" = "thread"
         result."hibernate.hbm2ddl.auto" = "update"
         result."hibernate.cache.provider_class" = "org.hibernate.cache.NoCacheProvider"
         result.putAll(config.flatten().findAll { String key, value -> key.startsWith("hibernate") })
-        config.dataSource.with {
+        config."${dataSourceNameUsed}".with {
             if (dbCreate) {
                 result."hibernate.hbm2ddl.auto" = dbCreate.toString()
             }
@@ -41,9 +44,14 @@ class DataSourceConfigUtil {
         return result as Properties
     }
 
-    static Map getHibernateOnlyProperties(ConfigObject config) {
+    static Properties getHibernatePoperties(ConfigObject config) {
+        getHibernatePoperties(config, DEFAULT_DATASOURCE)
+    }
+
+    static Map getHibernateOnlyProperties(ConfigObject config, String dataSourceName) {
+        def dataSourceNameUsed = dataSourceName ?: DEFAULT_DATASOURCE
         def properties = getHibernatePoperties(config)
-        config.dataSource.with {
+        config."${dataSourceNameUsed}".with {
             if (url) {
                 properties."hibernate.connection.url" = url.toString()
             }
@@ -66,23 +74,38 @@ class DataSourceConfigUtil {
         return properties
     }
 
-    static DataSource getDataSource(ConfigObject config) {
-        new BasicDataSource(getDataSourceProperties(config))
+    static Map getHibernateOnlyProperties(ConfigObject config) {
+        getHibernateOnlyProperties(config, DEFAULT_DATASOURCE)
     }
 
-    static Map getDataSourceProperties(ConfigObject config) {
+    static DataSource getDataSource(ConfigObject config, String dataSourceName) {
+        def dataSourceNameUsed = dataSourceName ?: DEFAULT_DATASOURCE
+        def dataSourceProperties = getDataSourceProperties(config, dataSourceNameUsed)
+        new BasicDataSource(dataSourceProperties)
+    }
+
+    static DataSource getDataSource(ConfigObject config) {
+        getDataSource(config, DEFAULT_DATASOURCE)
+    }
+
+    static Map getDataSourceProperties(ConfigObject config, String dataSourceName) {
+        def dataSourceNameUsed = dataSourceName ?: DEFAULT_DATASOURCE
         def result = [:]
-        config.dataSource.with {
+        config."${dataSourceNameUsed}".with {
             result.username = username
             result.password = password
             result.url = url
             result.driverClassName = driverClassName
         }
 
-        def dataSourceProperties = config.dataSource.properties
+        def dataSourceProperties = config."${dataSourceNameUsed}".properties
         if (dataSourceProperties) {
             result.putAll(dataSourceProperties)
         }
         return result
+    }
+
+    static Map getDataSourceProperties(ConfigObject config) {
+        getDataSourceProperties(config, DEFAULT_DATASOURCE)
     }
 }
