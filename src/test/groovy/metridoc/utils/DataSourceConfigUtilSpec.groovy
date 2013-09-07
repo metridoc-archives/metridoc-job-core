@@ -116,5 +116,15 @@ class DataSourceConfigUtilSpec extends Specification {
         then:
         noExceptionThrown()
         50 == dataSource.maxActive
+
+        when: "using a different dataSource name"
+        config.dataSource_alt = properties
+        config.dataSource_alt.properties.maxActive = 5
+        dataSource = DataSourceConfigUtil.getDataSource(config, "dataSource_alt")
+        dataSource.getConnection()
+
+        then:
+        noExceptionThrown()
+        5 == dataSource.maxActive
     }
 }
