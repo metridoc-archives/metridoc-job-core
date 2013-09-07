@@ -46,6 +46,22 @@ class MetridocScriptTest extends Specification {
         noExceptionThrown()
         tool.entityClasses
     }
+
+    void "test injection with abstract classes as parents" () {
+        given:
+        def binding = new Binding()
+        def targetManager = new TargetManager()
+        binding.foo = "bar"
+        def bar = new Bar()
+        targetManager.binding = binding
+
+        when:
+        targetManager.handlePropertyInjection(bar)
+
+        then:
+        noExceptionThrown()
+        "bar" == bar.foo
+    }
 }
 
 class MetridocScriptHelper extends Script {
@@ -54,4 +70,12 @@ class MetridocScriptHelper extends Script {
     Object run() {
         return null  //To change body of implemented methods use File | Settings | File Templates.
     }
+}
+
+abstract class Foo {
+    def foo
+}
+
+class Bar extends Foo {
+
 }
