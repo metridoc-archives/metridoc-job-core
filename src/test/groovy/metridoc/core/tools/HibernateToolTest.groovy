@@ -1,5 +1,8 @@
 package metridoc.core.tools
 
+import com.mysql.jdbc.Driver
+import metridoc.core.MetridocScript
+import org.hibernate.dialect.MySQL5InnoDBDialect
 import org.junit.Test
 
 
@@ -28,8 +31,8 @@ class HibernateToolTest {
         assert "create-drop" == properties.get("hibernate.hbm2ddl.auto")
 
         //what if we use classes instead of strings?
-        configObject.dataSource.dialect = org.hibernate.dialect.MySQL5InnoDBDialect
-        configObject.dataSource.driverClassName = com.mysql.jdbc.Driver
+        configObject.dataSource.dialect = MySQL5InnoDBDialect
+        configObject.dataSource.driverClassName = Driver
         configObject.dataSource.dbCreate = "create-drop"
 
         properties = new HibernateTool().convertDataSourcePropsToHibernate(configObject)
@@ -53,6 +56,23 @@ class HibernateToolTest {
         tool.init()
         assert "org.hibernate.dialect.H2Dialect" == tool.hibernateProperties."hibernate.dialect"
         assert "org.h2.Driver" == tool.hibernateProperties."hibernate.connection.driver_class"
+    }
+
+    @Test
+    void "test injection params"() {
+        def binding = new Binding()
+        binding.args = [
+                "--mergeMetridocConfig=false",
+                "--localMysql"
+        ] as String[]
+
+        use(MetridocScript) {
+            def tool = binding.includeTool(HibernateTool)
+            assert !tool.mergeMetridocConfig
+            assert tool.localMysql
+            def config = binding.config
+            assert "jdbc:mysql://localhost:3306/test" == config.dataSource.url
+        }
     }
 }
 
