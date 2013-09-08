@@ -8,7 +8,7 @@ import groovy.util.logging.Slf4j
  */
 @Slf4j
 class MainTool extends RunnableTool {
-    Map<String, Class<? extends RunnableTool>> runnableTools
+    Map<String, Class<? extends RunnableTool>> runnableTools = [:]
     String defaultTool
 
     public static void main(String[] args) {
@@ -26,6 +26,7 @@ class MainTool extends RunnableTool {
         assert params || defaultTool: "params cannot be null or empty, or a defaultTool must be specified"
         String toolToRun = params ? params[0] : defaultTool
         log.info "running $toolToRun"
+        assert runnableTools.containsKey(toolToRun): "[$toolToRun] does not exist"
         def tool = includeTool(runnableTools[toolToRun])
         tool.execute()
     }
