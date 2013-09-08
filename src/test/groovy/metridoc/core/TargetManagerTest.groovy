@@ -2,7 +2,6 @@ package metridoc.core
 
 import metridoc.core.tools.DefaultTool
 import metridoc.core.tools.HibernateTool
-import metridoc.core.InjectArg
 import metridoc.core.tools.Tool
 import org.junit.Test
 
@@ -105,12 +104,22 @@ class TargetManagerTest {
         assert "fromConfig" == helper.fooBar
         assert null == helper.baz
 
-        binding.argsMap = [fooBaz:"bam"]
+        binding.argsMap = [fooBaz: "bam"]
         targetManager.handlePropertyInjection(helper)
         assert "bam" == helper.fooBar
 
         helper = MetridocScript.includeTool(binding, PropertyInjectionHelper)
         assert "bam" == helper.fooBar
+    }
+
+    @Test
+    void "test injection with a base"() {
+        def binding = targetManager.binding
+        binding.config = new ConfigObject()
+        binding.config.foo.bar = "bam"
+        def helper = new PropertyInjectorHelperWithBase()
+        targetManager.handlePropertyInjection(helper)
+        assert "bam" == helper.bar
     }
 
     class FooToolHelper implements Tool {
@@ -134,6 +143,11 @@ class TargetManagerTest {
         def baz
 
         def binding
+    }
+
+    @InjectArgBase("foo")
+    class PropertyInjectorHelperWithBase {
+        def bar
     }
 
     class FooBarToolHelper extends DefaultTool {

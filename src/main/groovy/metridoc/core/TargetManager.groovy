@@ -172,19 +172,24 @@ class TargetManager {
     }
 
     protected void handlePropertyInjection(instance) {
+        InjectArgBase injectArgBase = instance.getClass().getAnnotation(InjectArgBase)
         instance.properties.each { String key, value ->
-            InjectArg injectArg = null
-
-            def field = getField(instance, key)
-            if (field) {
+            InjectArg injectArg
+            try {
+                def field = instance.getClass().getDeclaredField(key)
                 injectArg = field.getAnnotation(InjectArg)
+
+            }
+            catch (NoSuchFieldException ignored) {
+                //ignore... handles issues when searching for field "class" for instance
+                return
             }
 
             boolean ignoreInjection = injectArg ? injectArg.ignore() : false
 
             if (ignoreInjection) return
             if (injectWithCli(instance, key, injectArg)) return
-            if (injectWithConfig(instance, key, injectArg)) return
+            if (injectWithConfig(instance, key, injectArg, injectArgBase)) return
 
             injectWithBinding(instance, key, injectArg)
         }
@@ -193,7 +198,7 @@ class TargetManager {
     protected void injectWithBinding(def instance, String fieldName, InjectArg injectArg) {
         boolean injectByName = injectArg ? injectArg.injectByName() : true
         if (injectByName) {
-            if (binding.hasVariable(fieldName)) {
+            if(binding.hasVariable(fieldName)) {
                 setValueOnInstance(instance, fieldName, binding."$fieldName")
             }
         }
@@ -204,9 +209,10 @@ class TargetManager {
         def usedName = injectArg ? injectArg.injectByName() ? fieldName : null : fieldName
         def key = injectArg ? injectArg.config() ?: usedName : usedName
 
-        if (configObject instanceof ConfigObject) {
+        if(configObject instanceof ConfigObject) {
             def flattened = configObject.flatten()
-            if (flattened.containsKey(key)) {
+            def containsKey = flattened.containsKey(key as String)
+            if (containsKey) {
                 return setValueOnInstance(instance, fieldName, flattened[key])
             }
         }
