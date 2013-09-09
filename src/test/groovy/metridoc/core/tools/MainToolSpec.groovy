@@ -13,6 +13,19 @@ class MainToolSpec extends Specification {
     @Rule
     public final StandardOutputStreamLog log = new StandardOutputStreamLog()
 
+    void "if the main tool is run for a none existant tool, error is thrown"() {
+        given:
+        def mainTool = new MainTool()
+        mainTool.defaultTool = "foo"
+        mainTool.runnableTools.camelTool = CamelTool
+
+        when:
+        mainTool.execute()
+
+        then:
+        thrown(AssertionError)
+    }
+
     void "run tool spec"() {
         given: "binding containing args"
         def binding = new Binding()
