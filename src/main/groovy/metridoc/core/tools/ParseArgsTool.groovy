@@ -15,8 +15,14 @@ class ParseArgsTool {
 
     @SuppressWarnings("GrMethodMayBeStatic")
     void init() {
-        if (binding.hasVariable(ARGS) && binding."$ARGS" instanceof String[]) {
-            String[] args = binding."$ARGS"
+        if (binding.hasVariable(ARGS) &&
+                (binding."$ARGS" instanceof String[] ||
+                        binding."$ARGS" instanceof List)) {
+
+            def args = binding."$ARGS"
+            if (args instanceof List) {
+                args = args as String[]
+            }
             binding.argsMap = parseCli(args)
         }
     }
