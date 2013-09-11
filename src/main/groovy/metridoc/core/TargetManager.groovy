@@ -176,9 +176,13 @@ class TargetManager {
         instance.properties.each { String key, value ->
             InjectArg injectArg
             try {
-                def field = instance.getClass().getDeclaredField(key)
-                injectArg = field.getAnnotation(InjectArg)
-
+                def field = getField(instance, key)
+                if (field) {
+                    injectArg = field.getAnnotation(InjectArg)
+                }
+                else {
+                    return
+                }
             }
             catch (NoSuchFieldException ignored) {
                 //ignore... handles issues when searching for field "class" for instance
@@ -209,6 +213,13 @@ class TargetManager {
         def configObject = binding.variables.config
         def usedName = injectArg ? injectArg.injectByName() ? fieldName : null : fieldName
         def key = injectArg ? injectArg.config() ?: usedName : usedName
+        def prefix
+        if (injectArgBase) {
+            prefix = injectArgBase.value()
+        }
+        if (!key.contains(".") && prefix) {
+            key = "$prefix.$key"
+        }
 
         if (configObject instanceof ConfigObject) {
             def flattened = configObject.flatten()
@@ -242,7 +253,7 @@ class TargetManager {
 
             def isBoolean = type instanceof Boolean || type.name == "boolean"
             if (isBoolean) {
-                instance."$fieldName" = Boolean.valueOf(value)
+                instance."$fieldName" = Boolean.valueOf(value as String)
             }
             else {
                 instance."$fieldName" = value.asType(type)
