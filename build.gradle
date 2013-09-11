@@ -90,6 +90,9 @@ dependencies {
     runtime 'org.javassist:javassist:3.16.1-GA'
     runtime 'antlr:antlr:2.7.7'
     compile 'net.sf.opencsv:opencsv:2.3'
+    compile('com.bloidonia:groovy-stream:0.5.4') {
+        exclude module: "groovy-all"
+    }
 }
 
 enableMaven { pom ->
@@ -113,6 +116,11 @@ enableMaven { pom ->
         def xmlApisExclusion = Exclusion.newInstance(
                 artifactId: "xml-apis",
                 groupId: "xml-apis"
+        )
+
+        def groovyAllExclusion = Exclusion.newInstance(
+                artifactId: "groovy-all",
+                groupId: "org.codehaus.groovy"
         )
 
         pomToConfigure.dependencies.each { dep ->
@@ -151,6 +159,10 @@ enableMaven { pom ->
                         artifactId: "groovy-all",
                         groupId: "org.codehaus.groovy"
                 ))
+            }
+
+            if (artifactId == "groovy-stream") {
+                dep.addExclusion(groovyAllExclusion)
             }
 
             if (artifactId == "poi-ooxml") {

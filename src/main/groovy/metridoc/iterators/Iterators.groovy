@@ -1,5 +1,6 @@
 package metridoc.iterators
 
+import groovy.stream.Stream
 import metridoc.writers.*
 
 /**
@@ -23,6 +24,18 @@ class Iterators {
             split: SplitIteratorWriter
     ]
 
+    static WrappedIterator toRecordIterator(Iterator iterator) {
+        def iteratorToWrap = toRowIterator(iterator)
+        new WrappedIterator(iterator: iteratorToWrap)
+    }
+
+    /**
+     * please use {@link Iterators#toRowIterator(java.util.Iterator)}  instead
+     *
+     * @deprecated
+     * @param iterator
+     * @return
+     */
     static RecordIterator toRowIterator(Iterator iterator) {
         assert iterator: "iterator must not be null or empty"
         new RecordIterator() {
@@ -42,11 +55,28 @@ class Iterators {
         }
     }
 
+    static WrappedIterator toRecordIterator(List<Map> iterator) {
+        new WrappedIterator(iterator: toRowIterator(iterator))
+    }
+
+    /**
+     * Please use {@link Iterators#toRecordIterator(java.util.List)}
+     *
+     * @deprecated
+     * @param iterator
+     * @return
+     */
     static RecordIterator toRowIterator(List<Map> iterator) {
         assert iterator: "iterator must not be null or empty"
         toRowIterator(iterator.iterator())
     }
 
+    /**
+     * @deprecated
+     * @param iterator
+     * @param filter
+     * @return
+     */
     static RecordIterator toFilteredRowIterator(RecordIterator iterator, Closure<Boolean> filter) {
         assert iterator: "iterator must not be null"
         assert filter: "filter must not be null"
@@ -58,7 +88,7 @@ class Iterators {
     }
 
     /**
-     *
+     * @deprecated
      * @param rowIterator
      * @param transformer should return null if it should not be collected, otherwise should return a Map
      * @return
@@ -96,6 +126,17 @@ class Iterators {
 class WrappedIterator {
     @Delegate
     RecordIterator iterator
+
+    WrappedIterator filter(Closure closure) {
+        Iterators.toRecordIterator(Stream.from(iterator).filter(closure))
+    }
+
+    WrappedIterator map(Closure closure) {
+        Iterators.toRecordIterator(Stream.from(iterator).map { Record record ->
+            closure.call(record)
+            return record
+        })
+    }
 
     WriteResponse writeTo(LinkedHashMap properties, Class<IteratorWriter> writerClass) {
         def writer = Iterators.createWriter(properties, writerClass)

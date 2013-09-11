@@ -198,18 +198,19 @@ class TargetManager {
     protected void injectWithBinding(def instance, String fieldName, InjectArg injectArg) {
         boolean injectByName = injectArg ? injectArg.injectByName() : true
         if (injectByName) {
-            if(binding.hasVariable(fieldName)) {
+            if (binding.hasVariable(fieldName)) {
                 setValueOnInstance(instance, fieldName, binding."$fieldName")
             }
         }
     }
 
-    protected boolean injectWithConfig(def instance, String fieldName, InjectArg injectArg) {
+    protected boolean injectWithConfig(def instance, String fieldName, InjectArg injectArg,
+                                       InjectArgBase injectArgBase) {
         def configObject = binding.variables.config
         def usedName = injectArg ? injectArg.injectByName() ? fieldName : null : fieldName
         def key = injectArg ? injectArg.config() ?: usedName : usedName
 
-        if(configObject instanceof ConfigObject) {
+        if (configObject instanceof ConfigObject) {
             def flattened = configObject.flatten()
             def containsKey = flattened.containsKey(key as String)
             if (containsKey) {
@@ -240,7 +241,7 @@ class TargetManager {
             def type = field.type
 
             def isBoolean = type instanceof Boolean || type.name == "boolean"
-            if(isBoolean) {
+            if (isBoolean) {
                 instance."$fieldName" = Boolean.valueOf(value)
             }
             else {
