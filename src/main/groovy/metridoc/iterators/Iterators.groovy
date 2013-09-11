@@ -20,13 +20,15 @@ class Iterators {
     public static final WRITERS = [
             sql: DataSourceIteratorWriter,
             table: TableIteratorWriter,
+            sqlTable: DataSourceIteratorWriter,
+            guavaTable: TableIteratorWriter,
             entity: EntityIteratorWriter,
             split: SplitIteratorWriter
     ]
 
     static WrappedIterator toRecordIterator(Iterator iterator) {
         def iteratorToWrap = toRowIterator(iterator)
-        new WrappedIterator(iterator: iteratorToWrap)
+        new WrappedIterator(wrappedIterator: iteratorToWrap)
     }
 
     /**
@@ -56,7 +58,7 @@ class Iterators {
     }
 
     static WrappedIterator toRecordIterator(List<Map> iterator) {
-        new WrappedIterator(iterator: toRowIterator(iterator))
+        new WrappedIterator(wrappedIterator: toRowIterator(iterator))
     }
 
     /**
@@ -103,7 +105,7 @@ class Iterators {
     @SuppressWarnings("GrMethodMayBeStatic")
     static WrappedIterator createIterator(LinkedHashMap properties, Class<RecordIterator> iteratorClass) {
         def iterator = iteratorClass.newInstance(properties)
-        new WrappedIterator(iterator: iterator)
+        new WrappedIterator(wrappedIterator: iterator)
     }
 
     static WrappedIterator createIterator(LinkedHashMap properties, String name) {
@@ -125,14 +127,14 @@ class Iterators {
 
 class WrappedIterator {
     @Delegate
-    RecordIterator iterator
+    RecordIterator wrappedIterator
 
     WrappedIterator filter(Closure closure) {
-        Iterators.toRecordIterator(Stream.from(iterator).filter(closure))
+        Iterators.toRecordIterator(Stream.from(wrappedIterator).filter(closure))
     }
 
     WrappedIterator map(Closure closure) {
-        Iterators.toRecordIterator(Stream.from(iterator).map { Record record ->
+        Iterators.toRecordIterator(Stream.from(wrappedIterator).map { Record record ->
             closure.call(record)
             return record
         })
@@ -140,12 +142,12 @@ class WrappedIterator {
 
     WriteResponse writeTo(LinkedHashMap properties, Class<IteratorWriter> writerClass) {
         def writer = Iterators.createWriter(properties, writerClass)
-        writer.write(iterator)
+        writer.write(wrappedIterator)
     }
 
     WriteResponse writeTo(LinkedHashMap properties, String name) {
         def writer = Iterators.createWriter(properties, name)
-        writer.write(iterator)
+        writer.write(wrappedIterator)
     }
 
     WriteResponse writeTo(String name) {

@@ -20,18 +20,13 @@ class EntityIteratorWriterSpec extends Specification {
 
 
     def "test basic entity writing workflow"() {
-        given: "some valid data"
-        def data = [
+        when: "the data is written"
+        def response = Iterators.fromMaps(
                 [foo: "asd"],
                 [foo: "sdf"],
                 [foo: "fgd"],
                 [foo: "dfgh"]
-        ]
-        def rowIterator = Iterators.toRowIterator(data)
-
-        when: "the data is written"
-        def writer = new EntityIteratorWriter(sessionFactory: hTool.sessionFactory, recordEntityClass: EntityHelper)
-        def response = writer.write(rowIterator)
+        ).toEntity(EntityHelper, hTool)
 
         then: "appropriate data is returned"
         4 == response.aggregateStats[WRITTEN]

@@ -1,9 +1,13 @@
 package metridoc.iterators
 
 import com.google.common.collect.Table
+import groovy.sql.Sql
+import metridoc.utils.DataSourceConfigUtil
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
+
+import java.sql.ResultSet
 
 /**
  * Created with IntelliJ IDEA on 7/5/13
@@ -58,5 +62,26 @@ class IteratorsSpec extends Specification {
         then:
         set.contains(0)
         set.contains(1)
+    }
+
+    void "test sql iterator extension"() {
+        given:
+        def dataSource = DataSourceConfigUtil.embeddedDataSource
+        def sql = new Sql(dataSource)
+        sql.execute("create table foo (bar varchar(5))")
+
+        when: "fromSql is called with no arguments"
+        Iterators.fromSql(null)
+
+        then:
+        thrown(AssertionError)
+
+        when: "everything is fine when there is a dataSource"
+        sql.query("select * from foo") {ResultSet resultSet ->
+            Iterators.fromSql(resultSet)
+        }
+
+        then:
+        noExceptionThrown()
     }
 }

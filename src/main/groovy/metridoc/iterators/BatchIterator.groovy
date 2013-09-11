@@ -16,6 +16,9 @@ package metridoc.iterators
 
 import com.google.common.collect.AbstractIterator
 
+/**
+ * untested, use at your own risk
+ */
 class BatchIterator extends AbstractIterator<List<Map<String, Object>>> {
     /**
      * the wrapped iterator

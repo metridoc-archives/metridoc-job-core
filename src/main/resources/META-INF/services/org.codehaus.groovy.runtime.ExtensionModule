@@ -1,0 +1,4 @@
+moduleName=iterator-module
+moduleVersion=1.0
+extensionClasses=metridoc.iterators.WrappedIteratorExtension
+staticExtensionClasses=metridoc.iterators.IteratorsExtension

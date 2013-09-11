@@ -33,8 +33,7 @@ class CsvIteratorSpec extends Specification {
 
     void "can provide headers instead of assuming the top line is a header"() {
         given:
-        setupSimpleIterator()
-        iterator.headers = ["c", "b", "a"]
+        setupSimpleIterator(["c", "b", "a"])
 
         expect:
         while (iterator.hasNext()) {
@@ -51,10 +50,20 @@ class CsvIteratorSpec extends Specification {
         "baz"  | 5      | "bar"
     }
 
+    void "full workflow to guava table"() {
+        when:
+        def response = Iterators.fromCsv(getData()).toGuavaTable()
+
+        then:
+        noExceptionThrown()
+        0 == response.fatalErrors.size()
+        0 == response.errorTotal
+        2 == response.writtenTotal
+    }
+
     void "errors are thrown when header size and result size dont match"() {
         given:
-        setupSimpleIterator()
-        iterator.headers = ["a", "b"]
+        setupSimpleIterator(["a", "b"])
 
         when:
         iterator.next()
@@ -63,8 +72,11 @@ class CsvIteratorSpec extends Specification {
         thrown IllegalStateException
     }
 
-    void setupSimpleIterator() {
-        def inputStream = new ByteArrayInputStream(simpleData.bytes)
-        iterator = new CsvIterator(inputStream: inputStream)
+    InputStream getData() {
+        new ByteArrayInputStream(simpleData.bytes)
+    }
+
+    void setupSimpleIterator(headers = null) {
+        iterator = Iterators.fromCsv(getData(), headers).wrappedIterator
     }
 }

@@ -105,6 +105,16 @@ class DataSourceConfigUtil {
         return result
     }
 
+    static getEmbeddedDataSource() {
+        def dataSource = new BasicDataSource()
+        dataSource.username = "sa"
+        dataSource.password = ""
+        dataSource.url = "jdbc:h2:mem:devDb;MVCC=TRUE;LOCK_TIMEOUT=10000"
+        dataSource.driverClassName= "org.h2.Driver"
+
+        return dataSource
+    }
+
     static Map getDataSourceProperties(ConfigObject config) {
         getDataSourceProperties(config, DEFAULT_DATASOURCE)
     }

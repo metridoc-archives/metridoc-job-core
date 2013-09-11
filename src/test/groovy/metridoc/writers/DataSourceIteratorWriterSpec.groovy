@@ -2,6 +2,7 @@ package metridoc.writers
 
 import groovy.sql.Sql
 import metridoc.iterators.Iterators
+import metridoc.utils.DataSourceConfigUtil
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType
 import spock.lang.Specification
@@ -14,25 +15,24 @@ import static metridoc.writers.WrittenRecordStat.Status.WRITTEN
 
 class DataSourceIteratorWriterSpec extends Specification {
 
-    def dataSource = new EmbeddedDatabaseBuilder().setType(EmbeddedDatabaseType.H2).build()
+    def dataSource = DataSourceConfigUtil.embeddedDataSource
     def sql = new Sql(dataSource)
-    def iterator = Iterators.toRowIterator([
+    def iterator = Iterators.fromMaps(
             [foo: "bar", bar: 5],
             [foo: "baz", bar: 7]
-    ])
+    )
 
     def setup() {
         sql.execute("create table foo(foo varchar(3), bar int)")
     }
 
     def cleanup() {
-        dataSource.shutdown()
+        dataSource.close()
     }
 
     def "test basic dataSource writing"() {
         when: "data is written to the foo table"
-        def writer = new DataSourceIteratorWriter(dataSource: dataSource, tableName: "foo")
-        def results = writer.write(iterator)
+        def results = iterator.toDataSource(dataSource, "foo")
 
         then: "foo will have data from the iterator stored"
         2 == sql.firstRow("select count(*) as total from foo").total
@@ -45,7 +45,7 @@ class DataSourceIteratorWriterSpec extends Specification {
 
     def "dataSource and tableName must be set"() {
         when: "a dataSource writer is created without a dataSource"
-        new DataSourceIteratorWriter().write(iterator)
+        iterator.toDataSource(null, "foo")
 
         then: "an AssertionError is thrown"
         AssertionError error = thrown()
@@ -63,16 +63,21 @@ class DataSourceIteratorWriterSpec extends Specification {
 
     def "test errors when insert fails"() {
         given:
-        def data = [
+
+        def iterator1 = Iterators.fromMaps(
                 [foo: "bar", bar: 5],
                 [foo: "baz", bar: 7],
                 [foo: "foobar", bar: 7]
-        ]
-        def iterator1 = Iterators.toRowIterator(data)
-        def iterator2 = Iterators.toRowIterator(data)
+        )
+
+        def iterator2 = Iterators.fromMaps(
+                [foo: "bar", bar: 5],
+                [foo: "baz", bar: 7],
+                [foo: "foobar", bar: 7]
+        )
 
         when: "a record in a batch is too long"
-        def response = new DataSourceIteratorWriter(tableName: "foo", dataSource: dataSource).write(iterator1)
+        def response = iterator1.toDataSource(dataSource, "foo")
         def throwables = response.fatalErrors
 
         then: "a batch error occurs"
@@ -81,7 +86,7 @@ class DataSourceIteratorWriterSpec extends Specification {
         throwables[0] instanceof BatchUpdateException
 
         when: "a the table name does not exist"
-        response = new DataSourceIteratorWriter(tableName: "foobar", dataSource: dataSource).write(iterator2)
+        iterator2.toDataSource(dataSource, "fooBar")
         throwables = response.fatalErrors
 
         then: "an response exception occurs"

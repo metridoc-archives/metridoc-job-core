@@ -25,6 +25,13 @@ class DelimitedLineIterator extends FileIterator {
     @Lazy
     LineIterator lineIterator = { new LineIterator(getReader()) }()
 
+
+    /**
+     * if set to true, a missmatch between header count and split line count will throw assertion error,
+     * otherwise IllegalStateException
+     */
+    boolean dirtyData = false
+
     /**
      * if headers are not specified, column numbers are used
      */
@@ -61,7 +68,13 @@ class DelimitedLineIterator extends FileIterator {
             def result = [:]
             if (headers) {
                 if (headers.size() != splitLine.size()) {
-                    def errorMessage = "headers $headers and line $splitLine do not have the same number of arguments"
+                    def errorMessage = "headers $headers and line $splitLine do not have the same number of arguments, \n" +
+                            "headers count = ${headers.size()}\n"
+                            "splitLine count = ${splitLine.size()}"
+                    if(dirtyData) {
+                        assert headers.size() == splitLine.size() : errorMessage
+                    }
+
                     throw new IllegalStateException(errorMessage)
                 }
             } else {

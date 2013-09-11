@@ -10,7 +10,7 @@ class DelimitedLineIteratorSpec extends Specification {
 
     def text = "blah|blam\nbloom|blim"
     def inputStream = new ByteArrayInputStream(text.bytes)
-    def iterator = new DelimitedLineIterator(inputStream: inputStream, delimiter: /\|/)
+    def iterator = Iterators.fromDelimited(inputStream, /\|/)
 
     void "test basic iteration"() {
 
@@ -37,7 +37,7 @@ class DelimitedLineIteratorSpec extends Specification {
 
     void "delimiter must be set"() {
         when:
-        iterator.delimiter = null
+        iterator.wrappedIterator.delimiter = null
         iterator.next()
 
         then:
@@ -46,8 +46,10 @@ class DelimitedLineIteratorSpec extends Specification {
 
     void "headers size must be the same as each line"() {
         given:
-        iterator.headers = ["foo"]
-        iterator.delimitTill = 0
+        def iterator = Iterators.fromDelimited(inputStream, /\|/, [
+                headers: ["foo"],
+                delimitTill: 0,
+        ])
 
         when:
         iterator.next()
@@ -55,4 +57,21 @@ class DelimitedLineIteratorSpec extends Specification {
         then:
         thrown IllegalStateException
     }
+
+    void "if dirty data is specified, assertion error happens instead"() {
+        given:
+        def iterator = Iterators.fromDelimited(inputStream, /\|/, [
+                headers: ["foo"],
+                delimitTill: 0,
+                dirtyData: true
+        ])
+
+        when:
+        iterator.next()
+
+        then:
+        thrown AssertionError
+    }
+
+
 }
