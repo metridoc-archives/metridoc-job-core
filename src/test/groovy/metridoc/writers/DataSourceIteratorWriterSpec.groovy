@@ -3,8 +3,6 @@ package metridoc.writers
 import groovy.sql.Sql
 import metridoc.iterators.Iterators
 import metridoc.utils.DataSourceConfigUtil
-import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder
-import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType
 import spock.lang.Specification
 
 import javax.sql.DataSource
@@ -23,6 +21,13 @@ class DataSourceIteratorWriterSpec extends Specification {
     )
 
     def setup() {
+        try {
+            // in case we didn't close dataSource from other test
+            sql.execute("drop table foo")
+        }
+        catch (Throwable throwable) {
+            //do nothing
+        }
         sql.execute("create table foo(foo varchar(3), bar int)")
     }
 
