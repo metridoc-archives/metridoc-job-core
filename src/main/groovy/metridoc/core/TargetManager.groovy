@@ -270,8 +270,10 @@ class TargetManager {
 
     def runDefaultTarget() {
         includeTool(ParseArgsTool)
-        Map argsMap = binding.argsMap
-        defaultTarget = argsMap.target ?: defaultTarget
+        if (binding.hasVariable("argsMap")) {
+            Map argsMap = binding.argsMap
+            defaultTarget = argsMap.target ?: defaultTarget
+        }
         depends(defaultTarget)
     }
 

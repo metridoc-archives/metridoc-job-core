@@ -23,6 +23,13 @@ class DataSourceIteratorWriterSpec extends Specification {
     )
 
     def setup() {
+        try {
+            //in case we have a lingering connection and an existing foo table
+            sql.execute("drop table foo")
+        }
+        catch (Throwable ignore) {
+        }
+
         sql.execute("create table foo(foo varchar(3), bar int)")
     }
 
