@@ -1,5 +1,6 @@
 package metridoc.core
 
+import metridoc.core.tools.ParseArgsTool
 import org.apache.commons.lang.StringUtils
 import org.slf4j.LoggerFactory
 
@@ -268,6 +269,9 @@ class TargetManager {
     }
 
     def runDefaultTarget() {
+        includeTool(ParseArgsTool)
+        Map argsMap = binding.argsMap
+        defaultTarget = argsMap.target ?: defaultTarget
         depends(defaultTarget)
     }
 
