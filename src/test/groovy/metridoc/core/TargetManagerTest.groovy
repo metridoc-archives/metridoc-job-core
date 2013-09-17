@@ -122,6 +122,17 @@ class TargetManagerTest {
         assert "bam" == helper.bar
     }
 
+    @Test
+    void "target flag should also work in MetridocScript" () {
+        def binding = new Binding()
+        binding.args = ["--target=foo"]
+        def helper = new MetridocJobTestTargetHelperWithDefaultTarget()
+        helper.binding = binding
+        helper.run()
+        assert helper.fooRan
+        assert !helper.barRan
+    }
+
     class FooToolHelper implements Tool {
         def bar
         String bam
@@ -154,17 +165,30 @@ class TargetManagerTest {
         String foo
     }
 
+    class MetridocJobTestTargetHelperWithDefaultTarget extends Script {
+        @Override
+        Object run() {
+            use(MetridocScript) {
+                includeTargets(MetridocJobTestTargetHelper)
+                targetManager.defaultTarget = "bar"
+                runDefaultTarget()
+            }
+        }
+    }
+
     class MetridocJobTestTargetHelper extends Script {
 
         @Override
         Object run() {
             fooRan = false
+            barRan = false
             target(foo: "runs foo") {
                 fooRan = true
                 assert targetManager instanceof TargetManager
             }
 
             target(bar: "runs bar") {
+                barRan = true
                 depends("foo")
             }
         }
