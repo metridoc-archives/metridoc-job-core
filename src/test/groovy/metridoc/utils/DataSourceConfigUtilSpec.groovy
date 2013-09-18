@@ -159,4 +159,17 @@ class DataSourceConfigUtilSpec extends Specification {
         "jdbc:h2:mem:foo;MVCC=TRUE;LOCK_TIMEOUT=10000" == config.dataSource_bar.url
         "org.h2.Driver" == config.dataSource_bar.driverClassName
     }
+
+    void "should be able to get all the dataSource names"() {
+        given:
+        def config = new ConfigObject()
+        config.dataSource = [:]
+        config.dataSource_foo = [:]
+
+        when:
+        def result = DataSourceConfigUtil.getDataSourcesNames(config)
+
+        then:
+        ["dataSource", "dataSource_foo"] == result
+    }
 }

@@ -84,6 +84,10 @@ class DataSourceConfigUtil {
         new BasicDataSource(dataSourceProperties)
     }
 
+    static List getDataSourcesNames(ConfigObject configObject) {
+        configObject.keySet().findAll { it.startsWith("dataSource") } as List
+    }
+
     static DataSource getDataSource(ConfigObject config) {
         getDataSource(config, DEFAULT_DATASOURCE)
     }
