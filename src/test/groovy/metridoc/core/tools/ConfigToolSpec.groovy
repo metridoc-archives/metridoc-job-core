@@ -86,4 +86,28 @@ class ConfigToolSpec extends Specification {
         tool.binding.dataSource_foo
         tool.binding.sql_foo
     }
+
+    void "config from flag overrides home config"() {
+        given:
+        def metridocConfig = folder.newFile("MetridocConfig.groovy")
+        def flagConfig = folder.newFile("FlagConfig.groovy")
+
+        metridocConfig.withPrintWriter {
+            it.println("foo = \"bar\"")
+        }
+
+        flagConfig.withPrintWriter {
+            it.println("foo = \"foobar\"")
+        }
+
+        def configTool = new ConfigTool(metridocConfigLocation: metridocConfig.path)
+        def binding = new Binding()
+        binding.args = ["-config=${flagConfig.path}"] as String[]
+
+        when:
+        configTool.binding = binding
+
+        then:
+        "foobar" == configTool.getVariable("foo")
+    }
 }

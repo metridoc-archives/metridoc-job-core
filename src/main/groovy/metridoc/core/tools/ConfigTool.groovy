@@ -18,6 +18,7 @@ import static org.apache.commons.lang.SystemUtils.USER_HOME
 class ConfigTool extends DefaultTool {
 
     private static final String METRIDOC_CONFIG = "${USER_HOME}${FILE_SEPARATOR}.metridoc${FILE_SEPARATOR}MetridocConfig.groovy"
+    def metridocConfigLocation = METRIDOC_CONFIG
 
     void setBinding(Binding binding) {
         super.setBinding(binding)
@@ -42,10 +43,11 @@ class ConfigTool extends DefaultTool {
                 cliConfigObject = configureFromFile(cliConfigLocation, configSlurper)
             }
 
-            def metridocConfigFile = new File(METRIDOC_CONFIG)
+            def metridocConfigFile = new File(metridocConfigLocation)
             if (metridocConfigFile.exists() && mergeMetridocConfig) {
                 def metridocConfigObject = configureFromFile(metridocConfigFile, configSlurper)
-                cliConfigObject.merge(metridocConfigObject)
+                metridocConfigObject.merge(cliConfigObject)
+                cliConfigObject = metridocConfigObject
             }
 
             addCliConfigArgs(configSlurper, cliConfigObject)
