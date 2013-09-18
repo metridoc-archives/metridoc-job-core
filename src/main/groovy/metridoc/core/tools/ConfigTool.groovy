@@ -1,6 +1,8 @@
 package metridoc.core.tools
 
+import groovy.util.logging.Slf4j
 import metridoc.core.MetridocScript
+import metridoc.utils.DataSourceConfigUtil
 
 import static org.apache.commons.lang.SystemUtils.FILE_SEPARATOR
 import static org.apache.commons.lang.SystemUtils.USER_HOME
@@ -12,6 +14,7 @@ import static org.apache.commons.lang.SystemUtils.USER_HOME
  * Time: 7:51 PM
  * To change this template use File | Settings | File Templates.
  */
+@Slf4j
 class ConfigTool extends DefaultTool {
 
     private static final String METRIDOC_CONFIG = "${USER_HOME}${FILE_SEPARATOR}.metridoc${FILE_SEPARATOR}MetridocConfig.groovy"
@@ -48,6 +51,7 @@ class ConfigTool extends DefaultTool {
             addCliConfigArgs(configSlurper, cliConfigObject)
 
             binding.config = cliConfigObject
+            initiateDataSources(cliConfigObject)
         }
     }
 
@@ -93,6 +97,25 @@ class ConfigTool extends DefaultTool {
         config.merge(slurper.parse(file.toURI().toURL()))
 
         return this
+    }
+
+    void initiateDataSources(ConfigObject configObject) {
+        DataSourceConfigUtil.getDataSourcesNames(configObject).each { String dataSourceName ->
+            try {
+                def dataSource = DataSourceConfigUtil.getDataSource(configObject, dataSourceName)
+                def m = dataSourceName =~ /dataSource_(\w+)$/
+                def sqlName = "sql"
+                if (m.matches()) {
+                    sqlName += "_${m.group(1)}"
+                }
+
+                binding."$dataSourceName" = dataSource
+                binding."$sqlName" = dataSource
+            }
+            catch (Throwable throwable) {
+                log.warn "Could not instantiate dataSource [$dataSourceName]", throwable
+            }
+        }
     }
 }
 
