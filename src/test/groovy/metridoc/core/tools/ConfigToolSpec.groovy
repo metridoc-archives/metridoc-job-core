@@ -1,6 +1,7 @@
 package metridoc.core.tools
 
 import metridoc.core.MetridocScript
+import metridoc.utils.DataSourceConfigUtil
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
@@ -66,5 +67,23 @@ class ConfigToolSpec extends Specification {
 
         then:
         5 == config.foo.bar
+    }
+
+    void "test instantiating dataSource"() {
+        given:
+        def config = new ConfigObject()
+        DataSourceConfigUtil.addEmbeddedDataSource(config)
+        DataSourceConfigUtil.addEmbeddedDataSource(config, "foo", "foo")
+        config.dataSource_blah = "bad dataSource"
+
+        when:
+        def tool = new ConfigTool()
+        tool.initiateDataSources(config)
+
+        then:
+        tool.binding.dataSource
+        tool.binding.sql
+        tool.binding.dataSource_foo
+        tool.binding.sql_foo
     }
 }
