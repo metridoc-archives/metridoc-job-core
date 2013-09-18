@@ -127,4 +127,36 @@ class DataSourceConfigUtilSpec extends Specification {
         noExceptionThrown()
         5 == dataSource.maxActive
     }
+
+    void "test adding a dataSource to a config"() {
+        given:
+        def config = new ConfigObject()
+
+        when:
+        DataSourceConfigUtil.addEmbeddedDataSource(config)
+
+        then:
+        "" == config.dataSource.password
+        "sa" == config.dataSource.username
+        "jdbc:h2:mem:devDb;MVCC=TRUE;LOCK_TIMEOUT=10000" == config.dataSource.url
+        "org.h2.Driver" == config.dataSource.driverClassName
+
+        when:
+        DataSourceConfigUtil.addEmbeddedDataSource(config, "foo")
+
+        then: "the name of the database in the url is foo"
+        "" == config.dataSource.password
+        "sa" == config.dataSource.username
+        "jdbc:h2:mem:foo;MVCC=TRUE;LOCK_TIMEOUT=10000" == config.dataSource.url
+        "org.h2.Driver" == config.dataSource.driverClassName
+
+        when:
+        DataSourceConfigUtil.addEmbeddedDataSource(config, "foo", "bar")
+
+        then: "the name of the database in the url is foo"
+        "" == config.dataSource_bar.password
+        "sa" == config.dataSource_bar.username
+        "jdbc:h2:mem:foo;MVCC=TRUE;LOCK_TIMEOUT=10000" == config.dataSource_bar.url
+        "org.h2.Driver" == config.dataSource_bar.driverClassName
+    }
 }
