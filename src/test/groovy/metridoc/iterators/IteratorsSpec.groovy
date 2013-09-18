@@ -68,6 +68,13 @@ class IteratorsSpec extends Specification {
         given:
         def dataSource = DataSourceConfigUtil.embeddedDataSource
         def sql = new Sql(dataSource)
+        try {
+            //just in case dataSource was not closed from another test
+            sql.execute("drop table foo")
+        }
+        catch (Throwable ignore) {
+
+        }
         sql.execute("create table foo (bar varchar(5))")
 
         when: "fromSql is called with no arguments"
@@ -77,11 +84,19 @@ class IteratorsSpec extends Specification {
         thrown(AssertionError)
 
         when: "everything is fine when there is a dataSource"
-        sql.query("select * from foo") {ResultSet resultSet ->
+        sql.query("select * from foo") { ResultSet resultSet ->
             Iterators.fromSql(resultSet)
         }
 
         then:
         noExceptionThrown()
+
+        cleanup:
+        try {
+            dataSource.close()
+        }
+        catch (Throwable ignore) {
+
+        }
     }
 }
