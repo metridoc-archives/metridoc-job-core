@@ -84,6 +84,10 @@ class DataSourceConfigUtil {
         new BasicDataSource(dataSourceProperties)
     }
 
+    static List getDataSourcesNames(ConfigObject configObject) {
+        configObject.keySet().findAll { it.startsWith("dataSource") } as List
+    }
+
     static DataSource getDataSource(ConfigObject config) {
         getDataSource(config, DEFAULT_DATASOURCE)
     }
@@ -110,12 +114,29 @@ class DataSourceConfigUtil {
         dataSource.username = "sa"
         dataSource.password = ""
         dataSource.url = "jdbc:h2:mem:devDb;MVCC=TRUE;LOCK_TIMEOUT=10000"
-        dataSource.driverClassName= "org.h2.Driver"
+        dataSource.driverClassName = "org.h2.Driver"
 
         return dataSource
     }
 
     static Map getDataSourceProperties(ConfigObject config) {
         getDataSourceProperties(config, DEFAULT_DATASOURCE)
+    }
+
+    static void addEmbeddedDataSource(ConfigObject configObject) {
+        addEmbeddedDataSource(configObject, "devDb")
+    }
+
+    static void addEmbeddedDataSource(ConfigObject configObject, String name) {
+        addEmbeddedDataSource(configObject, name, "dataSource")
+    }
+
+    static void addEmbeddedDataSource(ConfigObject configObject, String name, String dataSourceName) {
+        def dataSourceNameToUse = dataSourceName.startsWith("dataSource") ? dataSourceName : "dataSource_${dataSourceName}"
+
+        configObject."$dataSourceNameToUse".username = "sa"
+        configObject."$dataSourceNameToUse".password = ""
+        configObject."$dataSourceNameToUse".url = "jdbc:h2:mem:${name};MVCC=TRUE;LOCK_TIMEOUT=10000"
+        configObject."$dataSourceNameToUse".driverClassName = "org.h2.Driver"
     }
 }
