@@ -319,6 +319,4 @@ class TargetManager {
 
         return field
     }
-
-
 }
