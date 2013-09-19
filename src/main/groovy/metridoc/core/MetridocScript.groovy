@@ -54,8 +54,8 @@ class MetridocScript {
         getManager(self).includeTargets(targets)
     }
 
-    static <T> T includeService(Script self, Class<T> tool) {
-        getManager(self).includeService(tool)
+    static <T> T includeService(Script self, Class<T> serviceClass) {
+        getManager(self).includeService(serviceClass)
     }
 
     /**
@@ -68,16 +68,16 @@ class MetridocScript {
         getManager(self).includeService(tool)
     }
 
-    static <T> T includeService(Binding self, Class<T> tool) {
-        getManager(self).includeService(tool)
+    static <T> T includeService(Binding self, Class<T> serviceClass) {
+        getManager(self).includeService(serviceClass)
     }
 
     static <T> T includeTool(Binding self, Class<T> tool) {
         getManager(self).includeService(tool)
     }
 
-    static <T> T includeService(Script self, LinkedHashMap args, Class<T> tool) {
-        getManager(self).includeService(args, tool)
+    static <T> T includeService(Script self, LinkedHashMap args, Class<T> serviceClass) {
+        getManager(self).includeService(args, serviceClass)
     }
 
     /**
@@ -91,8 +91,8 @@ class MetridocScript {
         getManager(self).includeService(args, tool)
     }
 
-    static <T> T includeService(Binding self, LinkedHashMap args, Class<T> tool) {
-        getManager(self).includeService(args, tool)
+    static <T> T includeService(Binding self, LinkedHashMap args, Class<T> serviceClass) {
+        getManager(self).includeService(args, serviceClass)
     }
 
     /**
