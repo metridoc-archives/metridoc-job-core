@@ -1,12 +1,10 @@
 package metridoc.core.tools
 
+import metridoc.core.services.Service
+
 /**
- * Created with IntelliJ IDEA.
- * User: tbarker
- * Date: 3/18/13
- * Time: 10:01 AM
- * To change this template use File | Settings | File Templates.
+ * @deprecated
  */
-public interface Tool {
-    void setBinding(Binding binding)
+public interface Tool extends Service {
+
 }

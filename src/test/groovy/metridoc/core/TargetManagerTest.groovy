@@ -1,8 +1,8 @@
 package metridoc.core
 
-import metridoc.core.tools.DefaultTool
-import metridoc.core.tools.HibernateTool
-import metridoc.core.tools.Tool
+import metridoc.core.services.DefaultService
+import metridoc.core.services.HibernateService
+import metridoc.core.services.Service
 import org.junit.Test
 
 class TargetManagerTest {
@@ -35,10 +35,10 @@ class TargetManagerTest {
 
     @Test
     void "include tool returns the tool it instantiates or has already instantiated"() {
-        def tool = targetManager.includeTool(HibernateTool)
+        def tool = targetManager.includeService(HibernateService)
         assert tool
-        assert tool instanceof HibernateTool
-        assert tool == targetManager.includeTool(HibernateTool)
+        assert tool instanceof HibernateService
+        assert tool == targetManager.includeService(HibernateService)
     }
 
     @Test
@@ -61,10 +61,10 @@ class TargetManagerTest {
         binding.bar = "foo"
         binding.bam = "foo"
         binding.foobar = "55" //requires conversion
-        binding.blammo = "55" //does not exist in tool
+        binding.blammo = "55" //does not exist in service
         binding.something = "foobar" //wrong status
 
-        targetManager.includeTool(FooToolHelper)
+        targetManager.includeService(FooToolHelper)
         FooToolHelper helper = binding.fooToolHelper
         assert "foo" == helper.bar
         assert "foo" == helper.bam
@@ -73,11 +73,11 @@ class TargetManagerTest {
     }
 
     @Test
-    void "injection uses getVariable if the class extends DefaultTool"() {
+    void "injection uses getVariable if the class extends DefaultService"() {
         def binding = targetManager.binding
         binding.config = new ConfigObject()
         binding.config.foo = "bar"
-        def helper = targetManager.includeTool(FooBarToolHelper)
+        def helper = targetManager.includeService(FooBarServiceHelper)
         assert helper.foo == "bar"
     }
 
@@ -108,7 +108,7 @@ class TargetManagerTest {
         targetManager.handlePropertyInjection(helper)
         assert "bam" == helper.fooBar
 
-        helper = MetridocScript.includeTool(binding, PropertyInjectionHelper)
+        helper = MetridocScript.includeService(binding, PropertyInjectionHelper)
         assert "bam" == helper.fooBar
     }
 
@@ -123,7 +123,7 @@ class TargetManagerTest {
     }
 
     @Test
-    void "target flag should also work in MetridocScript" () {
+    void "target flag should also work in MetridocScript"() {
         def binding = new Binding()
         binding.args = ["--target=foo"]
         def helper = new MetridocJobTestTargetHelperWithDefaultTarget()
@@ -133,7 +133,7 @@ class TargetManagerTest {
         assert !helper.barRan
     }
 
-    class FooToolHelper implements Tool {
+    class FooToolHelper implements Service {
         def bar
         String bam
         Integer foobar
@@ -161,7 +161,7 @@ class TargetManagerTest {
         def bar
     }
 
-    class FooBarToolHelper extends DefaultTool {
+    class FooBarServiceHelper extends DefaultService {
         String foo
     }
 
