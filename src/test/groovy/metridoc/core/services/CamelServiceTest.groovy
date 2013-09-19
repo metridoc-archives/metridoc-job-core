@@ -1,7 +1,7 @@
 package metridoc.core.services
 
 import metridoc.core.MetridocScript
-import metridoc.core.TargetManager
+import metridoc.core.StepManager
 import org.apache.camel.Exchange
 import org.apache.camel.Processor
 import org.apache.camel.builder.RouteBuilder
@@ -59,7 +59,7 @@ class CamelServiceTest {
 
     @Test
     void "make sure we can add the tool to the target manager"() {
-        def manager = new TargetManager()
+        def manager = new StepManager()
         manager.includeService(CamelService)
         assert manager.binding.camelService
     }
