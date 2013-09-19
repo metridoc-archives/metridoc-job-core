@@ -1,4 +1,4 @@
-package metridoc.core.tools
+package metridoc.core.services
 
 import metridoc.core.MetridocScript
 import spock.lang.Specification
@@ -11,9 +11,9 @@ import spock.lang.Specification
  * To change this template use File | Settings | File Templates.
  */
 @SuppressWarnings("GroovyAccessibility")
-class DefaultToolSpec extends Specification {
+class DefaultServiceSpec extends Specification {
 
-    def tool = new DefaultToolHelper()
+    def tool = new DefaultServiceHelper()
 
     void "check enabling mergeMetridocConfig"() {
         given:
@@ -21,21 +21,21 @@ class DefaultToolSpec extends Specification {
 
         when:
         use(MetridocScript) {
-            binding.includeTool(DefaultToolHelper)
+            binding.includeService(DefaultServiceHelper)
         }
 
         then:
-        binding.configTool.mergeMetridocConfig
+        binding.configService.mergeMetridocConfig
 
         when:
         binding = new Binding()
         binding.args = ["-mergeMetridocConfig=false"] as String[]
         use(MetridocScript) {
-            binding.includeTool(DefaultToolHelper)
+            binding.includeTool(DefaultServiceHelper)
         }
 
         then:
-        !binding.configTool.mergeMetridocConfig
+        !binding.configService.mergeMetridocConfig
     }
 
     void "converting a map to a map just returns the original config"() {
@@ -43,10 +43,10 @@ class DefaultToolSpec extends Specification {
         Map expected = [bar: "foobar"]
 
         when:
-        def foo = DefaultTool.convertConfig(expected)
+        def foo = DefaultService.convertConfig(expected)
 
         then:
-        foo == DefaultTool.convertConfig(expected)
+        foo == DefaultService.convertConfig(expected)
     }
 
     void "converting a config object flattens it"() {
@@ -55,7 +55,7 @@ class DefaultToolSpec extends Specification {
         foo.bar.baz = "foobar"
 
         when:
-        def foobar = DefaultTool.convertConfig(foo)["bar.baz"]
+        def foobar = DefaultService.convertConfig(foo)["bar.baz"]
 
         then:
         "foobar" == foobar
@@ -67,7 +67,7 @@ class DefaultToolSpec extends Specification {
         foo.bar = "bam"
 
         when:
-        def bam = DefaultTool.convertConfig(foo)["bar"]
+        def bam = DefaultService.convertConfig(foo)["bar"]
 
         then:
         "bam" == bam
@@ -78,7 +78,7 @@ class DefaultToolSpec extends Specification {
         Map config = [bar: "foobar"]
 
         when:
-        def foobar = DefaultTool.getVariableHelper(config, "bar", null)
+        def foobar = DefaultService.getVariableHelper(config, "bar", null)
 
         then:
         "foobar" == foobar
@@ -89,7 +89,7 @@ class DefaultToolSpec extends Specification {
         Map config = [bar: "foobar"]
 
         when:
-        def blam = DefaultTool.getVariableHelper(config, "blam", null)
+        def blam = DefaultService.getVariableHelper(config, "blam", null)
 
         then:
         blam == null
@@ -100,11 +100,11 @@ class DefaultToolSpec extends Specification {
         Map config = [bar: "foobar"]
 
         when:
-        def bar = DefaultTool.getVariableHelper(config, "bar", Integer)
+        def bar = DefaultService.getVariableHelper(config, "bar", Integer)
 
         then:
         null == bar
-        "foobar" == DefaultTool.getVariableHelper(config, "bar", String)
+        "foobar" == DefaultService.getVariableHelper(config, "bar", String)
     }
 
     void "argsMap trumps binding when getting a variable"() {
@@ -153,7 +153,7 @@ class DefaultToolSpec extends Specification {
 
     void "test including tool with args"() {
         when:
-        tool.includeTool(HibernateTool, entityClasses: [this.class])
+        tool.includeService(HibernateService, entityClasses: [this.class])
 
         then:
         noExceptionThrown()
@@ -161,6 +161,6 @@ class DefaultToolSpec extends Specification {
 }
 
 
-class DefaultToolHelper extends DefaultTool {
+class DefaultServiceHelper extends DefaultService {
 
 }

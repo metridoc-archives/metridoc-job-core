@@ -1,4 +1,4 @@
-package metridoc.core.tools
+package metridoc.core.services
 
 import groovy.transform.InheritConstructors
 
@@ -7,5 +7,5 @@ import groovy.transform.InheritConstructors
  * @author Tommy Barker
  */
 @InheritConstructors
-class ToolException extends Exception {
+class ServiceException extends Exception {
 }

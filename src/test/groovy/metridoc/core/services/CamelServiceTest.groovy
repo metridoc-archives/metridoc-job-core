@@ -1,4 +1,4 @@
-package metridoc.core.tools
+package metridoc.core.services
 
 import metridoc.core.MetridocScript
 import metridoc.core.TargetManager
@@ -14,16 +14,16 @@ import org.junit.Test
 /**
  * @author Tommy Barker
  */
-class CamelToolTest {
+class CamelServiceTest {
     def binding = new Binding()
-    def tool = MetridocScript.includeTool(binding, CamelTool)
+    def service = MetridocScript.includeService(binding, CamelService)
 
     @Test
     void "do basic from and to test"() {
 
         def fromCalled = false
 
-        tool.with {
+        service.with {
             asyncSend("seda:test", "testBody")
             consume("seda:test") {
                 assert "testBody" == it
@@ -37,7 +37,7 @@ class CamelToolTest {
     void "do raw Exchange handling"() {
         def fromCalled = false
 
-        tool.with {
+        service.with {
             asyncSend("seda:test", "testBody")
             consume("seda:test") { Exchange exchange ->
                 assert "testBody" == exchange.in.body
@@ -51,7 +51,7 @@ class CamelToolTest {
     void "test binding to binding"() {
         binding.setVariable("boo", "bam")
         binding.setVariable("foo", "bar")
-        def context = tool.camelContext
+        def context = service.camelContext
         def registry = context.registry
         assert "bam" == registry.lookupByName("boo")
         assert "bar" == registry.lookupByName("foo")
@@ -60,8 +60,8 @@ class CamelToolTest {
     @Test
     void "make sure we can add the tool to the target manager"() {
         def manager = new TargetManager()
-        manager.includeTool(CamelTool)
-        assert manager.binding.camelTool
+        manager.includeService(CamelService)
+        assert manager.binding.camelService
     }
 
     @Test
@@ -78,8 +78,8 @@ class CamelToolTest {
 
         deleteTempDirectoryAndFiles()
         createTempDirectoryAndFiles()
-        tool.with {
-            def context = tool.camelContext
+        service.with {
+            def context = service.camelContext
             def mock = context.getEndpoint("mock:endFull", MockEndpoint)
             mock.expectedMessageCount(4)
             Set fileNames = []
@@ -103,7 +103,7 @@ class CamelToolTest {
     @Test
     void "if there is a failure proper actions should take place, such as moving files on error"() {
         createTempDirectoryAndFiles()
-        tool.with {
+        service.with {
             try {
                 consume("file://${tmpDirectory.path}?initialDelay=0&moveFailed=.error" as String) { GenericFile file ->
                     throw new RuntimeException("meant to fail for testing")
@@ -120,7 +120,7 @@ class CamelToolTest {
 
     @Test
     void "check responses from a route"() {
-        tool.camelContext.addRoutes(
+        service.camelContext.addRoutes(
                 new RouteBuilder() {
                     @Override
                     void configure() throws Exception {
@@ -136,7 +136,7 @@ class CamelToolTest {
                 }
         )
 
-        int response = tool.send("direct:start", "hello") as int
+        int response = service.send("direct:start", "hello") as int
         assert 5 == response
     }
 

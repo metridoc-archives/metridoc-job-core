@@ -1,6 +1,6 @@
 package metridoc.core
 
-import metridoc.core.tools.ConfigTool
+import metridoc.core.services.ConfigService
 
 /**
  * Class to use if you are doing groovy scripting and want to add Metridoc functionality
@@ -32,7 +32,7 @@ class MetridocScript {
     static ConfigObject configure(Script self) {
         //Need to make sure that we use the correct classloader, fixes issues with remote runs
         Thread.currentThread().setContextClassLoader(self.getClass().getClassLoader())
-        includeService(self, ConfigTool)
+        includeService(self, ConfigService)
         return self.binding.config
     }
 
@@ -72,6 +72,12 @@ class MetridocScript {
         getManager(self).includeService(tool)
     }
 
+    /**
+     * @deprecated
+     * @param self
+     * @param tool
+     * @return
+     */
     static <T> T includeTool(Binding self, Class<T> tool) {
         getManager(self).includeService(tool)
     }

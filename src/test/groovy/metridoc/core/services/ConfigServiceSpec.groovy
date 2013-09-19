@@ -1,4 +1,4 @@
-package metridoc.core.tools
+package metridoc.core.services
 
 import metridoc.core.MetridocScript
 import metridoc.utils.DataSourceConfigUtil
@@ -10,14 +10,14 @@ import spock.lang.Specification
  * Created with IntelliJ IDEA on 7/2/13
  * @author Tommy Barker
  */
-class ConfigToolSpec extends Specification {
+class ConfigServiceSpec extends Specification {
 
     @Rule
     public TemporaryFolder folder = new TemporaryFolder()
 
     def "test in script adhoc configuration"() {
         when: "an adhoc configuration is created"
-        def variable = new ConfigTool().addConfig {
+        def variable = new ConfigService().addConfig {
             foo.bar = "foobar"
         }.getVariable("foo.bar")
 
@@ -33,7 +33,7 @@ class ConfigToolSpec extends Specification {
         }
 
         when: "add file to configuration"
-        def variable = new ConfigTool().addConfig(file).getVariable("foo.bar")
+        def variable = new ConfigService().addConfig(file).getVariable("foo.bar")
 
         then: "the variable can be extracted"
         "foobar" == variable
@@ -45,7 +45,7 @@ class ConfigToolSpec extends Specification {
 
         when:
         use(MetridocScript) {
-            def configTool = binding.includeTool(ConfigTool)
+            def configTool = binding.includeService(ConfigService)
             configTool.binding.foo = "bar"
         }
 
@@ -61,7 +61,7 @@ class ConfigToolSpec extends Specification {
         when:
         def configTool
         use(MetridocScript) {
-            configTool = binding.includeTool(ConfigTool)
+            configTool = binding.includeService(ConfigService)
         }
         def config = binding.config
 
@@ -77,7 +77,7 @@ class ConfigToolSpec extends Specification {
         config.dataSource_blah = "bad dataSource"
 
         when:
-        def tool = new ConfigTool()
+        def tool = new ConfigService()
         tool.initiateDataSources(config)
 
         then:
@@ -100,7 +100,7 @@ class ConfigToolSpec extends Specification {
             it.println("foo = \"foobar\"")
         }
 
-        def configTool = new ConfigTool(metridocConfigLocation: metridocConfig.path)
+        def configTool = new ConfigService(metridocConfigLocation: metridocConfig.path)
         def binding = new Binding()
         binding.args = ["-config=${flagConfig.path}"] as String[]
 

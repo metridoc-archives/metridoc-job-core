@@ -3,7 +3,10 @@ package metridoc.core.tools
 import groovy.sql.Sql
 
 /**
+ * A lotof this stuff is already handled but the config tool, really don't need this anymore
+ *
  * @author Tommy Barker
+ * @deprecated
  */
 class SqlTool {
     String dataSourceKey = "dataSource"
