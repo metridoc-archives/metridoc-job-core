@@ -1,24 +1,69 @@
 package metridoc.core
 
-import metridoc.core.tools.ParseArgsTool
+import metridoc.core.services.ParseArgsService
 import org.apache.commons.lang.StringUtils
 import org.slf4j.LoggerFactory
 
 import java.lang.reflect.Field
 
-class TargetManager {
+class StepManager {
     static final String DEFAULT_TARGET = "default"
-    String defaultTarget = DEFAULT_TARGET
-    Map<String, Closure> targetMap = [:]
-    Set<String> targetsRan = []
+    String defaultStep = DEFAULT_TARGET
+    Map<String, Closure> stepMap = [:]
+    Set<String> stepsRan = []
     private boolean _interrupted = false
     private Binding _binding
+
+    void setDefaultTarget(String defaultTarget) {
+        this.defaultStep = defaultTarget
+    }
+
+    /**
+     * @deprecated
+     * @param targetMap
+     */
+    void setTargetMap(Map<String, Closure> targetMap) {
+        this.stepMap = targetMap
+    }
+
+    /**
+     * @deprecated
+     * @param targetsRan
+     */
+    void setTargetsRan(Set<String> targetsRan) {
+        this.stepsRan = targetsRan
+    }
+
+    /**
+     * @deprecated
+     * @return
+     */
+    String getDefaultTarget() {
+        return defaultStep
+    }
+
+    /**
+     * @deprecated
+     * @return
+     */
+    Map<String, Closure> getTargetMap() {
+        return stepMap
+    }
+
+    /**
+     * @deprecated
+     * @return
+     */
+    Set<String> getTargetsRan() {
+        return stepsRan
+    }
 
     Binding getBinding() {
         if (_binding) return _binding
 
         _binding = new Binding()
         _binding.targetManager = this
+        _binding.stepManager = this
         return _binding
     }
 
@@ -46,61 +91,89 @@ class TargetManager {
         this._interrupted = interrupted
     }
 
-    def target(Map data, Closure closure) {
-        closure.delegate = this //required for imported targets
-        assert data.size() == 1: "the map in target can only have one variable, which is the name and the description of the target"
+    def step(Map data, Closure closure) {
+        closure.delegate = this //required for imported step
+        assert data.size() == 1: "the map in step can only have one variable, which is the name and the description " +
+                "of the step"
         def key = (data.keySet() as List<String>)[0]
         String description = data[key]
         def closureToRun = {
             profile(description, closure)
         }
-        targetMap.put(key, closureToRun)
+        stepMap.put(key, closureToRun)
+    }
+
+    def target(Map data, Closure closure) {
+        step(data, closure)
     }
 
     /**
      * fires off a target by name if it has not been run yet.  If it has run then it is skipped
      *
-     * @param targetNames
+     * @param stepNames
      * @return
      */
     @SuppressWarnings("UnnecessaryQualifiedReference")
-    def depends(String... targetNames) {
-        targetNames.each { targetName ->
-            Closure target = targetMap.get(targetName)
-            assert target != null: "target $targetName does not exist"
+    def depends(String... stepNames) {
+        stepNames.each { stepName ->
+            Closure step = stepMap.get(stepName)
+            assert step != null: "step $stepName does not exist"
 
-            def targetHasNotBeenCalled = !targetsRan.contains(targetName)
-            if (targetHasNotBeenCalled) {
-                target.delegate = this
-                target.resolveStrategy = Closure.DELEGATE_FIRST
-                target.call()
-                targetsRan.add(targetName)
+            def stepHasNotBeenCalled = !stepsRan.contains(stepName)
+            if (stepHasNotBeenCalled) {
+                step.delegate = this
+                step.resolveStrategy = Closure.DELEGATE_FIRST
+                step.call()
+                stepsRan.add(stepName)
             }
         }
     }
 
     /**
-     * loads scripts that contain targets to allow for code reuse
+     * @deprecated
+     * @param scriptClass
+     * @return
+     */
+    def includeTargets(Class<? extends Script> scriptClass) {
+        return includeSteps(scriptClass, binding)
+    }
+
+    /**
+     * loads scripts that contains steps to allow for code reuse
      *
      * @param scriptClass
      * @return returns the binding from the script in case global variables need to accessed
      */
-    def includeTargets(Class<? extends Script> scriptClass) {
-        return includeTargets(scriptClass, binding)
+    def includeSteps(Class<? extends Script> scriptClass) {
+        return includeSteps(scriptClass, binding)
     }
 
     /**
-     * the same as {@link #includeTargets(Class)}, but a binding can be passed so more global variables can
+     * @deprecated
+     * @param scriptClass
+     * @param binding
+     * @return
+     */
+    def includeTargets(Class<? extends Script> scriptClass, Binding binding) {
+        includeSteps(scriptClass, binding)
+
+    }
+
+    /**
+     * the same as {@link #includeSteps(Class)}, but a binding can be passed so more global variables can
      * be loaded
      *
      * @param scriptClass
      * @param binding
      * @return the passed binding
      */
-    def includeTargets(Class<? extends Script> scriptClass, Binding binding) {
-
+    def includeSteps(Class<? extends Script> scriptClass, Binding binding) {
         binding.setVariable("target") { Map description, Closure closure ->
-            target(description, closure)
+            step(description, closure)
+        }
+
+        binding.setVariable("step") { Map description, Closure closure ->
+            step(description, closure)
         }
         Script script = scriptClass.newInstance()
         script.binding = binding
@@ -115,7 +188,7 @@ class TargetManager {
      * @param targetMap
      */
     def includeTargets(Map<String, Closure> targetMap) {
-        this.targetMap.putAll(targetMap)
+        this.stepMap.putAll(targetMap)
     }
 
     /**
@@ -136,7 +209,7 @@ class TargetManager {
         if (interrupted) {
             throw new JobInterruptionException(this.getClass().name)
         }
-        def log = LoggerFactory.getLogger(TargetManager)
+        def log = LoggerFactory.getLogger(StepManager)
         def start = System.currentTimeMillis()
         log.info "profiling [$description] start"
         closure.call()
@@ -164,7 +237,7 @@ class TargetManager {
         def serviceName = serviceClass.simpleName
         def serviceNameUsed = StringUtils.uncapitalize(serviceName)
         if (binding.hasVariable(serviceNameUsed)) {
-            def log = LoggerFactory.getLogger(TargetManager)
+            def log = LoggerFactory.getLogger(StepManager)
             log.debug "service $serviceNameUsed already exists"
         }
         else {
@@ -295,13 +368,20 @@ class TargetManager {
         return false
     }
 
-    def runDefaultTarget() {
-        includeService(ParseArgsTool)
+    def runDefaultStep() {
+        includeService(ParseArgsService)
         if (binding.hasVariable("argsMap")) {
             Map argsMap = binding.argsMap
-            defaultTarget = argsMap.target ?: defaultTarget
+            defaultStep = argsMap.step ?: argsMap.target ?: defaultStep
         }
-        depends(defaultTarget)
+        depends(defaultStep)
+    }
+    /**
+     * @deprecated
+     * @return
+     */
+    def runDefaultTarget() {
+        runDefaultStep()
     }
 
     protected static Field getField(instance, String fieldName) {

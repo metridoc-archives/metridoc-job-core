@@ -5,16 +5,16 @@ import metridoc.core.services.HibernateService
 import metridoc.core.services.Service
 import org.junit.Test
 
-class TargetManagerTest {
+class StepManagerTest {
 
-    def targetManager = new TargetManager()
+    def stepManager = new StepManager()
 
     @Test
     void "when a job is interrupted it should throw an exception"() {
-        targetManager.interrupt()
+        stepManager.interrupt()
 
         try {
-            targetManager.profile("do something") {
+            stepManager.profile("do something") {
 
             }
             assert false: "exception should have occurred"
@@ -25,46 +25,46 @@ class TargetManagerTest {
 
     @Test
     void "test general functionality of including and using targets"() {
-        targetManager.includeTargets(MetridocJobTestTargetHelper)
-        targetManager.defaultTarget = "bar"
-        targetManager.runDefaultTarget()
-        assert targetManager.binding.fooRan
-        assert targetManager.targetsRan.contains("foo")
-        assert targetManager.targetsRan.contains("bar")
+        stepManager.includeSteps(MetridocJobTestTargetHelper)
+        stepManager.defaultStep = "bar"
+        stepManager.runDefaultStep()
+        assert stepManager.binding.fooRan
+        assert stepManager.stepsRan.contains("foo")
+        assert stepManager.stepsRan.contains("bar")
     }
 
     @Test
     void "include tool returns the tool it instantiates or has already instantiated"() {
-        def tool = targetManager.includeService(HibernateService)
+        def tool = stepManager.includeService(HibernateService)
         assert tool
         assert tool instanceof HibernateService
-        assert tool == targetManager.includeService(HibernateService)
+        assert tool == stepManager.includeService(HibernateService)
     }
 
     @Test
     void "test target manager interruption"() {
-        assert !targetManager.interrupted
-        targetManager.interrupt()
-        assert targetManager.interrupted
-        assert targetManager.binding.interrupted
+        assert !stepManager.interrupted
+        stepManager.interrupt()
+        assert stepManager.interrupted
+        assert stepManager.binding.interrupted
     }
 
     @Test
     void "if the binding has an interrupted value set to true, then it is interrupted"() {
-        targetManager.binding.interrupted = true
-        assert targetManager.interrupted
+        stepManager.binding.interrupted = true
+        assert stepManager.interrupted
     }
 
     @Test
     void "test property injection"() {
-        def binding = targetManager.binding
+        def binding = stepManager.binding
         binding.bar = "foo"
         binding.bam = "foo"
         binding.foobar = "55" //requires conversion
         binding.blammo = "55" //does not exist in service
         binding.something = "foobar" //wrong status
 
-        targetManager.includeService(FooToolHelper)
+        stepManager.includeService(FooToolHelper)
         FooToolHelper helper = binding.fooToolHelper
         assert "foo" == helper.bar
         assert "foo" == helper.bam
@@ -74,19 +74,19 @@ class TargetManagerTest {
 
     @Test
     void "injection uses getVariable if the class extends DefaultService"() {
-        def binding = targetManager.binding
+        def binding = stepManager.binding
         binding.config = new ConfigObject()
         binding.config.foo = "bar"
-        def helper = targetManager.includeService(FooBarServiceHelper)
+        def helper = stepManager.includeService(FooBarServiceHelper)
         assert helper.foo == "bar"
     }
 
     @Test
     void "property injection should override already set properties"() {
-        def binding = targetManager.binding
+        def binding = stepManager.binding
         binding.foo = "bam"
         def helper = new PropertyInjectionHelper()
-        targetManager.handlePropertyInjection(helper)
+        stepManager.handlePropertyInjection(helper)
         assert "bam" == helper.foo
 
         //check that the current properties are maintained
@@ -95,17 +95,17 @@ class TargetManagerTest {
 
     @Test
     void "fine grain injection can be controlled by InjectArg annotation"() {
-        def binding = targetManager.binding
+        def binding = stepManager.binding
         binding.config = new ConfigObject()
         binding.config.foo.bar = "fromConfig"
         binding.baz = "shouldNotInject"
         def helper = new PropertyInjectionHelper()
-        targetManager.handlePropertyInjection(helper)
+        stepManager.handlePropertyInjection(helper)
         assert "fromConfig" == helper.fooBar
         assert null == helper.baz
 
         binding.argsMap = [fooBaz: "bam"]
-        targetManager.handlePropertyInjection(helper)
+        stepManager.handlePropertyInjection(helper)
         assert "bam" == helper.fooBar
 
         helper = MetridocScript.includeService(binding, PropertyInjectionHelper)
@@ -114,11 +114,11 @@ class TargetManagerTest {
 
     @Test
     void "test injection with a base"() {
-        def binding = targetManager.binding
+        def binding = stepManager.binding
         binding.config = new ConfigObject()
         binding.config.foo.bar = "bam"
         def helper = new PropertyInjectorHelperWithBase()
-        targetManager.handlePropertyInjection(helper)
+        stepManager.handlePropertyInjection(helper)
         assert "bam" == helper.bar
     }
 
@@ -169,9 +169,9 @@ class TargetManagerTest {
         @Override
         Object run() {
             use(MetridocScript) {
-                includeTargets(MetridocJobTestTargetHelper)
-                targetManager.defaultTarget = "bar"
-                runDefaultTarget()
+                includeSteps(MetridocJobTestTargetHelper)
+                stepManager.defaultStep = "bar"
+                runDefaultStep()
             }
         }
     }
@@ -182,12 +182,12 @@ class TargetManagerTest {
         Object run() {
             fooRan = false
             barRan = false
-            target(foo: "runs foo") {
+            step(foo: "runs foo") {
                 fooRan = true
-                assert targetManager instanceof TargetManager
+                assert this.stepManager instanceof StepManager
             }
 
-            target(bar: "runs bar") {
+            step(bar: "runs bar") {
                 barRan = true
                 depends("foo")
             }

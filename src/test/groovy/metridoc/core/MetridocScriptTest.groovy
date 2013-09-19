@@ -1,6 +1,6 @@
 package metridoc.core
 
-import metridoc.core.tools.HibernateTool
+import metridoc.core.services.HibernateService
 import spock.lang.Specification
 
 class MetridocScriptTest extends Specification {
@@ -12,45 +12,45 @@ class MetridocScriptTest extends Specification {
         MetridocScript.initializeTargetManagerIfNotThere(script)
 
         then:
-        script.targetManager
+        script.stepManager
     }
 
     void "target manager can only be initialize once"() {
         when:
         MetridocScript.initializeTargetManagerIfNotThere(script)
-        def targetManager = script.targetManager
+        def targetManager = script.stepManager
         MetridocScript.initializeTargetManagerIfNotThere(script)
 
         then:
-        targetManager == script.targetManager
+        targetManager == script.stepManager
     }
 
     void "include tool returns the tool that has been instantiated or instantiated in the past"() {
         when:
-        def tool = MetridocScript.includeTool(script, HibernateTool)
+        def tool = MetridocScript.includeService(script, HibernateService)
 
         then:
         tool
-        tool == MetridocScript.includeTool(script, HibernateTool)
+        tool == MetridocScript.includeService(script, HibernateService)
     }
 
     void "test adding tools with arguments"() {
         when:
-        def tool
+        def service
         use(MetridocScript) {
-            tool = script.includeTool(HibernateTool, entityClasses: [this.class])
-            tool = script.binding.includeTool(HibernateTool, entityClasses: [this.class])
+            service = script.includeService(HibernateService, entityClasses: [this.class])
+            service = script.binding.includeService(HibernateService, entityClasses: [this.class])
         }
 
         then:
         noExceptionThrown()
-        tool.entityClasses
+        service.entityClasses
     }
 
-    void "test injection with abstract classes as parents" () {
+    void "test injection with abstract classes as parents"() {
         given:
         def binding = new Binding()
-        def targetManager = new TargetManager()
+        def targetManager = new StepManager()
         binding.foo = "bar"
         def bar = new Bar()
         targetManager.binding = binding
