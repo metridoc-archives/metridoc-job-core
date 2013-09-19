@@ -38,9 +38,9 @@ abstract class RunnableService extends DefaultService {
         if (target) {
             setDefaultTarget(target)
         }
-        String defaultTarget = manager.defaultTarget
-        if (manager.targetMap.containsKey(defaultTarget)) {
-            manager.runDefaultTarget()
+        String defaultTarget = manager.defaultStep
+        if (manager.stepMap.containsKey(defaultTarget)) {
+            manager.runDefaultStep()
         }
     }
 

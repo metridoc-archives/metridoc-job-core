@@ -8,14 +8,14 @@ import metridoc.core.services.ConfigService
 class MetridocScript {
 
 
-    private static TargetManager getManager(Script self) {
+    private static StepManager getManager(Script self) {
         initializeTargetManagerIfNotThere(self.binding)
-        self.targetManager
+        self.stepManager
     }
 
-    private static TargetManager getManager(Binding binding) {
+    private static StepManager getManager(Binding binding) {
         initializeTargetManagerIfNotThere(binding)
-        binding.targetManager
+        binding.stepManager
     }
 
     private static initializeTargetManagerIfNotThere(Script script) {
@@ -23,9 +23,13 @@ class MetridocScript {
     }
 
     private static initializeTargetManagerIfNotThere(Binding binding) {
+        if (!binding.hasVariable("stepManager")) {
+            StepManager stepManager = new StepManager(binding: binding)
+            binding.stepManager = stepManager
+        }
+
         if (!binding.hasVariable("targetManager")) {
-            TargetManager targetManager = new TargetManager(binding: binding)
-            binding.targetManager = targetManager
+            binding.targetManager = binding.stepManager
         }
     }
 
@@ -36,22 +40,55 @@ class MetridocScript {
         return self.binding.config
     }
 
+    static void step(Script self, LinkedHashMap description, Closure unitOfWork) {
+        initializeTargetManagerIfNotThere(self)
+        getManager(self).step(description, unitOfWork)
+    }
+
+    /**
+     * @deprecated
+     * @param self
+     * @param description
+     * @param unitOfWork
+     */
     static void target(Script self, LinkedHashMap description, Closure unitOfWork) {
-        initializeTargetManagerIfNotThere(self)
-        getManager(self).target(description, unitOfWork)
+        step(self, description, unitOfWork)
     }
 
+    static void step(Binding self, LinkedHashMap description, Closure unitOfWork) {
+        initializeTargetManagerIfNotThere(self)
+        getManager(self).step(description, unitOfWork)
+    }
+
+    /**
+     * @deprecated
+     * @param self
+     * @param description
+     * @param unitOfWork
+     */
     static void target(Binding self, LinkedHashMap description, Closure unitOfWork) {
-        initializeTargetManagerIfNotThere(self)
-        getManager(self).target(description, unitOfWork)
+        step(self, description, unitOfWork)
     }
 
-    static void includeTargets(Script self, Class<Script> targets) {
-        getManager(self).includeTargets(targets)
+    static void includeSteps(Script self, Class<Script> steps) {
+        getManager(self).includeSteps(steps)
     }
 
+    static void includeTargets(Script self, Class<Script> steps) {
+        includeSteps(self, steps)
+    }
+
+    /**
+     * @deprecated
+     * @param self
+     * @param targets
+     */
     static void includeTargets(Binding self, Class<Script> targets) {
-        getManager(self).includeTargets(targets)
+        includeSteps(self, targets)
+    }
+
+    static void includeSteps(Binding self, Class<Script> steps) {
+        getManager(self).includeSteps(steps)
     }
 
     static <T> T includeService(Script self, Class<T> tool) {
@@ -112,20 +149,54 @@ class MetridocScript {
         getManager(self).includeService(args, tool)
     }
 
+    static void runDefaultStep(Script self) {
+        getManager(self).runDefaultStep()
+    }
+
+    /**
+     * @deprecated
+     * @param self
+     */
     static void runDefaultTarget(Script self) {
-        getManager(self).runDefaultTarget()
+        runDefaultStep(self)
     }
 
+    static void runDefaultStep(Binding self) {
+        getManager(self).runDefaultStep()
+    }
+
+    /**
+     * @deprecated
+     * @param self
+     */
     static void runDefaultTarget(Binding self) {
-        getManager(self).runDefaultTarget()
+        runDefaultStep(self)
     }
 
+    static void runSteps(Script self, String... steps) {
+        getManager(self).depends(steps)
+    }
+
+    /**
+     * @deprecated
+     * @param self
+     * @param targets
+     */
     static void runTargets(Script self, String... targets) {
-        getManager(self).depends(targets)
+        runSteps(self, targets)
     }
 
+    static void runSteps(Binding self, String... steps) {
+        getManager(self).depends(steps)
+    }
+
+    /**
+     * @deprecated
+     * @param self
+     * @param targets
+     */
     static void runTargets(Binding self, String... targets) {
-        getManager(self).depends(targets)
+        runSteps(self, targets)
     }
 
     static void depends(Script self, String... targetDependencies) {

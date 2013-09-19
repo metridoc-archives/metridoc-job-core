@@ -90,9 +90,18 @@ class DefaultService implements Service {
         return [:]
     }
 
+    /**
+     * @deprecated
+     * @param targetInfo
+     * @param closure
+     */
     void target(LinkedHashMap targetInfo, Closure closure) {
+        step(targetInfo, closure)
+    }
+
+    void step(LinkedHashMap stepInfo, Closure closure) {
         use(MetridocScript) {
-            getBinding().target(targetInfo, closure)
+            getBinding().step(stepInfo, closure)
         }
     }
 
@@ -127,9 +136,17 @@ class DefaultService implements Service {
         includeService(args, tool)
     }
 
+    /**
+     * @deprecated
+     * @param targets
+     */
     void includeTargets(Class<Script> targets) {
+        includeSteps(targets)
+    }
+
+    void includeSteps(Class<Script> steps) {
         use(MetridocScript) {
-            return getBinding().includeTargets(targets)
+            return getBinding().includeSteps(steps)
         }
     }
 

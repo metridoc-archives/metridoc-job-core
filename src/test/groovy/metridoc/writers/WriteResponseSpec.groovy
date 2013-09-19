@@ -1,6 +1,6 @@
 package metridoc.writers
 
-import metridoc.core.TargetManager
+import metridoc.core.StepManager
 import org.codehaus.groovy.runtime.typehandling.GroovyCastException
 import spock.lang.Specification
 
@@ -30,7 +30,7 @@ class WriteResponseSpec extends Specification {
         thrown GroovyCastException
 
         when: "asType is called when there is no possibility"
-        response as TargetManager //pick a random object
+        response as StepManager //pick a random object
 
         then: "an error is thrown"
         thrown GroovyCastException
