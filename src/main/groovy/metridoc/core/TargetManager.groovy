@@ -147,11 +147,20 @@ class TargetManager {
         }
     }
 
-    public <T> T includeTool(Class<T> tool) {
-        includeTool([:] as LinkedHashMap, tool)
+    def <T> T includeService(Class<T> service) {
+        includeService([:] as LinkedHashMap, service)
     }
 
-    public <T> T includeTool(LinkedHashMap args, Class<T> tool) {
+    /**
+     * @deprecated
+     * @param tool
+     * @return
+     */
+    public <T> T includeTool(Class<T> tool) {
+        includeService([:] as LinkedHashMap, tool)
+    }
+
+    def <T> T includeService(LinkedHashMap args, Class<T> tool) {
         def toolName = tool.simpleName
         def toolNameUsed = StringUtils.uncapitalize(toolName)
         if (binding.hasVariable(toolNameUsed)) {
@@ -170,6 +179,16 @@ class TargetManager {
             }
         }
         return binding."${toolNameUsed}"
+    }
+
+    /**
+     * @deprecated
+     * @param args
+     * @param tool
+     * @return
+     */
+    public <T> T includeTool(LinkedHashMap args, Class<T> tool) {
+        includeService(args, tool)
     }
 
     protected void handlePropertyInjection(instance) {
@@ -269,7 +288,7 @@ class TargetManager {
     }
 
     def runDefaultTarget() {
-        includeTool(ParseArgsTool)
+        includeService(ParseArgsTool)
         if (binding.hasVariable("argsMap")) {
             Map argsMap = binding.argsMap
             defaultTarget = argsMap.target ?: defaultTarget
@@ -292,4 +311,6 @@ class TargetManager {
 
         return field
     }
+
+
 }
