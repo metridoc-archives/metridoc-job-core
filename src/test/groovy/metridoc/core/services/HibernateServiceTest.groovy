@@ -1,20 +1,19 @@
-package metridoc.core.tools
+package metridoc.core.services
 
 import com.mysql.jdbc.Driver
 import metridoc.core.MetridocScript
 import org.hibernate.dialect.MySQL5InnoDBDialect
 import org.junit.Test
 
-
 /**
  * @author Tommy Barker
  *
  */
-class HibernateToolTest {
+class HibernateServiceTest {
 
     @Test
     void "set Binding should not fail if config property does not exist"() {
-        def tool = new HibernateTool()
+        def tool = new HibernateService()
         tool.binding = new Binding()
     }
 
@@ -25,7 +24,7 @@ class HibernateToolTest {
         configObject.dataSource.driverClassName = "com.mysql.jdbc.Driver"
         configObject.dataSource.dbCreate = "create-drop"
 
-        def properties = new HibernateTool().convertDataSourcePropsToHibernate(configObject)
+        def properties = new HibernateService().convertDataSourcePropsToHibernate(configObject)
         assert "org.hibernate.dialect.MySQL5InnoDBDialect" == properties.get("hibernate.dialect")
         assert "com.mysql.jdbc.Driver" == properties.get("hibernate.connection.driver_class")
         assert "create-drop" == properties.get("hibernate.hbm2ddl.auto")
@@ -35,7 +34,7 @@ class HibernateToolTest {
         configObject.dataSource.driverClassName = Driver
         configObject.dataSource.dbCreate = "create-drop"
 
-        properties = new HibernateTool().convertDataSourcePropsToHibernate(configObject)
+        properties = new HibernateService().convertDataSourcePropsToHibernate(configObject)
         assert "org.hibernate.dialect.MySQL5InnoDBDialect" == properties.get("hibernate.dialect")
         assert "com.mysql.jdbc.Driver" == properties.get("hibernate.connection.driver_class")
         assert "create-drop" == properties.get("hibernate.hbm2ddl.auto")
@@ -46,13 +45,13 @@ class HibernateToolTest {
         def configObject = new ConfigObject()
         configObject.hibernate.hbm2ddl.auto = "create-drop"
 
-        def properties = new HibernateTool().convertDataSourcePropsToHibernate(configObject)
+        def properties = new HibernateService().convertDataSourcePropsToHibernate(configObject)
         assert "create-drop" == properties.get("hibernate.hbm2ddl.auto")
     }
 
     @Test
     void "test configuring a basic embedded database"() {
-        def tool = new HibernateTool(embeddedDataSource: true)
+        def tool = new HibernateService(embeddedDataSource: true)
         tool.init()
         assert "org.hibernate.dialect.H2Dialect" == tool.hibernateProperties."hibernate.dialect"
         assert "org.h2.Driver" == tool.hibernateProperties."hibernate.connection.driver_class"
@@ -67,7 +66,7 @@ class HibernateToolTest {
         ] as String[]
 
         use(MetridocScript) {
-            def tool = binding.includeTool(HibernateTool)
+            def tool = binding.includeService(HibernateService)
             assert !tool.mergeMetridocConfig
             assert tool.localMysql
             def config = binding.config

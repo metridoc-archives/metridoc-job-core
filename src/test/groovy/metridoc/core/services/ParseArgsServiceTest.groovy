@@ -1,4 +1,4 @@
-package metridoc.core.tools
+package metridoc.core.services
 
 import metridoc.core.MetridocScript
 import spock.lang.Specification
@@ -6,14 +6,14 @@ import spock.lang.Specification
 /**
  * @author Tommy Barker
  */
-class ParseArgsToolTest extends Specification {
+class ParseArgsServiceTest extends Specification {
 
     Binding binding = new Binding()
-    ParseArgsTool tool
+    ParseArgsService service
 
     void "test parsing basic arguments"() {
         when:
-        def argsMap = primeTool(["-foo=bar", "--bar=foo"])
+        def argsMap = primeService(["-foo=bar", "--bar=foo"])
 
         then:
         "bar" == argsMap.foo
@@ -22,7 +22,7 @@ class ParseArgsToolTest extends Specification {
 
     void "test args with no equals"() {
         when:
-        def argsMap = primeTool(["-foo", "--bar", "-foobar=bar"])
+        def argsMap = primeService(["-foo", "--bar", "-foobar=bar"])
 
         then:
         testArgsWithNoEquals(argsMap)
@@ -30,7 +30,7 @@ class ParseArgsToolTest extends Specification {
 
     void "test parameters"() {
         when:
-        def argsMap = primeTool(["-foo", "--bar", "blah", "-foobar=bar", "bammo"])
+        def argsMap = primeService(["-foo", "--bar", "blah", "-foobar=bar", "bammo"])
 
         then:
         //do previous tests since this is an expansion
@@ -49,7 +49,7 @@ class ParseArgsToolTest extends Specification {
 
     void "test just the environment parameter"() {
         when:
-        def argsMap = primeTool(["-env=dev"])
+        def argsMap = primeService(["-env=dev"])
 
         then:
         "dev" == argsMap.env
@@ -62,7 +62,7 @@ class ParseArgsToolTest extends Specification {
 
         when:
         use(MetridocScript) {
-            binding.includeTool(ParseArgsTool)
+            binding.includeService(ParseArgsService)
         }
 
         then:
@@ -71,9 +71,9 @@ class ParseArgsToolTest extends Specification {
         params.contains("bar")
     }
 
-    Map primeTool(List args) {
+    Map primeService(List args) {
         binding.args = args as String[]
-        tool = MetridocScript.includeTool(binding, ParseArgsTool)
+        service = MetridocScript.includeService(binding, ParseArgsService)
         return binding.argsMap
     }
 }

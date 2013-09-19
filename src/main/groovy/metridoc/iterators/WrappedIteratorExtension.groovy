@@ -1,7 +1,6 @@
 package metridoc.iterators
 
-import metridoc.core.tools.HibernateTool
-import metridoc.writers.EntityIteratorWriter
+import metridoc.core.services.HibernateService
 import metridoc.writers.WriteResponse
 import org.hibernate.SessionFactory
 
@@ -27,7 +26,7 @@ class WrappedIteratorExtension {
         Iterators.createWriter(sessionFactory: sessionFactory, recordEntityClass: entity, "entity").write(iterator.wrappedIterator)
     }
 
-    public static WriteResponse toEntity(WrappedIterator iterator, Class entity, HibernateTool hibernateTool) {
-        Iterators.createWriter(sessionFactory: hibernateTool.sessionFactory, recordEntityClass: entity, "entity").write(iterator.wrappedIterator)
+    public static WriteResponse toEntity(WrappedIterator iterator, Class entity, HibernateService hibernateService) {
+        Iterators.createWriter(sessionFactory: hibernateService.sessionFactory, recordEntityClass: entity, "entity").write(iterator.wrappedIterator)
     }
 }

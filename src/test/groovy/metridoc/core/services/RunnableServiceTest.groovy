@@ -1,16 +1,12 @@
-package metridoc.core.tools
+package metridoc.core.services
 
 import org.junit.Test
 
-class RunnableToolTest {
+class RunnableServiceTest {
 
     @Test
     void "dealing with bug where the runnable tool crashes since it is trying to deal with property injection incorrectly"() {
-        def runnableTool = new RunnableTool() {
-            @Override
-            String getUsage() {
-                return null  //To change body of implemented methods use File | Settings | File Templates.
-            }
+        def runnableTool = new RunnableService() {
 
             @Override
             def configure() {
@@ -24,12 +20,7 @@ class RunnableToolTest {
     @Test
     void "test a basic job withthe runnable tool"() {
         boolean fooRan = false
-        def runnableTool = new RunnableTool() {
-            @Override
-            String getUsage() {
-                return null  //To change body of implemented methods use File | Settings | File Templates.
-            }
-
+        def runnableTool = new RunnableService() {
             @Override
             def configure() {
                 target(foo: "run foo") {
@@ -49,11 +40,7 @@ class RunnableToolTest {
     void "setting the default target on the commanline will override the default target"() {
         boolean barRan = false
         boolean fooRan = false
-        def runnableTool = new RunnableTool() {
-            @Override
-            String getUsage() {
-                return null  //To change body of implemented methods use File | Settings | File Templates.
-            }
+        def runnableTool = new RunnableService() {
 
             @Override
             def configure() {
@@ -78,12 +65,7 @@ class RunnableToolTest {
 
     @Test
     void "a runnabel tool can only run once"() {
-        def runnableTool = new RunnableTool() {
-
-            @Override
-            String getUsage() {
-                return null  //To change body of implemented methods use File | Settings | File Templates.
-            }
+        def runnableTool = new RunnableService() {
 
             @Override
             def configure() {
@@ -96,7 +78,7 @@ class RunnableToolTest {
             runnableTool.execute()
             assert false: "exception should have occurred"
         }
-        catch (ToolException ignored) {
+        catch (ServiceException ignored) {
         }
     }
 }
