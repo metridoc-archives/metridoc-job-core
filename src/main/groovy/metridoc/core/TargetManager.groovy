@@ -147,29 +147,56 @@ class TargetManager {
         }
     }
 
-    public <T> T includeTool(Class<T> tool) {
-        includeTool([:] as LinkedHashMap, tool)
+    def <T> T includeService(Class<T> serviceClass) {
+        includeService([:] as LinkedHashMap, serviceClass)
     }
 
-    public <T> T includeTool(LinkedHashMap args, Class<T> tool) {
-        def toolName = tool.simpleName
-        def toolNameUsed = StringUtils.uncapitalize(toolName)
-        if (binding.hasVariable(toolNameUsed)) {
+    /**
+     * @deprecated
+     * @param tool
+     * @return
+     */
+    public <T> T includeTool(Class<T> tool) {
+        includeService([:] as LinkedHashMap, tool)
+    }
+
+    def <T> T includeService(LinkedHashMap args, Class<T> serviceClass) {
+        def serviceName = serviceClass.simpleName
+        def serviceNameUsed = StringUtils.uncapitalize(serviceName)
+        if (binding.hasVariable(serviceNameUsed)) {
             def log = LoggerFactory.getLogger(TargetManager)
-            log.debug "tool $toolNameUsed already exists"
+            log.debug "service $serviceNameUsed already exists"
         }
         else {
-            def instance = tool.newInstance(args)
-            instance.binding = binding
-            handlePropertyInjection(instance)
-            if (!binding.hasVariable(toolNameUsed)) {
-                binding."$toolNameUsed" = instance
-            }
-            if (instance.metaClass.respondsTo(instance, "init")) {
-                instance.init()
+            def service = createService(args, serviceClass)
+            if (!binding.hasVariable(serviceNameUsed)) {
+                binding."$serviceNameUsed" = service
             }
         }
-        return binding."${toolNameUsed}"
+        return binding."${serviceNameUsed}"
+    }
+
+    def <T> T createService(LinkedHashMap args, Class<T> serviceClass) {
+        def instance = serviceClass.newInstance(args)
+        if (instance.metaClass.respondsTo(instance, "setBinding")) {
+            instance.binding = binding
+        }
+        handlePropertyInjection(instance)
+        if (instance.metaClass.respondsTo(instance, "init")) {
+            instance.init()
+        }
+
+        return instance
+    }
+
+    /**
+     * @deprecated
+     * @param args
+     * @param tool
+     * @return
+     */
+    public <T> T includeTool(LinkedHashMap args, Class<T> tool) {
+        includeService(args, tool)
     }
 
     protected void handlePropertyInjection(instance) {
@@ -269,7 +296,7 @@ class TargetManager {
     }
 
     def runDefaultTarget() {
-        includeTool(ParseArgsTool)
+        includeService(ParseArgsTool)
         if (binding.hasVariable("argsMap")) {
             Map argsMap = binding.argsMap
             defaultTarget = argsMap.target ?: defaultTarget
@@ -292,4 +319,6 @@ class TargetManager {
 
         return field
     }
+
+
 }

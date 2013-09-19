@@ -32,7 +32,7 @@ class MetridocScript {
     static ConfigObject configure(Script self) {
         //Need to make sure that we use the correct classloader, fixes issues with remote runs
         Thread.currentThread().setContextClassLoader(self.getClass().getClassLoader())
-        includeTool(self, ConfigTool)
+        includeService(self, ConfigTool)
         return self.binding.config
     }
 
@@ -54,20 +54,56 @@ class MetridocScript {
         getManager(self).includeTargets(targets)
     }
 
+    static <T> T includeService(Script self, Class<T> serviceClass) {
+        getManager(self).includeService(serviceClass)
+    }
+
+    /**
+     * @deprecated
+     * @param self
+     * @param tool
+     * @return
+     */
     static <T> T includeTool(Script self, Class<T> tool) {
-        getManager(self).includeTool(tool)
+        getManager(self).includeService(tool)
+    }
+
+    static <T> T includeService(Binding self, Class<T> serviceClass) {
+        getManager(self).includeService(serviceClass)
     }
 
     static <T> T includeTool(Binding self, Class<T> tool) {
-        getManager(self).includeTool(tool)
+        getManager(self).includeService(tool)
     }
 
+    static <T> T includeService(Script self, LinkedHashMap args, Class<T> serviceClass) {
+        getManager(self).includeService(args, serviceClass)
+    }
+
+    /**
+     * @deprecated
+     * @param self
+     * @param args
+     * @param tool
+     * @return
+     */
     static <T> T includeTool(Script self, LinkedHashMap args, Class<T> tool) {
-        getManager(self).includeTool(args, tool)
+        getManager(self).includeService(args, tool)
     }
 
+    static <T> T includeService(Binding self, LinkedHashMap args, Class<T> serviceClass) {
+        getManager(self).includeService(args, serviceClass)
+    }
+
+    /**
+     * @deprecated
+     * @param self
+     * @param args
+     * @param tool
+     * @return
+     */
     static <T> T includeTool(Binding self, LinkedHashMap args, Class<T> tool) {
-        getManager(self).includeTool(args, tool)
+        getManager(self).includeService(args, tool)
     }
 
     static void runDefaultTarget(Script self) {
