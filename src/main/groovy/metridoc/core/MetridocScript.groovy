@@ -70,11 +70,11 @@ class MetridocScript {
         step(self, description, unitOfWork)
     }
 
-    static void includeSteps(Script self, Class<Script> steps) {
+    static void includeSteps(Script self, Class<? extends Script> steps) {
         getManager(self).includeSteps(steps)
     }
 
-    static void includeTargets(Script self, Class<Script> steps) {
+    static void includeTargets(Script self, Class<? extends Script> steps) {
         includeSteps(self, steps)
     }
 

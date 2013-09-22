@@ -29,6 +29,7 @@ class StepManagerTest {
         stepManager.defaultStep = "bar"
         stepManager.runDefaultStep()
         assert stepManager.binding.fooRan
+        assert stepManager.binding.foobarRan
         assert stepManager.stepsRan.contains("foo")
         assert stepManager.stepsRan.contains("bar")
     }
@@ -182,12 +183,18 @@ class StepManagerTest {
         Object run() {
             fooRan = false
             barRan = false
+            foobarRan = false
+
+            step(foobar: "runs foobar") {
+                foobarRan = true
+            }
+
             step(foo: "runs foo") {
                 fooRan = true
                 assert this.stepManager instanceof StepManager
             }
 
-            step(bar: "runs bar") {
+            step(bar: "runs bar", depends: "foobar") {
                 barRan = true
                 depends("foo")
             }

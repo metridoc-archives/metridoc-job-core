@@ -10,6 +10,7 @@ class StepManager {
     static final String DEFAULT_TARGET = "default"
     String defaultStep = DEFAULT_TARGET
     Map<String, Closure> stepMap = [:]
+    Map<String, List> dependsMap = [:]
     Set<String> stepsRan = []
     private boolean _interrupted = false
     private Binding _binding
@@ -93,14 +94,29 @@ class StepManager {
 
     def step(Map data, Closure closure) {
         closure.delegate = this //required for imported step
-        assert data.size() == 1: "the map in step can only have one variable, which is the name and the description " +
-                "of the step"
+        def depends = data.remove("depends")
+        assert data.size() == 1: "The target map has more variables than it should"
         def key = (data.keySet() as List<String>)[0]
         String description = data[key]
         def closureToRun = {
             profile(description, closure)
         }
         stepMap.put(key, closureToRun)
+        if (depends) {
+            addDepends(key, depends)
+        }
+    }
+
+    void addDepends(String targetName, List depends) {
+        dependsMap[targetName] = depends
+    }
+
+    void addDepends(String targetName, String depends) {
+        dependsMap[targetName] = [depends]
+    }
+
+    void addDepends(String targetName, String[] depends) {
+        dependsMap[targetName] = depends as List
     }
 
     def target(Map data, Closure closure) {
@@ -121,6 +137,9 @@ class StepManager {
 
             def stepHasNotBeenCalled = !stepsRan.contains(stepName)
             if (stepHasNotBeenCalled) {
+                if (dependsMap.containsKey(stepName)) {
+                    depends(dependsMap[stepName] as String[])
+                }
                 step.delegate = this
                 step.resolveStrategy = Closure.DELEGATE_FIRST
                 step.call()
