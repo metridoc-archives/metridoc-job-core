@@ -40,6 +40,7 @@ abstract class FileIterator extends RecordIterator implements Closeable {
 
     @Lazy(soft = true)
     InputStream inputStream = {
+        assert file : "file needs to be set in FileIterator"
         file.newInputStream()
     }()
 

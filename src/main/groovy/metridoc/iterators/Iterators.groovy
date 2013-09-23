@@ -14,7 +14,8 @@ class Iterators {
             sql: SqlIterator,
             xls: XlsIterator,
             xlsx: XlsxIterator,
-            csv: CsvIterator
+            csv: CsvIterator,
+            xml: XmlIterator
     ]
 
     public static final WRITERS = [
@@ -135,7 +136,10 @@ class WrappedIterator {
 
     WrappedIterator map(Closure closure) {
         Iterators.toRecordIterator(Stream.from(wrappedIterator).map { Record record ->
-            closure.call(record)
+            def response = closure.call(record)
+            if(response && response instanceof Record) {
+                return response
+            }
             return record
         })
     }
