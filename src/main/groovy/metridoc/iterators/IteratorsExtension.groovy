@@ -43,4 +43,29 @@ public class IteratorsExtension {
     public static WrappedIterator fromCsv(Iterators self, InputStream inputStream, List headers) {
         Iterators.createIterator([inputStream: inputStream, headers: headers] as LinkedHashMap, "csv")
     }
+
+    public static WrappedIterator fromXml(Iterators self, InputStream inputStream, String tag) {
+        Iterators.createIterator([inputStream: inputStream, tag:tag] as LinkedHashMap, "xml")
+    }
+
+    public static WrappedIterator fromXml(Iterators self, File file, String tag) {
+        Iterators.createIterator([file: file, tag:tag] as LinkedHashMap, "xml")
+    }
+
+    public static WrappedIterator fromXml(Iterators self, InputStream inputStream, String tag, Map inheritedNamespaces) {
+        Iterators.createIterator([inputStream: inputStream, tag:tag, inheritedNamespaces: inheritedNamespaces] as LinkedHashMap, "xml")
+    }
+
+    public static WrappedIterator fromXml(Iterators self, File file, String tag, Map inheritedNamespaces) {
+        Iterators.createIterator([file: file, tag:tag, inheritedNamespaces: inheritedNamespaces] as LinkedHashMap, "xml")
+
+    }
+
+    public static WrappedIterator fromXml(Iterators self, InputStream inputStream, String tag, Map inheritedNamespaces, String charSet) {
+        Iterators.createIterator([inputStream: inputStream, tag:tag, inheritedNamespaces: inheritedNamespaces, charSet: charSet] as LinkedHashMap, "xml")
+    }
+
+    public static WrappedIterator fromXml(Iterators self, File file, String tag, Map inheritedNamespaces, String charSet) {
+        Iterators.createIterator([file: file, tag:tag, inheritedNamespaces: inheritedNamespaces, charSet: charSet] as LinkedHashMap, "xml")
+    }
 }
