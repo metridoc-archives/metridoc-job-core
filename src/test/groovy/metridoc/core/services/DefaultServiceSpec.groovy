@@ -13,7 +13,7 @@ import spock.lang.Specification
 @SuppressWarnings("GroovyAccessibility")
 class DefaultServiceSpec extends Specification {
 
-    def tool = new DefaultServiceHelper()
+    def service = new DefaultServiceHelper()
 
     void "check enabling mergeMetridocConfig"() {
         given:
@@ -110,12 +110,12 @@ class DefaultServiceSpec extends Specification {
     void "argsMap trumps binding when getting a variable"() {
         given:
         def binding = new Binding()
-        tool.setBinding(binding)
+        service.setBinding(binding)
         binding.argsMap = [bar: "foo"]
         binding.bar = "foobar"
 
         when:
-        def bar = tool.getVariable("bar")
+        def bar = service.getVariable("bar")
 
         then:
         "foo" == bar
@@ -128,10 +128,10 @@ class DefaultServiceSpec extends Specification {
         def binding = new Binding()
         binding.foo = "foobar"
         binding.config = config
-        tool.setBinding(binding)
+        service.setBinding(binding)
 
         when:
-        def foo = tool.getVariable("foo")
+        def foo = service.getVariable("foo")
 
         then:
         "foobar" == foo
@@ -142,10 +142,10 @@ class DefaultServiceSpec extends Specification {
         def config = new ConfigObject()
         def binding = new Binding()
         binding.config = config
-        tool.setBinding(binding)
+        service.setBinding(binding)
 
         when:
-        def bar = tool.getVariable("bar")
+        def bar = service.getVariable("bar")
 
         then:
         null == bar
@@ -153,14 +153,27 @@ class DefaultServiceSpec extends Specification {
 
     void "test including tool with args"() {
         when:
-        tool.includeService(HibernateService, entityClasses: [this.class])
+        service.includeService(HibernateService, entityClasses: [this.class])
 
         then:
         noExceptionThrown()
+    }
+
+    void "test step via method or binding"() {
+        when:
+        service.step(foo: "runs foo")
+        service.depends("foo")
+
+        then:
+        service.fooRan
     }
 }
 
 
 class DefaultServiceHelper extends DefaultService {
+    boolean fooRan = false
 
+    void foo() {
+        fooRan = true
+    }
 }
