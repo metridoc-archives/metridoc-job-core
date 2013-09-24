@@ -6,7 +6,7 @@ import metridoc.core.services.ConfigService
  * Class to use if you are doing groovy scripting and want to add Metridoc functionality
  */
 class MetridocScript {
-
+    public static final String STEP_NOT_FOUND_IN_BINDING_OR_SCRIPT = "Could not find a corresponding method or closure for step"
 
     private static StepManager getManager(Script self) {
         initializeTargetManagerIfNotThere(self.binding)
@@ -213,5 +213,38 @@ class MetridocScript {
 
     static void profile(Binding self, String description, Closure work) {
         getManager(self).profile(description, work)
+    }
+
+    static void step(Script self, LinkedHashMap description) {
+        String stepName = getStepName(description)
+
+        def inScriptOrBinding = self.metaClass.respondsTo(self, stepName) ||
+                inBinding(self, stepName)
+
+        assert inScriptOrBinding: STEP_NOT_FOUND_IN_BINDING_OR_SCRIPT
+
+        step(self, description, self.&"$stepName")
+    }
+
+    static void step(Binding self, LinkedHashMap description) {
+        String stepName = getStepName(description)
+
+        assert inBinding(self, stepName): STEP_NOT_FOUND_IN_BINDING_OR_SCRIPT
+
+        step(self, description, self."$stepName")
+    }
+
+    protected static String getStepName(LinkedHashMap description) {
+        String stepName = description.find { it.key != "depends" }.key
+        assert stepName: "step name must NOT be null or empty"
+        stepName
+    }
+
+    protected static boolean inBinding(Binding binding, String stepName) {
+        binding.hasVariable(stepName) && binding."$stepName" instanceof Closure
+    }
+
+    protected static boolean inBinding(Script script, String stepName) {
+        inBinding(script.binding, stepName)
     }
 }
