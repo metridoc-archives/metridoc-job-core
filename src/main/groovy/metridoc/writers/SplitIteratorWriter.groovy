@@ -29,31 +29,38 @@ class SplitIteratorWriter extends DefaultIteratorWriter {
 
     @Override
     WriteResponse write(RecordIterator recordIterator) {
-        assert recordIterator: "record iterator should not be null or empty"
-        def service = Executors.newFixedThreadPool(threads)
-        List<QueueBasedRecordIterator> queueRowIterators = []
-        List<Future<WriteResponse>> futures = []
-        def iteratorManager = new QueueRecordIteratorManager(wrappedIterator: recordIterator)
-        writers.each { writer ->
-            def queueRowIterator = iteratorManager.createChild()
-            queueRowIterators << queueRowIterator
+        try {
+            assert recordIterator: "record iterator should not be null or empty"
+            def service = Executors.newFixedThreadPool(threads)
+            List<QueueBasedRecordIterator> queueRowIterators = []
+            List<Future<WriteResponse>> futures = []
+            def iteratorManager = new QueueRecordIteratorManager(wrappedIterator: recordIterator)
+            writers.each { writer ->
+                def queueRowIterator = iteratorManager.createChild()
+                queueRowIterators << queueRowIterator
 
-            futures << service.submit({
-                writer.write(queueRowIterator)
-            } as Callable)
+                futures << service.submit({
+                    writer.write(queueRowIterator)
+                } as Callable)
+            }
+
+            //noinspection GroovyAssignabilityCheck
+            iteratorManager.each {}
+
+            def splitResponse = new SplitWriteResponse()
+            futures.each {
+                future ->
+                    def response = future.get()
+                    splitResponse.addResponse(response)
+            }
+
+            return splitResponse
         }
-
-        //noinspection GroovyAssignabilityCheck
-        iteratorManager.each {}
-
-        def splitResponse = new SplitWriteResponse()
-        futures.each {
-            future ->
-                def response = future.get()
-                splitResponse.addResponse(response)
+        finally {
+            if (recordIterator instanceof Closeable) {
+                silentClose(recordIterator)
+            }
         }
-
-        return splitResponse
     }
 
     @Override
