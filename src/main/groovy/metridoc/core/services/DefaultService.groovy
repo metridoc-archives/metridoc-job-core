@@ -105,6 +105,18 @@ class DefaultService implements Service {
         }
     }
 
+    void step(LinkedHashMap stepInfo) {
+        use(MetridocScript) {
+            def stepName = MetridocScript.getStepName(stepInfo)
+            if(this.metaClass.respondsTo(this, stepName)) {
+                getBinding().step(stepInfo, this.&"$stepName")
+            }
+            else {
+                getBinding().step(stepInfo)
+            }
+        }
+    }
+
     public <T> T includeService(Class<T> serviceClass) {
         use(MetridocScript) {
             return getBinding().includeService(serviceClass)
