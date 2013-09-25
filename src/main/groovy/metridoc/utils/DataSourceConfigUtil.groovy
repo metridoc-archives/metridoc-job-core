@@ -119,6 +119,16 @@ class DataSourceConfigUtil {
         return dataSource
     }
 
+    static getLocalMysqlDataSource() {
+        def dataSource = new BasicDataSource()
+        dataSource.url = "jdbc:mysql://localhost:3306/test"
+        dataSource.username = "root"
+        dataSource.password = ""
+        dataSource.driverClassName = "com.mysql.jdbc.Driver"
+
+        return dataSource
+    }
+
     static Map getDataSourceProperties(ConfigObject config) {
         getDataSourceProperties(config, DEFAULT_DATASOURCE)
     }
