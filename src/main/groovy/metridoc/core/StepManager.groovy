@@ -1,11 +1,13 @@
 package metridoc.core
 
+import groovy.util.logging.Slf4j
 import metridoc.core.services.ParseArgsService
 import org.apache.commons.lang.StringUtils
 import org.slf4j.LoggerFactory
 
 import java.lang.reflect.Field
 
+@Slf4j
 class StepManager {
     static final String DEFAULT_TARGET = "default"
     String defaultStep = DEFAULT_TARGET
@@ -14,6 +16,7 @@ class StepManager {
     Set<String> stepsRan = []
     private boolean _interrupted = false
     private Binding _binding
+    List injectedServices = []
 
     void setDefaultTarget(String defaultTarget) {
         this.defaultStep = defaultTarget
@@ -264,7 +267,22 @@ class StepManager {
             if (!binding.hasVariable(serviceNameUsed)) {
                 binding."$serviceNameUsed" = service
             }
+            injectedServices.each {
+                def property = it.properties.find {it.key == serviceNameUsed}
+                try {
+                    if(property && it."$serviceNameUsed" == null) {
+                        if(it.metaClass.respondsTo(it, "set${serviceName}", [service.getClass()] as Object[])) {
+                            it."$serviceNameUsed" = service
+                        }
+                    }
+                }
+                catch (Throwable throwable) {
+                    log.error "error occurred trying to inject $service into $it, skipping injection", throwable
+                }
+            }
+            injectedServices << service
         }
+
         return binding."${serviceNameUsed}"
     }
 

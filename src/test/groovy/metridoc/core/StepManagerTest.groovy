@@ -134,6 +134,17 @@ class StepManagerTest {
         assert !helper.barRan
     }
 
+    @Test
+    void "includeService should perform injection on previously loaded services"() {
+        def foobar = stepManager.includeService(FooBar)
+        def foo = stepManager.includeService(Foo)
+        def bar = stepManager.includeService(Bar)
+
+        assert foo.bar == bar
+        assert bar.foo == foo
+        assert !foobar.foo
+    }
+
     class FooToolHelper implements Service {
         def bar
         String bam
@@ -199,5 +210,17 @@ class StepManagerTest {
                 depends("foo")
             }
         }
+    }
+
+    class Foo {
+        Bar bar
+    }
+
+    class Bar {
+        Foo foo
+    }
+
+    class FooBar {
+        String foo
     }
 }
