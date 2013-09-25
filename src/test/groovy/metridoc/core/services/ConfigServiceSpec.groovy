@@ -1,5 +1,6 @@
 package metridoc.core.services
 
+import groovy.sql.Sql
 import metridoc.core.MetridocScript
 import metridoc.utils.DataSourceConfigUtil
 import org.junit.Rule
@@ -110,4 +111,27 @@ class ConfigServiceSpec extends Specification {
         then:
         "foobar" == configTool.getVariable("foo")
     }
+
+    void "test embedded dataSourceinjection"() {
+        given:
+        Binding binding = new Binding()
+
+        when:
+        def configService
+        def args = ["-embeddedDataSource", "-mergeMetridocConfig=false"]
+        binding.args = args as String[]
+
+        use(MetridocScript) {
+            configService = binding.includeService(ConfigService)
+        }
+
+        then:
+        noExceptionThrown()
+        binding.dataSource
+        binding.sql
+    }
+}
+
+class Foo {
+    Sql sql
 }
