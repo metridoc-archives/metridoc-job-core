@@ -1,5 +1,6 @@
 package metridoc.core.services
 
+import groovy.sql.Sql
 import groovy.util.logging.Slf4j
 import metridoc.core.MetridocScript
 import metridoc.utils.DataSourceConfigUtil
@@ -97,7 +98,32 @@ class ConfigService extends DefaultService {
     }
 
     void initiateDataSources(ConfigObject configObject) {
+        def localMysql
+        def embeddedDataSource
+        try {
+            if (binding.hasVariable("args")) {
+                localMysql = binding.args.find { it.contains("-localMysql") }
+                if (localMysql) {
+                    def dataSource = DataSourceConfigUtil.localMysqlDataSource
+                    binding.dataSource = dataSource
+                    binding.sql = new Sql(dataSource)
+                }
+
+                embeddedDataSource = binding.args.find { it.contains("-embeddedDataSource") }
+                if (embeddedDataSource) {
+                    def dataSource = DataSourceConfigUtil.embeddedDataSource
+                    binding.dataSource = dataSource
+                    binding.sql = new Sql(dataSource)
+                }
+            }
+        }
+        catch (Throwable throwable) {
+            log.warn "Could not instantiate local data source", throwable
+        }
+
         DataSourceConfigUtil.getDataSourcesNames(configObject).each { String dataSourceName ->
+
+
             try {
                 def dataSource = DataSourceConfigUtil.getDataSource(configObject, dataSourceName)
                 def m = dataSourceName =~ /dataSource_(\w+)$/
@@ -106,8 +132,11 @@ class ConfigService extends DefaultService {
                     sqlName += "_${m.group(1)}"
                 }
 
+                if(sqlName == "sql" && (embeddedDataSource || localMysql)) return
+
                 binding."$dataSourceName" = dataSource
                 binding."$sqlName" = dataSource
+
             }
             catch (Throwable throwable) {
                 log.warn "Could not instantiate dataSource [$dataSourceName]", throwable
