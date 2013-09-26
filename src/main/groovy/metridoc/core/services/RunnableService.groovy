@@ -9,8 +9,12 @@ import org.apache.commons.lang.StringUtils
 abstract class RunnableService extends DefaultService {
     private hasRun = false
 
-    void setDefaultTarget(String target) {
-        MetridocScript.getManager(binding).defaultTarget = target
+    /**
+     * @deprecated
+     * @param step
+     */
+    void setDefaultTarget(String step) {
+        setDefaultStep(step)
     }
 
     def execute() {
@@ -34,9 +38,10 @@ abstract class RunnableService extends DefaultService {
         def manager = MetridocScript.getManager(binding)
         manager.handlePropertyInjection(this)
         configure()
-        String target = getVariable("target", String)
-        if (target) {
-            setDefaultTarget(target)
+        String step = getVariable("target", String)
+        step = getVariable("step", String) ?: step
+        if (step) {
+            setDefaultStep(step)
         }
         String defaultTarget = manager.defaultStep
         if (manager.stepMap.containsKey(defaultTarget)) {
