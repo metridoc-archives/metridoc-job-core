@@ -6,6 +6,7 @@ import org.apache.commons.lang.StringUtils
 import org.slf4j.LoggerFactory
 
 import java.lang.reflect.Field
+import java.lang.reflect.Method
 
 @Slf4j
 class StepManager {
@@ -268,10 +269,10 @@ class StepManager {
                 binding."$serviceNameUsed" = service
             }
             injectedServices.each {
-                def property = it.properties.find {it.key == serviceNameUsed}
+                def property = it.properties.find { it.key == serviceNameUsed }
                 try {
-                    if(property && it."$serviceNameUsed" == null) {
-                        if(it.metaClass.respondsTo(it, "set${serviceName}", [service.getClass()] as Object[])) {
+                    if (property && it."$serviceNameUsed" == null) {
+                        if (it.metaClass.respondsTo(it, "set${serviceName}", [service.getClass()] as Object[])) {
                             it."$serviceNameUsed" = service
                         }
                     }
@@ -281,9 +282,26 @@ class StepManager {
                 }
             }
             injectedServices << service
+            addServiceSteps(service)
         }
 
         return binding."${serviceNameUsed}"
+    }
+
+    void addServiceSteps(service) {
+        service.getClass().getMethods().each { Method method ->
+            def stepAnnotation = method.getAnnotation(Step)
+            if (stepAnnotation) {
+                def data = [:]
+                String name = stepAnnotation.name() ?: method.name
+                data[name] = stepAnnotation.description()
+                if (stepAnnotation.depends()) {
+                    data.depends = stepAnnotation.depends() as List
+                }
+                def closure = service.&"$method.name"
+                step(data, closure)
+            }
+        }
     }
 
     def <T> T createService(LinkedHashMap args, Class<T> serviceClass) {

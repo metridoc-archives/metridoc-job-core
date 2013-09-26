@@ -98,15 +98,15 @@ class MetridocScript {
     /**
      * @deprecated
      * @param self
-     * @param tool
+     * @param service
      * @return
      */
-    static <T> T includeTool(Script self, Class<T> tool) {
-        getManager(self).includeService(tool)
+    static <T> T includeTool(Script self, Class<T> service) {
+        getManager(self).includeService(service)
     }
 
-    static <T> T includeService(Binding self, Class<T> tool) {
-        getManager(self).includeService(tool)
+    static <T> T includeService(Binding self, Class<T> service) {
+        getManager(self).includeService(service)
     }
 
     /**
