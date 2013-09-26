@@ -108,7 +108,7 @@ class DefaultService implements Service {
     void step(LinkedHashMap stepInfo) {
         use(MetridocScript) {
             def stepName = MetridocScript.getStepName(stepInfo)
-            if(this.metaClass.respondsTo(this, stepName)) {
+            if (this.metaClass.respondsTo(this, stepName)) {
                 getBinding().step(stepInfo, this.&"$stepName")
             }
             else {
@@ -172,5 +172,21 @@ class DefaultService implements Service {
         use(MetridocScript) {
             return getBinding().profile(description, work)
         }
+    }
+
+    void setDefaultStep(String step) {
+        MetridocScript.getManager(binding).defaultStep = step
+    }
+
+    void runStep(String step) {
+        MetridocScript.runStep(binding, step)
+    }
+
+    void runSteps(String... steps) {
+        MetridocScript.runSteps(binding, steps)
+    }
+
+    void runDefaultStep() {
+        MetridocScript.runDefaultStep(binding)
     }
 }

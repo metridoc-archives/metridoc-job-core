@@ -247,4 +247,20 @@ class MetridocScript {
     protected static boolean inBinding(Script script, String stepName) {
         inBinding(script.binding, stepName)
     }
+
+    static void setDefaultStep(Binding self, String step) {
+        getManager(self).defaultStep = step
+    }
+
+    static void setDefaultStep(Script self, String step) {
+        setDefaultStep(self.binding, step)
+    }
+
+    static void runStep(Binding self, String step) {
+        getManager(self).depends(step)
+    }
+
+    static void runStep(Script self, String step) {
+        runSteps(self.binding, step)
+    }
 }
