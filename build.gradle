@@ -1,5 +1,5 @@
 project.group = "com.github.metridoc"
-project.version = "0.9.3"
+project.version = "0.9.4"
 sourceCompatibility = "1.6"
 targetCompatibility = "1.6"
 archivesBaseName = "metridoc-job-core"
