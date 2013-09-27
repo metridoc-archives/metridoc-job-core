@@ -1,11 +1,11 @@
-apply plugin: 'groovy'
-apply plugin: 'metridoc'
 project.group = "com.github.metridoc"
 project.version = "0.9.3"
 sourceCompatibility = "1.6"
 targetCompatibility = "1.6"
-
 archivesBaseName = "metridoc-job-core"
+
+apply plugin: 'groovy'
+apply plugin: 'metridoc'
 
 buildscript {
     repositories {
