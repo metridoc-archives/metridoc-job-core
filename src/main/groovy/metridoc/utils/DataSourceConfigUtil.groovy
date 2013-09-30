@@ -50,7 +50,7 @@ class DataSourceConfigUtil {
 
     static Map getHibernateOnlyProperties(ConfigObject config, String dataSourceName) {
         def dataSourceNameUsed = dataSourceName ?: DEFAULT_DATASOURCE
-        def properties = getHibernatePoperties(config)
+        def properties = getHibernatePoperties(config, dataSourceNameUsed)
         config."${dataSourceNameUsed}".with {
             if (url) {
                 properties."hibernate.connection.url" = url.toString()
