@@ -19,6 +19,7 @@ class DefaultServiceSpec extends Specification {
         def binding = new Binding()
 
         when:
+        binding.includeService(ConfigService)
         binding.includeService(DefaultServiceHelper)
 
         then:
@@ -27,6 +28,7 @@ class DefaultServiceSpec extends Specification {
         when:
         binding = new Binding()
         binding.args = ["-mergeMetridocConfig=false"] as String[]
+        binding.includeService(ConfigService)
         binding.includeTool(DefaultServiceHelper)
 
         then:

@@ -125,8 +125,7 @@ class Iterators {
     }
 }
 
-class WrappedIterator {
-    @Delegate
+class WrappedIterator extends RecordIterator {
     RecordIterator wrappedIterator
 
     WrappedIterator filter(Closure closure) {
@@ -155,6 +154,15 @@ class WrappedIterator {
 
     WriteResponse writeTo(String name) {
         writeTo([:], name)
+    }
+
+    @Override
+    protected Record computeNext() {
+        if(wrappedIterator.hasNext()) {
+            return wrappedIterator.next()
+        }
+
+        return endOfData()
     }
 }
 

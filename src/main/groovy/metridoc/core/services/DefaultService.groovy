@@ -9,21 +9,6 @@ class DefaultService implements Service {
     boolean mergeMetridocConfig = true
     Binding binding = new Binding()
 
-    @SuppressWarnings("GroovyAssignabilityCheck")
-    void setBinding(Binding binding) {
-        this.binding = binding
-        if (binding.hasVariable("args")) {
-            def argsMap = ParseArgsService.parseCli(binding.args)
-            if (argsMap.containsKey("mergeMetridocConfig")) {
-                mergeMetridocConfig = Boolean.valueOf(argsMap.mergeMetridocConfig)
-            }
-
-        }
-        if (!(this instanceof ConfigService)) {
-            binding.includeTool(ConfigService)
-        }
-    }
-
     def getVariable(String variableName) {
         getVariable(variableName, null)
     }
