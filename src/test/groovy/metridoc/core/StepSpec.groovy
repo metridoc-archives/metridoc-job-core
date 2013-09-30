@@ -13,10 +13,8 @@ class StepSpec extends Specification {
 
         when:
         Foo foo
-        use(MetridocScript) {
-            foo = binding.includeService(Foo)
-            binding.runStep("foo")
-        }
+        foo = binding.includeService(Foo)
+        binding.runStep("foo")
 
         then:
         foo.fooRan && foo.barRan

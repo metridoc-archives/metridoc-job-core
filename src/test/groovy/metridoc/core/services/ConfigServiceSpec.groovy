@@ -1,7 +1,6 @@
 package metridoc.core.services
 
 import groovy.sql.Sql
-import metridoc.core.MetridocScript
 import metridoc.utils.DataSourceConfigUtil
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
@@ -45,10 +44,8 @@ class ConfigServiceSpec extends Specification {
         def binding = new Binding()
 
         when:
-        use(MetridocScript) {
-            def configTool = binding.includeService(ConfigService)
-            configTool.binding.foo = "bar"
-        }
+        def configTool = binding.includeService(ConfigService)
+        configTool.binding.foo = "bar"
 
         then:
         binding.hasVariable("foo")
@@ -61,9 +58,7 @@ class ConfigServiceSpec extends Specification {
 
         when:
         def configTool
-        use(MetridocScript) {
-            configTool = binding.includeService(ConfigService)
-        }
+        configTool = binding.includeService(ConfigService)
         def config = binding.config
 
         then:
@@ -120,10 +115,7 @@ class ConfigServiceSpec extends Specification {
         def configService
         def args = ["-embeddedDataSource", "-mergeMetridocConfig=false"]
         binding.args = args as String[]
-
-        use(MetridocScript) {
-            configService = binding.includeService(ConfigService)
-        }
+        binding.includeService(ConfigService)
 
         then:
         noExceptionThrown()

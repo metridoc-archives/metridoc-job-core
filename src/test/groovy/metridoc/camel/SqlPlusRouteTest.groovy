@@ -1,8 +1,7 @@
 package metridoc.camel
 
 import groovy.sql.Sql
-import metridoc.core.MetridocScript
-import metridoc.core.tools.CamelTool
+import metridoc.core.services.CamelService
 import org.apache.camel.Exchange
 import org.junit.After
 import org.junit.Before
@@ -41,10 +40,10 @@ class SqlPlusRouteTest {
 
     @Test
     void "test sql routing using the camel tool"() {
-        def tool = MetridocScript.includeTool(new Binding(), CamelTool)
-        tool.bind("dataSource", embeddedDataSource)
+        def service = new Binding().includeService(CamelService)
+        service.bind("dataSource", embeddedDataSource)
 
-        tool.with {
+        service.with {
             consumeNoWait("sqlplus:foo?dataSource=dataSource") { ResultSet resultSet ->
                 Exchange exchange = send("sqlplus:bar?dataSource=dataSource", resultSet)
                 assert exchange.getException() == null

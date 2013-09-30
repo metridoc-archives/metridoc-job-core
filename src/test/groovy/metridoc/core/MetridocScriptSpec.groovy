@@ -18,29 +18,27 @@ class MetridocScriptSpec extends Specification {
     void "target manager can only be initialize once"() {
         when:
         MetridocScript.initializeTargetManagerIfNotThere(script)
-        def targetManager = script.stepManager
+        def stepManager = script.stepManager
         MetridocScript.initializeTargetManagerIfNotThere(script)
 
         then:
-        targetManager == script.stepManager
+        stepManager == script.stepManager
     }
 
     void "include tool returns the tool that has been instantiated or instantiated in the past"() {
         when:
-        def tool = MetridocScript.includeService(script, HibernateService)
+        def service = script.includeService(HibernateService)
 
         then:
-        tool
-        tool == MetridocScript.includeService(script, HibernateService)
+        service
+        service == script.includeService(HibernateService)
     }
 
     void "test adding tools with arguments"() {
         when:
         def service
-        use(MetridocScript) {
-            service = script.includeService(HibernateService, entityClasses: [this.class])
-            service = script.binding.includeService(HibernateService, entityClasses: [this.class])
-        }
+        script.includeService(HibernateService, entityClasses: [this.class])
+        service = script.binding.includeService(HibernateService, entityClasses: [this.class])
 
         then:
         noExceptionThrown()
@@ -66,11 +64,8 @@ class MetridocScriptSpec extends Specification {
     void "test running a step based on method name"() {
         when:
         def helper = new MetridocScriptHelper()
-
-        use(MetridocScript) {
-            helper.step(runFoo: "runs foo")
-            helper.runSteps("runFoo")
-        }
+        helper.step(runFoo: "runs foo")
+        helper.runSteps("runFoo")
 
         then:
         noExceptionThrown()
@@ -81,19 +76,15 @@ class MetridocScriptSpec extends Specification {
         helper.bar = {
             barRan = true
         }
-        use(MetridocScript) {
-            helper.step(bar: "runs bar")
-            helper.runSteps("bar")
-        }
+        helper.step(bar: "runs bar")
+        helper.runSteps("bar")
 
         then:
         noExceptionThrown()
         barRan
 
         when: "adding a step that does not have a corresponding method or closure"
-        use(MetridocScript) {
             helper.step(noMethod: "adding a bad step")
-        }
 
         then:
         def error = thrown(AssertionError)

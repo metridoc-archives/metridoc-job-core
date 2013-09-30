@@ -1,6 +1,5 @@
 package metridoc.core.services
 
-import metridoc.core.MetridocScript
 import org.apache.commons.lang.StringUtils
 
 /**
@@ -35,7 +34,7 @@ abstract class RunnableService extends DefaultService {
             binding.setVariable(thisToolName, this)
         }
         //redo injection in case properties were set after including the tool
-        def manager = MetridocScript.getManager(binding)
+        def manager = binding.manager
         manager.handlePropertyInjection(this)
         configure()
         String step = getVariable("target", String)

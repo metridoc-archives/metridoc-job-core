@@ -1,6 +1,5 @@
 package metridoc.core.services
 
-import metridoc.core.MetridocScript
 import spock.lang.Specification
 
 import static SimpleLogService.DEFAULT_LOG_LEVEL
@@ -15,9 +14,7 @@ class SimpleLogServiceSpec extends Specification {
     void "logging is added after includeTool is run"() {
         when:
         def binding = new Binding()
-        use(MetridocScript) {
-            binding.includeService(SimpleLogService)
-        }
+        binding.includeService(SimpleLogService)
 
         then:
         System.getProperty(METRIDOC_LOGGER)
