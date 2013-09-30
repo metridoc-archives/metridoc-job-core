@@ -268,7 +268,9 @@ class StepManager {
             if (!binding.hasVariable(serviceNameUsed)) {
                 binding."$serviceNameUsed" = service
             }
-            injectedServices.each {
+            def servicesToCheck = new ArrayList(injectedServices)
+            //now we can avoid concurrent modification issues
+            servicesToCheck.each {
                 def property = it.properties.find { it.key == serviceNameUsed }
                 try {
                     if (property && it."$serviceNameUsed" == null) {
