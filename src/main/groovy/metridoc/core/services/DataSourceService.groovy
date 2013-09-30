@@ -1,5 +1,6 @@
 package metridoc.core.services
 
+import org.hibernate.Session
 import org.hibernate.SessionFactory
 
 import java.util.concurrent.atomic.AtomicBoolean
@@ -41,11 +42,28 @@ abstract class DataSourceService extends DefaultService {
             doEnableFor(entities)
         }
         else {
-            throw IllegalStateException("Could not run [enableFor] since it has already ran")
+            throw new IllegalStateException("Could not run [enableFor] since it has already ran")
         }
+    }
+
+    static void withTransaction(Session session, Closure closure) {
+        def transaction = session.beginTransaction()
+        try {
+            closure.call(session)
+            transaction.commit()
+        }
+        catch (Exception e) {
+            transaction.rollback()
+            throw e
+        }
+    }
+
+    void withTransaction(Closure closure) {
+        assert sessionFactory : "session factory has not been set yet"
+        def session = sessionFactory.currentSession
+        withTransaction(session, closure)
     }
 
     abstract protected void doEnableFor(Class... classes)
     abstract SessionFactory getSessionFactory()
-    abstract void withTransaction(Closure closure)
 }
