@@ -1,6 +1,5 @@
 package metridoc.iterators
 
-import groovy.stream.Stream
 import metridoc.writers.*
 
 /**
@@ -131,13 +130,13 @@ class WrappedIterator {
     RecordIterator wrappedIterator
 
     WrappedIterator filter(Closure closure) {
-        Iterators.toRecordIterator(Stream.from(wrappedIterator).filter(closure))
+        Iterators.toRecordIterator(wrappedIterator.toStream().filter(closure))
     }
 
     WrappedIterator map(Closure closure) {
-        Iterators.toRecordIterator(Stream.from(wrappedIterator).map { Record record ->
+        Iterators.toRecordIterator(wrappedIterator.toStream().map { Record record ->
             def response = closure.call(record)
-            if(response && response instanceof Record) {
+            if (response && response instanceof Record) {
                 return response
             }
             return record
