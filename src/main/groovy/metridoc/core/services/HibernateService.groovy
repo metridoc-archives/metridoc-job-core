@@ -22,13 +22,11 @@ class HibernateService extends DataSourceService {
         }
         def configuration = new Configuration()
         def result
-        configuration.with {
-            entityClasses.each {
-                addAnnotatedClass(it)
-            }
-            addProperties(hibernateProperties)
-            result = buildSessionFactory()
+        this.entityClasses.each {
+            configuration.addAnnotatedClass(it)
         }
+        configuration.addProperties(hibernateProperties)
+        result = configuration.buildSessionFactory()
 
         return result
     }
