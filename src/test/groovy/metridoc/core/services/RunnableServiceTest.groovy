@@ -23,11 +23,11 @@ class RunnableServiceTest {
         def runnableTool = new RunnableService() {
             @Override
             def configure() {
-                target(foo: "run foo") {
+                step(foo: "run foo") {
                     fooRan = true
                 }
 
-                setDefaultTarget("foo")
+                setDefaultStep("foo")
             }
         }
 
@@ -44,15 +44,15 @@ class RunnableServiceTest {
 
             @Override
             def configure() {
-                target(foo: "run foo") {
+                step(foo: "run foo") {
                     fooRan = true
                 }
 
-                target(bar: "run bar") {
+                step(bar: "run bar") {
                     barRan = true
                 }
 
-                setDefaultTarget("foo")
+                setDefaultStep("foo")
             }
         }
 
@@ -64,7 +64,7 @@ class RunnableServiceTest {
     }
 
     @Test
-    void "a runnabel tool can only run once"() {
+    void "a runnable tool can only run once"() {
         def runnableTool = new RunnableService() {
 
             @Override
@@ -79,6 +79,21 @@ class RunnableServiceTest {
             assert false: "exception should have occurred"
         }
         catch (ServiceException ignored) {
+        }
+    }
+
+    @Test
+    void "test from binding"() {
+        def binding = new Binding()
+        binding.includeService(ParseArgsService)
+        binding.includeService(RunnableServiceMock).execute()
+    }
+
+    class RunnableServiceMock extends RunnableService {
+
+        @Override
+        def configure() {
+            return null  //To change body of implemented methods use File | Settings | File Templates.
         }
     }
 }
