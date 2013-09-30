@@ -13,7 +13,7 @@ class HibernateService extends DataSourceService {
     Properties hibernateProperties = [:]
 
     SessionFactory sessionFactory
-    List<Class> entityClasses = []
+    private List<Class> entityClasses = []
 
     @SuppressWarnings("GroovyVariableNotAssigned")
     SessionFactory createSessionFactory() {
@@ -33,17 +33,17 @@ class HibernateService extends DataSourceService {
         return result
     }
 
+    @Override
     void init() {
         super.init()
-        setConfig(binding.config)
-    }
-
-    void setConfig(ConfigObject config) {
         def hibernateProperties = convertDataSourcePropsToHibernate(config)
         this.hibernateProperties.putAll(hibernateProperties)
-        if (config.entityClasses) {
-            entityClasses = config.entityClasses
-        }
+    }
+
+    @Override
+    void doEnableFor(Class... classes) {
+        entityClasses = classes
+        sessionFactory = createSessionFactory()
     }
 
     static void withTransaction(Session session, Closure closure) {
@@ -75,7 +75,7 @@ class HibernateService extends DataSourceService {
     }
 
     @SuppressWarnings("GroovyMissingReturnStatement")
-    static Properties convertDataSourcePropsToHibernate(ConfigObject configObject) {
-        DataSourceConfigUtil.getHibernateOnlyProperties(configObject)
+    Properties convertDataSourcePropsToHibernate(ConfigObject configObject) {
+        DataSourceConfigUtil.getHibernateOnlyProperties(configObject, dataSourcePrefix)
     }
 }
