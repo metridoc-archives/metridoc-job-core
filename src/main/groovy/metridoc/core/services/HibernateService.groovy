@@ -46,26 +46,6 @@ class HibernateService extends DataSourceService {
         sessionFactory = createSessionFactory()
     }
 
-    static void withTransaction(Session session, Closure closure) {
-        def transaction = session.beginTransaction()
-        try {
-            closure.call(session)
-            transaction.commit()
-        }
-        catch (Exception e) {
-            transaction.rollback()
-            throw e
-        }
-    }
-
-    void withTransaction(Closure closure) {
-        if (!sessionFactory) {
-            sessionFactory = createSessionFactory()
-        }
-        def session = sessionFactory.currentSession
-        withTransaction(session, closure)
-    }
-
     SessionFactory getSessionFactory() {
         if (sessionFactory) {
             return sessionFactory
