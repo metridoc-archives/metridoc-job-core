@@ -14,7 +14,7 @@ abstract class DataSourceService extends DefaultService {
     boolean localMySql
     ConfigObject config = new ConfigObject()
     String dataSourcePrefix = "dataSource"
-    private AtomicBoolean enableForRan = new AtomicBoolean(false)
+    private boolean enableForRan = false
 
     void init() {
         def dataSource = config."$dataSourcePrefix"
@@ -37,9 +37,10 @@ abstract class DataSourceService extends DefaultService {
         }
     }
 
-    void enableFor(Class... entities) {
-        if(!enableForRan.get()) {
+    synchronized void enableFor(Class... entities) {
+        if(!enableForRan) {
             doEnableFor(entities)
+            enableForRan = true
         }
         else {
             throw new IllegalStateException("Could not run [enableFor] since it has already ran")
