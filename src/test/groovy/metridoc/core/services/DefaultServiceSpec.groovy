@@ -1,6 +1,5 @@
 package metridoc.core.services
 
-import metridoc.core.MetridocScript
 import spock.lang.Specification
 
 /**
@@ -20,9 +19,7 @@ class DefaultServiceSpec extends Specification {
         def binding = new Binding()
 
         when:
-        use(MetridocScript) {
-            binding.includeService(DefaultServiceHelper)
-        }
+        binding.includeService(DefaultServiceHelper)
 
         then:
         binding.configService.mergeMetridocConfig
@@ -30,9 +27,7 @@ class DefaultServiceSpec extends Specification {
         when:
         binding = new Binding()
         binding.args = ["-mergeMetridocConfig=false"] as String[]
-        use(MetridocScript) {
-            binding.includeTool(DefaultServiceHelper)
-        }
+        binding.includeTool(DefaultServiceHelper)
 
         then:
         !binding.configService.mergeMetridocConfig

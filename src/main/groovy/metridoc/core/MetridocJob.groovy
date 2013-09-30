@@ -57,7 +57,7 @@ abstract class MetridocJob extends RunnableTool {
         if (grailsApplication?.config) {
             binding.config = grailsApplication.config
         }
-        def manager = MetridocScript.getManager(binding)
+        def manager = binding.getManager()
         manager.handlePropertyInjection(this)
         execute()
     }

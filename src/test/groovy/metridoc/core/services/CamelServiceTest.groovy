@@ -1,6 +1,5 @@
 package metridoc.core.services
 
-import metridoc.core.MetridocScript
 import metridoc.core.StepManager
 import org.apache.camel.Exchange
 import org.apache.camel.Processor
@@ -16,7 +15,7 @@ import org.junit.Test
  */
 class CamelServiceTest {
     def binding = new Binding()
-    def service = MetridocScript.includeService(binding, CamelService)
+    def service = binding.includeService(CamelService)
 
     @Test
     void "do basic from and to test"() {

@@ -1,7 +1,6 @@
 package metridoc.core.services
 
 import com.mysql.jdbc.Driver
-import metridoc.core.MetridocScript
 import org.hibernate.dialect.MySQL5InnoDBDialect
 import org.junit.Test
 
@@ -65,13 +64,11 @@ class HibernateServiceTest {
                 "--localMysql"
         ] as String[]
 
-        use(MetridocScript) {
-            def tool = binding.includeService(HibernateService)
-            assert !tool.mergeMetridocConfig
-            assert tool.localMysql
-            def config = binding.config
-            assert "jdbc:mysql://localhost:3306/test" == config.dataSource.url
-        }
+        def service = binding.includeService(HibernateService)
+        assert !service.mergeMetridocConfig
+        assert service.localMysql
+        def config = binding.config
+        assert "jdbc:mysql://localhost:3306/test" == config.dataSource.url
     }
 }
 

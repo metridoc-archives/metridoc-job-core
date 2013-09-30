@@ -20,9 +20,7 @@ class DefaultService implements Service {
 
         }
         if (!(this instanceof ConfigService)) {
-            use(MetridocScript) {
-                binding.includeTool(ConfigService)
-            }
+            binding.includeTool(ConfigService)
         }
     }
 
@@ -100,27 +98,21 @@ class DefaultService implements Service {
     }
 
     void step(LinkedHashMap stepInfo, Closure closure) {
-        use(MetridocScript) {
-            getBinding().step(stepInfo, closure)
-        }
+        getBinding().step(stepInfo, closure)
     }
 
     void step(LinkedHashMap stepInfo) {
-        use(MetridocScript) {
-            def stepName = MetridocScript.getStepName(stepInfo)
-            if (this.metaClass.respondsTo(this, stepName)) {
-                getBinding().step(stepInfo, this.&"$stepName")
-            }
-            else {
-                getBinding().step(stepInfo)
-            }
+        def stepName = MetridocScript.getStepName(stepInfo)
+        if (this.metaClass.respondsTo(this, stepName)) {
+            getBinding().step(stepInfo, this.&"$stepName")
+        }
+        else {
+            getBinding().step(stepInfo)
         }
     }
 
     public <T> T includeService(Class<T> serviceClass) {
-        use(MetridocScript) {
-            return getBinding().includeService(serviceClass)
-        }
+        return getBinding().includeService(serviceClass)
     }
 
     /**
@@ -133,9 +125,7 @@ class DefaultService implements Service {
     }
 
     public <T> T includeService(LinkedHashMap args, Class<T> serviceClass) {
-        use(MetridocScript) {
-            return getBinding().includeService(args, serviceClass)
-        }
+        return getBinding().includeService(args, serviceClass)
     }
 
     /**
@@ -157,36 +147,30 @@ class DefaultService implements Service {
     }
 
     void includeSteps(Class<Script> steps) {
-        use(MetridocScript) {
-            return getBinding().includeSteps(steps)
-        }
+        getBinding().includeSteps(steps)
     }
 
     void depends(String... targetNames) {
-        use(MetridocScript) {
-            return getBinding().depends(targetNames)
-        }
+        getBinding().depends(targetNames)
     }
 
     void profile(String description, Closure work) {
-        use(MetridocScript) {
-            return getBinding().profile(description, work)
-        }
+        getBinding().profile(description, work)
     }
 
     void setDefaultStep(String step) {
-        MetridocScript.getManager(binding).defaultStep = step
+        binding.defaultStep = step
     }
 
     void runStep(String step) {
-        MetridocScript.runStep(binding, step)
+        binding.runStep(step)
     }
 
     void runSteps(String... steps) {
-        MetridocScript.runSteps(binding, steps)
+        binding.runSteps(steps)
     }
 
     void runDefaultStep() {
-        MetridocScript.runDefaultStep(binding)
+        binding.runDefaultStep()
     }
 }
