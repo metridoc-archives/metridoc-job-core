@@ -1,6 +1,5 @@
 package metridoc.core.services
 
-import metridoc.core.MetridocScript
 import spock.lang.Specification
 
 /**
@@ -61,9 +60,7 @@ class ParseArgsServiceTest extends Specification {
         binding.args = ["foo", "bar"]
 
         when:
-        use(MetridocScript) {
-            binding.includeService(ParseArgsService)
-        }
+        binding.includeService(ParseArgsService)
 
         then:
         def params = binding.argsMap.params
@@ -73,7 +70,7 @@ class ParseArgsServiceTest extends Specification {
 
     Map primeService(List args) {
         binding.args = args as String[]
-        service = MetridocScript.includeService(binding, ParseArgsService)
+        service = binding.includeService(ParseArgsService)
         return binding.argsMap
     }
 }

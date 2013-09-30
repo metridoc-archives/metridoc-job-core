@@ -8,12 +8,12 @@ import metridoc.core.services.ConfigService
 class MetridocScript {
     public static final String STEP_NOT_FOUND_IN_BINDING_OR_SCRIPT = "Could not find a corresponding method or closure for step"
 
-    private static StepManager getManager(Script self) {
+    static StepManager getManager(Script self) {
         initializeTargetManagerIfNotThere(self.binding)
         self.stepManager
     }
 
-    private static StepManager getManager(Binding binding) {
+    static StepManager getManager(Binding binding) {
         initializeTargetManagerIfNotThere(binding)
         binding.stepManager
     }

@@ -109,7 +109,7 @@ class StepManagerTest {
         stepManager.handlePropertyInjection(helper)
         assert "bam" == helper.fooBar
 
-        helper = MetridocScript.includeService(binding, PropertyInjectionHelper)
+        helper = binding.includeService(PropertyInjectionHelper)
         assert "bam" == helper.fooBar
     }
 
@@ -180,11 +180,9 @@ class StepManagerTest {
     class MetridocJobTestTargetHelperWithDefaultTarget extends Script {
         @Override
         Object run() {
-            use(MetridocScript) {
-                includeSteps(MetridocJobTestTargetHelper)
-                stepManager.defaultStep = "bar"
-                runDefaultStep()
-            }
+            includeSteps(MetridocJobTestTargetHelper)
+            defaultStep = "bar"
+            runDefaultStep()
         }
     }
 

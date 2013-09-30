@@ -2,7 +2,6 @@ package metridoc.core.services
 
 import groovy.sql.Sql
 import groovy.util.logging.Slf4j
-import metridoc.core.MetridocScript
 import metridoc.utils.DataSourceConfigUtil
 
 import static org.apache.commons.lang.SystemUtils.FILE_SEPARATOR
@@ -19,9 +18,7 @@ class ConfigService extends DefaultService {
     void setBinding(Binding binding) {
         super.setBinding(binding)
         if (!binding.hasVariable("config")) {
-            use(MetridocScript) {
-                binding.includeService(ParseArgsService)
-            }
+            binding.includeService(ParseArgsService)
 
             String env = getVariable("env", String)
             if ("prod" == env) {
@@ -132,7 +129,7 @@ class ConfigService extends DefaultService {
                     sqlName += "_${m.group(1)}"
                 }
 
-                if(sqlName == "sql" && (embeddedDataSource || localMysql)) return
+                if (sqlName == "sql" && (embeddedDataSource || localMysql)) return
 
                 binding."$dataSourceName" = dataSource
                 binding."$sqlName" = dataSource
