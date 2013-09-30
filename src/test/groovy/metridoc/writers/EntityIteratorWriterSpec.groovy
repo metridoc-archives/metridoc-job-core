@@ -1,6 +1,6 @@
 package metridoc.writers
 
-import metridoc.core.tools.HibernateTool
+import metridoc.core.services.HibernateService
 import metridoc.entities.MetridocRecordEntity
 import metridoc.iterators.Iterators
 import org.hibernate.Session
@@ -16,8 +16,11 @@ import static metridoc.writers.WrittenRecordStat.Status.*
  */
 class EntityIteratorWriterSpec extends Specification {
 
-    def hTool = new HibernateTool(entityClasses: [EntityHelper], embeddedDataSource: true)
+    def hService = new HibernateService(embeddedDataSource: true)
 
+    void setup() {
+        hService.enableFor(EntityHelper)
+    }
 
     def "test basic entity writing workflow"() {
         when: "the data is written"
@@ -26,7 +29,7 @@ class EntityIteratorWriterSpec extends Specification {
                 [foo: "sdf"],
                 [foo: "fgd"],
                 [foo: "dfgh"]
-        ).toEntity(EntityHelper, hTool)
+        ).toEntity(EntityHelper, hService)
 
         then: "appropriate data is returned"
         4 == response.aggregateStats[WRITTEN]
@@ -34,23 +37,22 @@ class EntityIteratorWriterSpec extends Specification {
         0 == response.aggregateStats[ERROR]
         0 == response.aggregateStats[INVALID]
 
-        hTool.withTransaction { Session session ->
+        hService.withTransaction { Session session ->
             4 == session.createQuery("from EntityHelper").list().size()
         }
     }
 
     def "test validation errors"() {
         given: "some invalid data"
-        def data = [
+        def rowIterator = Iterators.fromMaps(
                 [foo: "asd"],
                 [foo: "sdf"],
                 [foo: "invalid"],
                 [foo: "dfgh"]
-        ]
-        def rowIterator = Iterators.toRowIterator(data)
+        )
 
         when: "data is written"
-        def writer = new EntityIteratorWriter(sessionFactory: hTool.sessionFactory, recordEntityClass: EntityHelper)
+        def writer = new EntityIteratorWriter(sessionFactory: hService.sessionFactory, recordEntityClass: EntityHelper)
         def response = writer.write(rowIterator)
 
         then: "three records are written and one is invalid"
@@ -61,16 +63,15 @@ class EntityIteratorWriterSpec extends Specification {
 
     def "test errors"() {
         given: "bad data"
-        def data = [
+        def rowIterator = Iterators.fromMaps(
                 [foo: "asd"],
                 [foo: "sdf"],
                 [foo: "error"],
                 [foo: "dfgh"]
-        ]
-        def rowIterator = Iterators.toRowIterator(data)
+        )
 
         when: "data is written"
-        def writer = new EntityIteratorWriter(sessionFactory: hTool.sessionFactory, recordEntityClass: EntityHelper)
+        def writer = new EntityIteratorWriter(sessionFactory: hService.sessionFactory, recordEntityClass: EntityHelper)
         def response = writer.write(rowIterator)
         def throwables = response.fatalErrors
 

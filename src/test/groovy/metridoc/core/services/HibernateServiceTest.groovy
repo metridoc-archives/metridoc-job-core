@@ -50,10 +50,10 @@ class HibernateServiceTest {
 
     @Test
     void "test configuring a basic embedded database"() {
-        def tool = new HibernateService(embeddedDataSource: true)
-        tool.init()
-        assert "org.hibernate.dialect.H2Dialect" == tool.hibernateProperties."hibernate.dialect"
-        assert "org.h2.Driver" == tool.hibernateProperties."hibernate.connection.driver_class"
+        def service = new HibernateService(embeddedDataSource: true)
+        service.init()
+        assert "org.hibernate.dialect.H2Dialect" == service.hibernateProperties."hibernate.dialect"
+        assert "org.h2.Driver" == service.hibernateProperties."hibernate.connection.driver_class"
     }
 
     @Test
@@ -64,6 +64,7 @@ class HibernateServiceTest {
                 "--localMysql"
         ] as String[]
 
+        binding.includeService(ConfigService)
         def service = binding.includeService(HibernateService)
         assert !service.mergeMetridocConfig
         assert service.localMysql
