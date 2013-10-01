@@ -1,5 +1,6 @@
 package metridoc.core.services
 
+import groovy.util.logging.Slf4j
 import metridoc.utils.DataSourceConfigUtil
 import org.hibernate.Session
 import org.hibernate.SessionFactory
@@ -8,6 +9,7 @@ import org.hibernate.cfg.Configuration
 /**
  * @author Tommy Barker
  */
+@Slf4j
 class HibernateService extends DataSourceService {
 
     Properties hibernateProperties = [:]
@@ -26,6 +28,7 @@ class HibernateService extends DataSourceService {
             configuration.addAnnotatedClass(it)
         }
         configuration.addProperties(hibernateProperties)
+        log.info "hibernate service is connecting to ${hibernateProperties.'hibernate.connection.url'}"
         result = configuration.buildSessionFactory()
 
         return result
