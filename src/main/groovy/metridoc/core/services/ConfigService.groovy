@@ -132,7 +132,7 @@ class ConfigService extends DefaultService {
                 if (sqlName == "sql" && (embeddedDataSource || localMysql)) return
 
                 binding."$dataSourceName" = dataSource
-                binding."$sqlName" = dataSource
+                binding."$sqlName" = new Sql(dataSource)
 
             }
             catch (Throwable throwable) {
