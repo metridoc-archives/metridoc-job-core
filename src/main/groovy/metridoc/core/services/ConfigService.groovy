@@ -14,11 +14,15 @@ import static org.apache.commons.lang.SystemUtils.USER_HOME
 class ConfigService extends DefaultService {
     private static final String METRIDOC_CONFIG = "${USER_HOME}${FILE_SEPARATOR}.metridoc${FILE_SEPARATOR}MetridocConfig.groovy"
     def metridocConfigLocation = METRIDOC_CONFIG
+    boolean mergeMetridocConfig = true
 
     void setBinding(Binding binding) {
         super.setBinding(binding)
         if (!binding.hasVariable("config")) {
             binding.includeService(ParseArgsService)
+            if(binding.hasVariable("argsMap")) {
+                setDataFromFlags(binding.argsMap)
+            }
 
             String env = getVariable("env", String)
             if ("prod" == env) {
@@ -48,6 +52,13 @@ class ConfigService extends DefaultService {
             binding.config = cliConfigObject
             initiateDataSources(cliConfigObject)
         }
+    }
+
+    protected void setDataFromFlags(Map argsMap) {
+        mergeMetridocConfig = argsMap.containsKey("mergeMetridocConfig") ?
+            Boolean.valueOf(argsMap.mergeMetridocConfig) : true
+
+        metridocConfigLocation = argsMap.metridocConfigLocation ?: METRIDOC_CONFIG
     }
 
     void addCliConfigArgs(ConfigSlurper slurper, ConfigObject configObject) {

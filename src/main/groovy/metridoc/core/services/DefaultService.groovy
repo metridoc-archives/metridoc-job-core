@@ -6,7 +6,7 @@ import metridoc.core.MetridocScript
  * @author Tommy Barker
  */
 class DefaultService implements Service {
-    boolean mergeMetridocConfig = true
+
     Binding binding = new Binding()
 
     def getVariable(String variableName) {

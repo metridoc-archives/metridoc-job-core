@@ -15,6 +15,23 @@ class ConfigServiceSpec extends Specification {
     @Rule
     public TemporaryFolder folder = new TemporaryFolder()
 
+    def "test setting fields based on flags"() {
+        given: "mergeMetridocConfig and metridocConfigLocation flags are set"
+        def configService = new ConfigService()
+        def binding = new Binding()
+        binding.args = [
+                "-mergeMetridocConfig=false",
+                "-metridocConfigLocation=foo/bar"
+        ]
+
+        when: "when the binding is set"
+        configService.setBinding(binding)
+
+        then: "appropriate fields should be set"
+        !configService.mergeMetridocConfig
+        "foo/bar" == configService.metridocConfigLocation
+    }
+
     def "test in script adhoc configuration"() {
         when: "an adhoc configuration is created"
         def variable = new ConfigService().addConfig {
@@ -107,7 +124,7 @@ class ConfigServiceSpec extends Specification {
         "foobar" == configTool.getVariable("foo")
     }
 
-    void "test embedded dataSourceinjection"() {
+    void "test embedded dataSourceInjection"() {
         given:
         Binding binding = new Binding()
 
@@ -121,6 +138,10 @@ class ConfigServiceSpec extends Specification {
         noExceptionThrown()
         binding.dataSource
         binding.sql
+    }
+
+    void "test dealing with flag overrides"() {
+
     }
 }
 
