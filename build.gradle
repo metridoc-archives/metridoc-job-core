@@ -1,5 +1,5 @@
 project.group = "com.github.metridoc"
-project.version = "1.0.2"
+project.version = new File(project.projectDir, "VERSION").text
 sourceCompatibility = "1.6"
 targetCompatibility = "1.6"
 archivesBaseName = "metridoc-job-core"
@@ -19,7 +19,7 @@ buildscript {
     }
 
     dependencies {
-        classpath "com.github.metridoc:metridoc-gradle-plugin:0.2.16"
+        classpath "com.github.metridoc:metridoc-gradle-plugin:0.2.18"
     }
 }
 
