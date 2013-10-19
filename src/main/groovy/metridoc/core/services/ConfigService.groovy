@@ -3,6 +3,7 @@ package metridoc.core.services
 import groovy.sql.Sql
 import groovy.util.logging.Slf4j
 import metridoc.utils.DataSourceConfigUtil
+import org.apache.commons.lang.text.StrBuilder
 
 import static org.apache.commons.lang.SystemUtils.FILE_SEPARATOR
 import static org.apache.commons.lang.SystemUtils.USER_HOME
@@ -56,7 +57,7 @@ class ConfigService extends DefaultService {
 
     protected void setDataFromFlags(Map argsMap) {
         mergeMetridocConfig = argsMap.containsKey("mergeMetridocConfig") ?
-            Boolean.valueOf(argsMap.mergeMetridocConfig) : true
+            Boolean.valueOf(argsMap.mergeMetridocConfig as String) : true
 
         metridocConfigLocation = argsMap.metridocConfigLocation ?: METRIDOC_CONFIG
     }
@@ -64,17 +65,18 @@ class ConfigService extends DefaultService {
     void addCliConfigArgs(ConfigSlurper slurper, ConfigObject configObject) {
         if (binding.hasVariable("args")) {
             String[] args = binding.args
-            File tempFile = File.createTempFile("cliConfig", null)
+            StrBuilder builder = new StrBuilder()
+
             args.each {
                 if (it.startsWith("-config.") || it.startsWith("--config.")) {
                     def propertyToWrite = it.replaceFirst(/-?-config\./, "")
-                    tempFile.append(propertyToWrite)
-                    tempFile.append("\n")
+                    builder.appendln(propertyToWrite)
                 }
             }
 
-            if (tempFile.text) {
-                configObject.merge(slurper.parse(tempFile.toURI().toURL()))
+            String configScript = builder.toString().trim()
+            if (configScript) {
+                configObject.merge(slurper.parse(configScript))
             }
         }
     }
