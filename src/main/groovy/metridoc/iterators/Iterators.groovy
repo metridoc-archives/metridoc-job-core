@@ -39,7 +39,7 @@ class Iterators {
      * @return
      */
     static RecordIterator toRowIterator(Iterator iterator) {
-        assert iterator: "iterator must not be null or empty"
+        assert iterator != null: "iterator must not be null"
         new RecordIterator() {
             @Override
             protected Record computeNext() {
@@ -69,7 +69,7 @@ class Iterators {
      * @return
      */
     static RecordIterator toRowIterator(List<Map> iterator) {
-        assert iterator: "iterator must not be null or empty"
+        assert iterator != null: "iterator must not be null"
         toRowIterator(iterator.iterator())
     }
 
