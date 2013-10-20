@@ -3,6 +3,7 @@ package metridoc.core
 import groovy.util.logging.Slf4j
 import metridoc.core.services.ParseArgsService
 import org.apache.commons.lang.StringUtils
+import org.apache.commons.lang.time.StopWatch
 import org.slf4j.LoggerFactory
 
 import java.lang.reflect.Field
@@ -96,6 +97,7 @@ class StepManager {
         this._interrupted = interrupted
     }
 
+    @SuppressWarnings("GroovyAssignabilityCheck")
     def step(Map data, Closure closure) {
         closure.delegate = this //required for imported step
         def depends = data.remove("depends")
@@ -233,11 +235,12 @@ class StepManager {
             throw new JobInterruptionException(this.getClass().name)
         }
         def log = LoggerFactory.getLogger(StepManager)
-        def start = System.currentTimeMillis()
+        StopWatch stopWatch = new StopWatch()
+        stopWatch.start()
         log.info "profiling [$description] start"
         closure.call()
-        def end = System.currentTimeMillis()
-        log.info "profiling [$description] finished ${end - start} ms"
+        stopWatch.stop()
+        log.info "profiling [$description] finished $stopWatch"
         if (interrupted) {
             throw new JobInterruptionException(this.getClass().name)
         }
