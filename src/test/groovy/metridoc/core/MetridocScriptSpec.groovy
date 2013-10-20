@@ -1,6 +1,7 @@
 package metridoc.core
 
 import metridoc.core.services.HibernateService
+import org.slf4j.LoggerFactory
 import spock.lang.Specification
 
 class MetridocScriptSpec extends Specification {
@@ -89,6 +90,33 @@ class MetridocScriptSpec extends Specification {
         then:
         def error = thrown(AssertionError)
         error.message.contains("Could not find a corresponding method or closure for step")
+    }
+
+    void "test logging extension"() {
+        when:
+        def logName
+        new Script(){
+            @Override
+            Object run() {
+                logName = log.name
+            }
+        }.run()
+
+        then:
+        "metridoc.script" == logName
+
+        when:
+
+        new Script(){
+            @Override
+            Object run() {
+                log = LoggerFactory.getLogger("foo.bar")
+                logName = log.name
+            }
+        }.run()
+
+        then:
+        "foo.bar" == logName
     }
 }
 
