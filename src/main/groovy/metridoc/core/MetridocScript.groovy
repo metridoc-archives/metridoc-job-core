@@ -1,6 +1,8 @@
 package metridoc.core
 
 import metridoc.core.services.ConfigService
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 
 /**
  * Class to use if you are doing groovy scripting and want to add Metridoc functionality
@@ -223,7 +225,7 @@ class MetridocScript {
 
         assert inScriptOrBinding: STEP_NOT_FOUND_IN_BINDING_OR_SCRIPT
 
-        step(self, description, self.&"$stepName")
+        step(self, description, self.&"$stepName" as Closure)
     }
 
     static void step(Binding self, LinkedHashMap description) {
@@ -231,7 +233,7 @@ class MetridocScript {
 
         assert inBinding(self, stepName): STEP_NOT_FOUND_IN_BINDING_OR_SCRIPT
 
-        step(self, description, self."$stepName")
+        step(self, description, self."$stepName" as Closure)
     }
 
     protected static String getStepName(LinkedHashMap description) {
@@ -262,5 +264,17 @@ class MetridocScript {
 
     static void runStep(Script self, String step) {
         runSteps(self.binding, step)
+    }
+
+    static Logger getLog(Script self) {
+        getLog(self.binding)
+    }
+
+    static Logger getLog(Binding self) {
+        if(self.hasVariable("log")) {
+            return self.variables["log"] as Logger
+        }
+
+        LoggerFactory.getLogger("metridoc.script")
     }
 }
