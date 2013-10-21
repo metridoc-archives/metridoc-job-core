@@ -23,6 +23,7 @@ class WriteResponse {
         aggregateStats[IGNORED] = 0
         aggregateStats[WRITTEN] = 0
         aggregateStats[INVALID] = 0
+        aggregateStats[TOTAL] = 0
     }
 
     void addAll(List<WrittenRecordStat> stats) {
@@ -60,7 +61,7 @@ class WriteResponse {
         aggregateStats.values().each {
             total += it
         }
-
+        aggregateStats[TOTAL] = total
         return total
     }
 
