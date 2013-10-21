@@ -1,11 +1,14 @@
 project.group = "com.github.metridoc"
 project.version = new File(project.projectDir, "VERSION").text
-sourceCompatibility = "1.6"
-targetCompatibility = "1.6"
+
 archivesBaseName = "metridoc-job-core"
 
 apply plugin: 'groovy'
 apply plugin: 'metridoc'
+
+sourceCompatibility = "1.7"
+targetCompatibility = "1.7"
+
 
 buildscript {
     repositories {
