@@ -17,7 +17,7 @@ public class IteratorsExtension {
     public static WrappedIterator fromDelimited(Iterators self, File file, String delimiter, Map options = [:]) {
         assert file: "file cannot be null"
         def result = fromDelimited(self, file.newInputStream(), delimiter)
-        result.file = file
+        result.wrappedIterator.file = file
 
         return result
     }

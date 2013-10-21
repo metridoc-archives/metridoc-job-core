@@ -52,13 +52,10 @@ class IteratorsSpec extends Specification {
     }
 
     void "iterators should also be able to write"() {
-        when: "a delimited iterator is built"
-        def iterator = Iterators.createIterator("delimited", delimiter: /\|/, file: foo)
-
-        and: "and is written to a guave table"
-        def table = iterator.writeTo("table") as Table
-
+        when: "and is written to a guave table"
+        def table = Iterators.fromDelimited(foo, /\|/).toGuavaTable() as Table
         def set = table.columnKeySet()
+
         then:
         set.contains(0)
         set.contains(1)
