@@ -1,8 +1,11 @@
 package metridoc.core
 
+import groovy.sql.Sql
 import metridoc.core.services.ConfigService
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+
+import javax.sql.DataSource
 
 /**
  * Class to use if you are doing groovy scripting and want to add Metridoc functionality
@@ -276,5 +279,34 @@ class MetridocScript {
         }
 
         LoggerFactory.getLogger("metridoc.script")
+    }
+
+    static DataSource getDataSource(Script self) {
+        getDataSource(self.binding)
+    }
+
+    static DataSource getDataSource(Binding self) {
+        if(self.hasVariable("dataSource")) {
+            return self.getVariable("dataSource") as DataSource
+        }
+
+        return null
+    }
+
+    static Sql getSql(Script self) {
+        getSql(self)
+    }
+
+    static Sql getSql(Binding self) {
+        if(self.hasVariable("sql")) {
+            return self.getVariable("sql") as Sql
+        }
+
+        def dataSource = getDataSource(self)
+        if(dataSource) {
+            return new Sql(dataSource)
+        }
+
+        return null
     }
 }
