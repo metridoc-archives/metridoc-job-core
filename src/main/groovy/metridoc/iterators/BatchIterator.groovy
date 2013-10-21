@@ -27,7 +27,7 @@ class BatchIterator extends AbstractIterator<List<Map<String, Object>>> {
     int batchSize
 
     BatchIterator(RecordIterator iterator, int batchSize) {
-        assert iterator: "iterator cannot be null"
+        assert iterator != null: "iterator cannot be null"
         assert batchSize > 0: "batch size must be greater than 0"
         this.iterator = iterator
         this.batchSize = batchSize
