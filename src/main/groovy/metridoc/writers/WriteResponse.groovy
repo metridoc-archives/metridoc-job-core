@@ -26,6 +26,12 @@ class WriteResponse {
         aggregateStats[TOTAL] = 0
     }
 
+    EnumMap<WrittenRecordStat.Status, Integer> getAggregateStats() {
+        //make sure total has been added
+        aggregateStats[TOTAL] = getTotal()
+        aggregateStats
+    }
+
     void addAll(List<WrittenRecordStat> stats) {
         stats.each {
             aggregateStats[it.status] = aggregateStats[it.status] + 1
@@ -58,10 +64,9 @@ class WriteResponse {
 
     int getTotal() {
         int total = 0
-        aggregateStats.values().each {
-            total += it
+        aggregateStats.findAll{it.key != TOTAL}.each {
+            total += it.value
         }
-        aggregateStats[TOTAL] = total
         return total
     }
 
