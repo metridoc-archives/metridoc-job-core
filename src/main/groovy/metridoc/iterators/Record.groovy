@@ -6,6 +6,7 @@ import groovy.transform.ToString
  * Created with IntelliJ IDEA on 7/9/13
  *
  * @author Tommy Barker
+ * @deprecated
  */
 @ToString(includePackage = false, includeFields = true, includeNames = true, includes = ["body"])
 class Record implements Cloneable {

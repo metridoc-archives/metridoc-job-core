@@ -1,27 +1,14 @@
-/*
- * Copyright 2010 Trustees of the University of Pennsylvania Licensed under the
- * Educational Community License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License. You may
- * obtain a copy of the License at
- *
- * http://www.osedu.org/licenses/ECL-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an "AS IS"
- * BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing
- * permissions and limitations under the License.
- */
-package metridoc.iterators
+package metridoc.stream
 
 import groovy.util.logging.Slf4j
 import org.apache.poi.ss.usermodel.*
 
 /**
- * @deprecated
+ * Created with IntelliJ IDEA on 10/22/13
+ * @author Tommy Barker
  */
 @Slf4j
-class XlsIterator extends BaseExcelIterator {
+class XlsStream extends BaseExcelStream {
 
     @Lazy(soft = true)
     Workbook workbook = { WorkbookFactory.create(getInputStream()) }()
@@ -66,7 +53,8 @@ class XlsIterator extends BaseExcelIterator {
         }
     }
 
-    protected Record computeNext() {
+    @Override
+    protected Map computeNext() {
         def result = [:]
 
         log.debug("retrieving record {} for sheet {}", rowNum, getSheet().sheetName)
@@ -84,7 +72,7 @@ class XlsIterator extends BaseExcelIterator {
         }
 
         rowNum++
-        return new Record(body: result)
+        return result
     }
 
     private List getRow(int rowNumber) {

@@ -9,6 +9,7 @@ import static metridoc.writers.WrittenRecordStat.Status.*
 /**
  * Created with IntelliJ IDEA on 7/3/13
  * @author Tommy Barker
+ * @deprecated
  */
 @ToString(includePackage = false, includes = ["aggregateStats"])
 class WriteResponse {

@@ -8,6 +8,7 @@ import org.hibernate.SessionFactory
 /**
  * Created with IntelliJ IDEA on 7/2/13
  * @author Tommy Barker
+ * @deprecated
  */
 class EntityIteratorWriter extends DefaultIteratorWriter {
 

@@ -146,41 +146,4 @@ class IteratorsSpec extends Specification {
 
         }
     }
-
-    void "test iterator mapping"() {
-        when:
-        WriteResponse result = [0,1,2,3].toStream().map {
-            it * 2
-        }.each{}
-
-        then:
-        4 == result.writtenTotal
-        4 == result.total
-    }
-
-    void "test filtering"() {
-        when:
-        WriteResponse result = [0,1,2,3].toStream().filter {
-            it % 2 == 0
-        }.each{}
-
-        then:
-        2 == result.writtenTotal
-        4 == result.total
-        2 == result.ignoredTotal
-    }
-
-    void "test validation"() {
-        when:
-        WriteResponse result = [0,1,2,3,4].toStream().filter {
-            it % 2 == 0
-        }.map{it * 2}.validate {assert it != 8}.each{}
-
-        then:
-        2 == result.writtenTotal
-        println result.toString()
-        5 == result.total
-        2 == result.ignoredTotal
-        1 == result.invalidTotal
-    }
 }

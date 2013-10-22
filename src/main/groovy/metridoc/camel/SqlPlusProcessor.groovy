@@ -14,9 +14,7 @@
  */
 package metridoc.camel
 
-import metridoc.iterators.BatchIterator
-import metridoc.iterators.RecordIterator
-import metridoc.iterators.SqlIterator
+import groovy.stream.Stream
 import metridoc.utils.ColumnConstrainedList
 import metridoc.utils.ColumnConstrainedMap
 import org.apache.camel.Exchange
@@ -40,7 +38,7 @@ class SqlPlusProcessor extends SqlPlusMixin implements Processor {
     void process(Exchange exchange) {
         def body = exchange.in.body
 
-        if (body instanceof RecordIterator) {
+        if (body instanceof Stream) {
             handleBatchIteration(query, body)
             return;
         }
@@ -92,18 +90,27 @@ class SqlPlusProcessor extends SqlPlusMixin implements Processor {
     }
 
     private void handleBatchResultSet(String tableOrInsert, ResultSet resultSet) {
-        def resultSetIterator = new SqlIterator(resultSet: resultSet)
-        handleBatchIteration(tableOrInsert, resultSetIterator)
+        handleBatchIteration(tableOrInsert, Stream.fromResultSet(resultSet))
     }
 
-    private void handleBatchIteration(String tableOrInsert, RecordIterator iterator) {
-        def batchIterator = new BatchIterator(iterator, getBatchSize())
+    private void handleBatchIteration(String tableOrInsert, Stream stream) {
+
         def sql = getSql()
 
         try {
-            while (batchIterator.hasNext()) {
-                def next = batchIterator.next().collect { it.body }
-                sql.runBatch(tableOrInsert, next, logBatches)
+            List<Map<String, Object>> batch = []
+            if(logBatches) {
+                stream.logEvery(getBatchSize())
+            }
+            stream.process {Map itemToInsert ->
+                batch.add(itemToInsert)
+                if(batch.size() % getBatchSize() == 0) {
+                    sql.runBatch(tableOrInsert, batch)
+                    batch.clear()
+                }
+            }
+            if (batch.size() > 0) {
+                sql.runBatch(tableOrInsert, batch)
             }
         }
         finally {

@@ -7,6 +7,7 @@ import java.util.concurrent.*
 /**
  * Created with IntelliJ IDEA on 7/9/13
  * @author Tommy Barker
+ * @deprecated
  */
 class QueueBasedRecordIterator extends RecordIterator {
 
@@ -49,6 +50,9 @@ class QueueBasedRecordIterator extends RecordIterator {
 }
 
 @ToString(includePackage = false, includeNames = true)
+/**
+ * @deprecated
+ */
 class QueueData {
     /**
      * indicates that all data has been processed.  When done is true record should be null

@@ -18,6 +18,7 @@ import com.google.common.collect.AbstractIterator
 
 /**
  * untested, use at your own risk
+ * @deprecated
  */
 class BatchIterator extends AbstractIterator<List<Map<String, Object>>> {
     /**

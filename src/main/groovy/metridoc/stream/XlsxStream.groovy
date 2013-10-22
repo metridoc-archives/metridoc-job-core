@@ -1,18 +1,4 @@
-/*
- * Copyright 2010 Trustees of the University of Pennsylvania Licensed under the
- * Educational Community License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License. You may
- * obtain a copy of the License at
- *
- * http://www.osedu.org/licenses/ECL-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an "AS IS"
- * BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing
- * permissions and limitations under the License.
- */
-package metridoc.iterators
+package metridoc.stream
 
 import org.apache.poi.openxml4j.opc.OPCPackage
 import org.apache.poi.xssf.eventusermodel.XSSFReader
@@ -24,11 +10,11 @@ import javax.xml.stream.XMLInputFactory
 import javax.xml.stream.XMLStreamReader
 
 /**
- * @deprecated
+ * Created with IntelliJ IDEA on 10/22/13
+ * @author Tommy Barker
  */
-class XlsxIterator extends BaseExcelIterator {
-
-    private static log = LoggerFactory.getLogger(XlsxIterator)
+class XlsxStream extends BaseExcelStream {
+    private static log = LoggerFactory.getLogger(XlsxStream)
     public static final String ROW = "row"
 
     @Lazy
@@ -190,7 +176,7 @@ class XlsxIterator extends BaseExcelIterator {
     }
 
     @Override
-    protected Record computeNext() {
+    protected Map computeNext() {
         def headerSize = headers.size()
         def row = getNextRow(getReader())
         def result = [:]
@@ -199,8 +185,7 @@ class XlsxIterator extends BaseExcelIterator {
             (0..headerSize - 1).each {
                 result[headers[it]] = data[it]
             }
-            def record = new Record(body: result)
-            return record
+            return result
         }
 
         close()
@@ -208,9 +193,6 @@ class XlsxIterator extends BaseExcelIterator {
     }
 }
 
-/**
- * @deprecated
- */
 class XlsxCell {
     String reference
     String type
@@ -232,3 +214,4 @@ class XlsxCell {
         XlsxIterator.convertColumnToNumber(reference)
     }
 }
+

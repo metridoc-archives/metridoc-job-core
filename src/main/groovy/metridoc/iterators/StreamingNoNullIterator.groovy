@@ -2,6 +2,9 @@ package metridoc.iterators
 
 import com.google.common.collect.AbstractIterator
 
+/**
+ * @deprecated
+ */
 class StreamingNoNullIterator extends AbstractIterator {
     Iterator iterator
 

@@ -9,6 +9,8 @@ import javax.sql.DataSource
 /**
  * Created with IntelliJ IDEA on 9/11/13
  * @author Tommy Barker
+ * @deprecated
+ *
  */
 class WrappedIteratorExtension {
 

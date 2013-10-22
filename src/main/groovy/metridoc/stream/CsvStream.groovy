@@ -1,29 +1,12 @@
-/*
- * Copyright 2010 Trustees of the University of Pennsylvania Licensed under the
- * Educational Community License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License. You may
- * obtain a copy of the License at
- *
- * http://www.osedu.org/licenses/ECL-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an "AS IS"
- * BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing
- * permissions and limitations under the License.
- */
-package metridoc.iterators
+package metridoc.stream
 
 import au.com.bytecode.opencsv.CSVReader
 
 /**
- *
- * Handles iterating over csv files
- * @deprecated
- *
+ * Created with IntelliJ IDEA on 10/22/13
+ * @author Tommy Barker
  */
-class CsvIterator extends FileIterator {
-
+class CsvStream extends FileStream<Map> {
     @Lazy(soft = true)
     CSVReader csvReader = { new CSVReader(new InputStreamReader(inputStream)) }()
 
@@ -31,7 +14,7 @@ class CsvIterator extends FileIterator {
     List headers = { csvReader.readNext() as List }()
 
     @Override
-    protected Record computeNext() {
+    protected Map computeNext() {
 
         def headersSize = headers.size()
         def next = csvReader.readNext()
@@ -54,7 +37,6 @@ class CsvIterator extends FileIterator {
             return endOfData()
         }
 
-        return new Record(body: result)
+        return result
     }
 }
-

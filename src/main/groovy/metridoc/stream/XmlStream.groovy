@@ -1,16 +1,13 @@
-package metridoc.iterators
+package metridoc.stream
 
 import groovy.util.slurpersupport.GPathResult
 import org.apache.camel.support.TokenXMLPairExpressionIterator
-import groovy.util.slurpersupport.Node
 
 /**
- * Built to convert large xml docs into an iterator
+ * Created with IntelliJ IDEA on 10/22/13
  * @author Tommy Barker
- * @deprecated
  */
-class XmlIterator extends FileIterator {
-
+class XmlStream extends FileStream<Map>{
     /**
      * beginning and end tag for an xml "record"
      */
@@ -29,20 +26,20 @@ class XmlIterator extends FileIterator {
     }
 
     @Override
-    protected Record computeNext() {
+    protected Map computeNext() {
         if (!xmlTokenPairIterator) {
             initializeCamelIterator()
         }
 
         if (xmlTokenPairIterator.hasNext()) {
             def next = xmlTokenPairIterator.next()
-            return convertToRecord(next)
+            return convertToMap(next)
         }
 
         endOfData()
     }
 
-    Record convertToRecord(String xmlText) {
+    Map convertToMap(String xmlText) {
         GPathResult xmlResult
         if (namespaces) {
             xmlResult = new XmlSlurper().parseText(xmlText).declareNamespace(namespaces)
@@ -50,13 +47,13 @@ class XmlIterator extends FileIterator {
         else {
             xmlResult = new XmlSlurper().parseText(xmlText)
         }
-        Record record = new Record()
-        xmlResult.childNodes().each {Node child ->
-            record.body[child.name()] = child
+        Map result = [:]
+        xmlResult.childNodes().each {groovy.util.slurpersupport.Node child ->
+            result[child.name()] = child
         }
-        record.body.root = xmlResult
+        result.root = xmlResult
 
-        return record
+        return result
     }
 
     void initializeCamelIterator() {

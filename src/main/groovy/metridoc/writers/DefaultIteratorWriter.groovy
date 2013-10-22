@@ -9,6 +9,7 @@ import static metridoc.writers.WrittenRecordStat.Status.*
 /**
  * Created with IntelliJ IDEA on 6/5/13
  * @author Tommy Barker
+ * @deprecated
  */
 abstract class DefaultIteratorWriter implements IteratorWriter<RecordIterator> {
 

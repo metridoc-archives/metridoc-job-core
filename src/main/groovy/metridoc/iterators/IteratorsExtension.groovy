@@ -4,6 +4,7 @@ import java.sql.ResultSet
 
 /**
  * Created with IntelliJ IDEA on 9/11/13
+ * @deprecated
  *
  * @author Tommy Barker
  */
