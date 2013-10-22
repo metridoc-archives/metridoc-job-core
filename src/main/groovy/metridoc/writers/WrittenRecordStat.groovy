@@ -8,7 +8,7 @@ import metridoc.iterators.Record
  */
 class WrittenRecordStat {
     public enum Status {
-        IGNORED, INVALID, WRITTEN, ERROR
+        IGNORED, INVALID, WRITTEN, ERROR, TOTAL
     }
     Record record
     Status status
