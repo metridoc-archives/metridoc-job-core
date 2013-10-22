@@ -6,14 +6,16 @@ import metridoc.writers.WrittenRecordStat
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
+import java.sql.ResultSet
+
 /**
  * @author Tommy Barker
  */
 class StreamExtension {
 
     @SuppressWarnings("GroovyAccessibility")
-    public static WriteResponse each(Stream self, Closure closure) {
-        def response = new WriteResponse()
+    public static StreamResponse process(Stream self, Closure closure) {
+        def response = new StreamResponse()
         Closure clone = closure.clone() as Closure
 
         def wrapped = self.wrapped
@@ -23,7 +25,7 @@ class StreamExtension {
             self.filter {value ->
                 def result = oldCondition.call(value)
                 if (!result) {
-                    response.aggregateStats[WrittenRecordStat.Status.IGNORED] = response.ignoredTotal + 1
+                    response.incrementIgnored()
                     lastFilterInvalid = true
                 }
                 else {
@@ -35,7 +37,7 @@ class StreamExtension {
         }
 
         int count = 0
-        int logEvery = getMetaProperty(self, "logEvery", Integer) ?: 1000
+        int logEvery = getMetaProperty(self, "logEvery", Integer) ?: 0
         while (self.hasNext()) {
             def next = self.next()
             boolean valid = true
@@ -56,34 +58,38 @@ class StreamExtension {
             }
             if (valid) {
                 clone.call(next)
-                response.aggregateStats[WrittenRecordStat.Status.WRITTEN] = response.writtenTotal + 1
+                response.incrementWritten()
             }
             else {
-                response.aggregateStats[WrittenRecordStat.Status.INVALID] = response.invalidTotal + 1
+                response.incrementInvalid()
             }
 
-            if(count != 0 && count % logEvery == 0) {
-                getLogger(self).info response.toString()
+            if (logEvery != 0) {
+                if(count != 0 && count % logEvery == 0) {
+                    getLogger(self).info response.toString()
+                }
             }
         }
 
-        if(response.aggregateStats[WrittenRecordStat.Status.IGNORED] > 1 && lastFilterInvalid) {
-            response.aggregateStats[WrittenRecordStat.Status.IGNORED] = response.ignoredTotal - 1
+        if(response.ignored > 1 && lastFilterInvalid) {
+            response.decrementIgnored()
         }
 
-        getLogger(self).info response.toString()
+        if (logEvery != 0) {
+            getLogger(self).info response.toString()
+        }
         return response
     }
 
-    public static Stream validate(Stream self, Closure validate) {
-        setMetaProperty(self, "validator", validate)
+    public static Stream validate(Stream self, Closure validator) {
+        setMetaProperty(self, "validator", validator)
         return self
     }
 
     protected static <T> T getMetaProperty(Stream self, String propertyName, Class<T> aClass) {
         initializePropertyMapIfNotThere(self)
-
-        def response = self.getMetaPropertyMap[propertyName]
+        Map propertyMap = self.metaPropertyMap
+        def response = propertyMap[propertyName]
         if(response && aClass.isAssignableFrom(response.getClass())) {
             return response.asType(aClass)
         }
@@ -93,14 +99,16 @@ class StreamExtension {
 
     protected static void setMetaProperty(Stream self, String propertyName, propertyValue) {
         initializePropertyMapIfNotThere(self)
-
-        self.getMetaPropertyMap[propertyName] = propertyValue
+        Map propertyMap = self.metaPropertyMap
+        propertyMap[propertyName] = propertyValue
     }
 
     private static void initializePropertyMapIfNotThere(Stream self) {
-        if(!self.metaClass.respondsTo(self, "getMetaPropertyMap")) {
-            self.metaClass.metaPropertyMap = {
-                [:]
+        def propertyMapExists = self.metaClass.respondsTo(self, "getMetaPropertyMap")
+        if(!propertyMapExists) {
+            def propertyMap = [:]
+            self.metaClass.getMetaPropertyMap = {
+                propertyMap
             }
         }
     }
