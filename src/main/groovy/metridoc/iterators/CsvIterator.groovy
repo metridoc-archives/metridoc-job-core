@@ -19,7 +19,7 @@ import au.com.bytecode.opencsv.CSVReader
 /**
  *
  * Handles iterating over csv files
- *
+ * @deprecated
  *
  */
 class CsvIterator extends FileIterator {

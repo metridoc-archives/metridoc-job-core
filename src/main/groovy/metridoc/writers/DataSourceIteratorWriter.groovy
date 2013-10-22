@@ -9,6 +9,9 @@ import javax.sql.DataSource
 import java.sql.Connection
 import java.sql.PreparedStatement
 
+/**
+ * @deprecated
+ */
 @Slf4j
 class DataSourceIteratorWriter extends DefaultIteratorWriter {
     public static final String DATASOURCE_MESSAGE = "dataSource cannot be null"

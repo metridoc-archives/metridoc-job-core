@@ -2,6 +2,10 @@ package metridoc.writers;
 
 import java.util.Iterator;
 
+/**
+ * @deprecated
+ * @param <T>
+ */
 public interface IteratorWriter<T extends Iterator> {
     /**
      * Should iterate over the iterator and write all the records.  With the exception of checking

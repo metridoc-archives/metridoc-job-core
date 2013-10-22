@@ -3,6 +3,8 @@ package metridoc.iterators
 /**
  * Created with IntelliJ IDEA on 5/31/13
  * @author Tommy Barker
+ * @deprecated
+ *
  */
 class FilteredRecordIterator extends RecordIterator {
     Closure<Boolean> filter

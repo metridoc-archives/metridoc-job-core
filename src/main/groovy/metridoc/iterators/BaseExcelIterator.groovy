@@ -14,7 +14,9 @@
  */
 package metridoc.iterators
 
-
+/**
+ * @deprecated
+ */
 abstract class BaseExcelIterator extends FileIterator {
 
     /**

@@ -23,6 +23,9 @@ import org.slf4j.LoggerFactory
 import javax.xml.stream.XMLInputFactory
 import javax.xml.stream.XMLStreamReader
 
+/**
+ * @deprecated
+ */
 class XlsxIterator extends BaseExcelIterator {
 
     private static log = LoggerFactory.getLogger(XlsxIterator)
@@ -205,6 +208,9 @@ class XlsxIterator extends BaseExcelIterator {
     }
 }
 
+/**
+ * @deprecated
+ */
 class XlsxCell {
     String reference
     String type

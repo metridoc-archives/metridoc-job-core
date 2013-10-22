@@ -16,6 +16,9 @@ package metridoc.iterators
 
 import metridoc.utils.IOUtils
 
+/**
+ * @deprecated
+ */
 abstract class FileIterator extends RecordIterator implements Closeable {
 
     String path

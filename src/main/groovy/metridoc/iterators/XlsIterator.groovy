@@ -17,6 +17,9 @@ package metridoc.iterators
 import groovy.util.logging.Slf4j
 import org.apache.poi.ss.usermodel.*
 
+/**
+ * @deprecated
+ */
 @Slf4j
 class XlsIterator extends BaseExcelIterator {
 

@@ -15,6 +15,7 @@ import static metridoc.writers.WrittenRecordStat.Status.*
 /**
  * Created with IntelliJ IDEA on 7/5/13
  * @author Tommy Barker
+ * @deprecated
  */
 class SplitIteratorWriter extends DefaultIteratorWriter {
 
@@ -71,6 +72,9 @@ class SplitIteratorWriter extends DefaultIteratorWriter {
 
 }
 
+/**
+ * @deprecated
+ */
 class SplitWriteResponse extends WriteResponse {
 
     @Delegate

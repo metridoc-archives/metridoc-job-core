@@ -5,6 +5,7 @@ import java.util.concurrent.CountDownLatch
 /**
  * Created with IntelliJ IDEA on 7/15/13
  * @author Tommy Barker
+ * @deprecated
  */
 class QueueRecordIteratorManager extends RecordIterator {
 

@@ -16,6 +16,9 @@ package metridoc.iterators
 
 import java.sql.ResultSet
 
+/**
+ * @deprecated
+ */
 class SqlIterator extends RecordIterator {
 
     ResultSet resultSet

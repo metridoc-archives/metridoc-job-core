@@ -8,6 +8,7 @@ import groovy.sql.Sql
  * Date: 9/16/12
  * Time: 2:28 PM
  * To change this template use File | Settings | File Templates.
+ * @deprecated
  */
 class StreamingTableList extends AbstractList {
     def id = "id"

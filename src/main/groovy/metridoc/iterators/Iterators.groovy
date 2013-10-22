@@ -5,6 +5,7 @@ import metridoc.writers.*
 /**
  * Created with IntelliJ IDEA on 5/31/13
  * @author Tommy Barker
+ * @deprecated
  */
 class Iterators {
 
@@ -125,6 +126,9 @@ class Iterators {
     }
 }
 
+/**
+ * @deprecated
+ */
 class WrappedIterator extends RecordIterator {
     RecordIterator wrappedIterator
 

@@ -5,6 +5,9 @@ import metridoc.iterators.Record
 import metridoc.iterators.RecordIterator
 import org.apache.commons.lang.ObjectUtils
 
+/**
+ * @deprecated
+ */
 class TableIteratorWriter extends DefaultIteratorWriter {
 
     @Override

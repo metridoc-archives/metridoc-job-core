@@ -16,7 +16,9 @@ package metridoc.iterators
 
 import org.apache.commons.io.LineIterator
 
-
+/**
+ * @deprecated
+ */
 class DelimitedLineIterator extends FileIterator {
 
     @Lazy(soft = true)

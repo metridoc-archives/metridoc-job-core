@@ -3,6 +3,7 @@ package metridoc.iterators
 /**
  * Created with IntelliJ IDEA on 6/14/13
  * @author Tommy Barker
+ * @deprecated
  */
 class FilteredAndTransformedRecordIterator extends RecordIterator {
 

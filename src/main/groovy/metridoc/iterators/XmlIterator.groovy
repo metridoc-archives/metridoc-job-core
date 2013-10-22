@@ -7,6 +7,7 @@ import groovy.util.slurpersupport.Node
 /**
  * Built to convert large xml docs into an iterator
  * @author Tommy Barker
+ * @deprecated
  */
 class XmlIterator extends FileIterator {
 
