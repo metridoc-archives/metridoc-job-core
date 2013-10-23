@@ -45,8 +45,7 @@ class SqlPlusRouteTest {
 
         service.with {
             consumeNoWait("sqlplus:foo?dataSource=dataSource") { ResultSet resultSet ->
-                Exchange exchange = send("sqlplus:bar?dataSource=dataSource", resultSet)
-                assert exchange.getException() == null
+                send("sqlplus:bar?dataSource=dataSource&logBatches=true", resultSet)
             }
         }
 

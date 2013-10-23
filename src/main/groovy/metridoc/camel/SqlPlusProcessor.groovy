@@ -39,7 +39,7 @@ class SqlPlusProcessor extends SqlPlusMixin implements Processor {
         def body = exchange.in.body
 
         if (body instanceof Stream) {
-            handleBatchIteration(query, body)
+            handleBatchStream(query, body)
             return;
         }
 
@@ -90,26 +90,26 @@ class SqlPlusProcessor extends SqlPlusMixin implements Processor {
     }
 
     private void handleBatchResultSet(String tableOrInsert, ResultSet resultSet) {
-        handleBatchIteration(tableOrInsert, Stream.fromResultSet(resultSet))
+        handleBatchStream(tableOrInsert, Stream.fromResultSet(resultSet))
     }
 
-    private void handleBatchIteration(String tableOrInsert, Stream stream) {
+    private void handleBatchStream(String tableOrInsert, Stream stream) {
 
         def sql = getSql()
 
         try {
-            List<Map<String, Object>> batch = []
+            int count = 0
+            def collated = stream.map{count++; return it}.collate(getBatchSize())
+
+            def streamToUse = collated
             if(logBatches) {
-                stream.logEvery(getBatchSize())
-            }
-            stream.process {Map itemToInsert ->
-                batch.add(itemToInsert)
-                if(batch.size() % getBatchSize() == 0) {
-                    sql.runBatch(tableOrInsert, batch)
-                    batch.clear()
+                streamToUse = collated.map {
+                    log.info "inserted [$count] records"
+                    return it
                 }
             }
-            if (batch.size() > 0) {
+
+            streamToUse.each {List<Map<String, Object>> batch ->
                 sql.runBatch(tableOrInsert, batch)
             }
         }

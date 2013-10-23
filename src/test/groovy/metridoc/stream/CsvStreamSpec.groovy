@@ -53,11 +53,14 @@ class CsvStreamSpec extends Specification {
 
     void "full workflow with each"() {
         when:
-        def response = Stream.fromCsv(getData()).process{}
+        int count = 0
+        Stream.fromCsv(getData()).map{
+            count++
+        }.each{}
 
         then:
         noExceptionThrown()
-        2 == response.written
+        2 == count
     }
 
     void "errors are thrown when header size and result size dont match"() {
